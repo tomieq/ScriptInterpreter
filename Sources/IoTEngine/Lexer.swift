@@ -21,10 +21,10 @@ class Lexer {
         while let match = try Lexer.getNextMatch(code: code) {
             let (resolver, matchingString) = match
             code = String(code[matchingString.endIndex...]).trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let token = resolver(matchingString) else {
+            guard let tkns = resolver(matchingString) else {
                 fatalError()
             }
-            tokens.append(token)
+            tokens.append(contentsOf: tkns)
         }
         self.tokens = tokens
     }

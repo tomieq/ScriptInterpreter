@@ -51,7 +51,7 @@
                     .ifStatement,
                     .bracketOpen,
                     .boolLiteral(true),
-                    .braketClose,
+                    .bracketClose,
                     .blockOpen,
                     .returnStatement,
                     .floatLiteral(89.1),
@@ -119,6 +119,20 @@
             do {
                 let lexer = try Lexer(code: script)
                 XCTAssertEqual(lexer.tokens.first, .function(name: "someAction"))
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
+        
+        func test_functionWithOneArgument() {
+            let script = "drive(false)"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertEqual(lexer.tokens.first, .functionWithArguments(name: "drive"))
+                XCTAssertEqual(lexer.tokens[1], .bracketOpen)
+                XCTAssertEqual(lexer.tokens[2], .boolLiteral(false))
+                XCTAssertEqual(lexer.tokens[3], .bracketClose)
             } catch {
                 XCTFail("\(error)")
             }
