@@ -9,6 +9,7 @@ import Foundation
 
 enum LexerError: Swift.Error {
     case unknownSyntax(String)
+    case invalidRegex(String)
 }
 
 class Lexer {
@@ -32,7 +33,7 @@ class Lexer {
     private static func getNextMatch(code: String) throws -> (regex: String, matchingString: String)? {
         
         for (regex, _) in Token.generators {
-            if let matchingString = code.getMatchingString(regex: regex) {
+            if let matchingString = try code.getMatchingString(regex: regex) {
                 return (regex, matchingString)
             }
         }
@@ -44,7 +45,7 @@ class Lexer {
 }
 
 fileprivate extension String {
-    func getMatchingString(regex: String) -> String? {
+    func getMatchingString(regex: String) throws -> String? {
         if let expression = try? NSRegularExpression(pattern: "^\(regex)", options: []) {
             let range = expression.rangeOfFirstMatch(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count))
             if range.location == 0 {
@@ -53,7 +54,7 @@ fileprivate extension String {
             }
             return nil
         } else {
-            fatalError("Invalid regex: \(regex)")
+            throw LexerError.invalidRegex("Invalid regex: \(regex)")
         }
     }
 }

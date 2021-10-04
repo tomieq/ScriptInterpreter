@@ -112,4 +112,15 @@
                 XCTFail(error.localizedDescription)
             }
         }
+        
+        func test_functionWithoutArgs() {
+            let script = "someAction()"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertEqual(lexer.tokens.first, .function(name: "someAction"))
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
     }

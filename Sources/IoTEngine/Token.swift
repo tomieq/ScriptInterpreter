@@ -21,6 +21,7 @@ enum Token: Equatable {
     case blockOpen
     case blockClose
     case equals
+    case function(name: String)
 }
 
 // MARK: regex for tokens
@@ -43,6 +44,7 @@ extension Token {
             "\\{": { _ in .blockOpen },
             "\\}": { _ in .blockClose },
             "==": { _ in .equals },
+            "[a-zA-Z0-9_]+\\(\\)": { .function(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))) }
         ]
     }
 }
@@ -75,6 +77,8 @@ extension Token: CustomDebugStringConvertible {
             return "return"
         case .equals:
             return "equals"
+        case .function(let name):
+            return "function:\(name)"
         }
     }
 }
