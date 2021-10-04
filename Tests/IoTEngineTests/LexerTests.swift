@@ -44,7 +44,7 @@
         }
         
         func test_ifElseStatement() {
-            let script = "if(true){ return 89 } else { return 100 }"
+            let script = "if(true){ return 89.1 } else { return 100 }"
             do {
                 let lexer = try Lexer(code: script)
                 let tokens: [Token] = [
@@ -54,7 +54,7 @@
                     .braketClose,
                     .blockOpen,
                     .returnStatement,
-                    .intLiteral(89),
+                    .floatLiteral(89.1),
                     .blockClose,
                     .elseStatement,
                     .blockOpen,
@@ -68,6 +68,15 @@
                 }
             } catch {
                 XCTFail(error.localizedDescription)
+            }
+        }
+        
+        func test_InvalidFloatNumber() {
+            
+            let script = " if (unknownToken) { return }"
+            
+            XCTAssertThrowsError(try Lexer(code: script)){ error in
+                XCTAssertNotNil(error as? LexerError)
             }
         }
     }

@@ -36,6 +36,9 @@ class Lexer {
                 return (regex, matchingString)
             }
         }
+        if code.count != 0 {
+            throw LexerError.unknownSyntax("unknown token \(code)")
+        }
         return nil
     }
 }
