@@ -22,33 +22,43 @@ enum Token: Equatable {
     case blockClose
     case equals
     case function(name: String)
+    case functionWithArguments(name: String)
 }
 
 // MARK: regex for tokens
 
 extension Token {
-    typealias TokenGenerator = (String) -> Token?
-    static var generators: [String: TokenGenerator] {
-        return [
-            "\\-?([0-9]*\\.[0-9]*)": { .floatLiteral(Float($0)!) },
-            "(\\d++)(?!\\.)": { .intLiteral(Int($0)!) },
-            "true": { _ in .boolLiteral(true) },
-            "false": { _ in .boolLiteral(false) },
-            "\"[a-zA-Z_\\-0-9 ']*\"": { .stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "\""))) },
-            "'[a-zA-Z_\\-0-9 ]*'": { .stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "'"))) },
-            "\\(": { _ in .bracketOpen },
-            "\\)": { _ in .braketClose },
-            "if": { _ in .ifStatement },
-            "else": { _ in .elseStatement },
-            "return": { _ in .returnStatement },
-            "\\{": { _ in .blockOpen },
-            "\\}": { _ in .blockClose },
-            "==": { _ in .equals },
-            "[a-zA-Z0-9_]+\\(\\)": { .function(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))) }
-        ]
+    static let generators: [TokenGenerator] = Token.makeTokenGenerators()
+    
+    private static func makeTokenGenerators() -> [TokenGenerator] {
+        var generators: [TokenGenerator] = []
+        
+        generators.append(TokenGenerator(regex: "true", resolver: { _ in .boolLiteral(true) }))
+        generators.append(TokenGenerator(regex: "false", resolver: { _ in .boolLiteral(false) }))
+        generators.append(TokenGenerator(regex: "if", resolver: { _ in .ifStatement }))
+        generators.append(TokenGenerator(regex: "\\{", resolver: { _ in .blockOpen }))
+        generators.append(TokenGenerator(regex: "\\}", resolver: { _ in .blockClose }))
+        generators.append(TokenGenerator(regex: "==", resolver: { _ in .equals }))
+        generators.append(TokenGenerator(regex: "else", resolver: { _ in .elseStatement }))
+        generators.append(TokenGenerator(regex: "return", resolver: { _ in .returnStatement }))
+        generators.append(TokenGenerator(regex: "\\(", resolver: { _ in .bracketOpen }))
+        generators.append(TokenGenerator(regex: "\\)", resolver: { _ in .braketClose }))
+        generators.append(TokenGenerator(regex: "\\-?([0-9]*\\.[0-9]*)", resolver: { .floatLiteral(Float($0)!) }))
+        generators.append(TokenGenerator(regex: "(\\d++)(?!\\.)", resolver: { .intLiteral(Int($0)!) }))
+        generators.append(TokenGenerator(regex: "'[a-zA-Z_\\-0-9 ]*'", resolver: { .stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "'"))) }))
+        generators.append(TokenGenerator(regex: "\"[a-zA-Z_\\-0-9 ']*\"", resolver: { .stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "\""))) }))
+        generators.append(TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { .function(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))) }))
+        generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+\\()(?!\\))", resolver: { .functionWithArguments(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))) }))
+        return generators
     }
 }
 
+typealias TokenResolver = (String) -> Token?
+struct TokenGenerator {
+    
+    let regex: String
+    let resolver: TokenResolver
+}
 
 extension Token: CustomDebugStringConvertible {
     var debugDescription: String {
@@ -79,6 +89,8 @@ extension Token: CustomDebugStringConvertible {
             return "equals"
         case .function(let name):
             return "function:\(name)"
+        case .functionWithArguments(let name):
+            return "functionWithArguments:\(name)"
         }
     }
 }

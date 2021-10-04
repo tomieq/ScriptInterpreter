@@ -19,9 +19,9 @@ class Lexer {
         var code = code.trimmingCharacters(in: .whitespacesAndNewlines)
         var tokens: [Token] = []
         while let match = try Lexer.getNextMatch(code: code) {
-            let (regex, matchingString) = match
+            let (resolver, matchingString) = match
             code = String(code[matchingString.endIndex...]).trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let generator = Token.generators[regex], let token = generator(matchingString) else {
+            guard let token = resolver(matchingString) else {
                 fatalError()
             }
             tokens.append(token)
@@ -30,11 +30,11 @@ class Lexer {
     }
     
 
-    private static func getNextMatch(code: String) throws -> (regex: String, matchingString: String)? {
+    private static func getNextMatch(code: String) throws -> (resolver: TokenResolver, matchingString: String)? {
         
-        for (regex, _) in Token.generators {
-            if let matchingString = try code.getMatchingString(regex: regex) {
-                return (regex, matchingString)
+        for tokenGenerator in Token.generators {
+            if let matchingString = try code.getMatchingString(regex: tokenGenerator.regex) {
+                return (tokenGenerator.resolver, matchingString)
             }
         }
         if code.count != 0 {

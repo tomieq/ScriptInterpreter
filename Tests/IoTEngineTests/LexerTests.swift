@@ -15,7 +15,7 @@
                 let lexer = try Lexer(code: script)
                 XCTAssert(lexer.tokens.count == 8, "Invalid number of tokens")
             } catch {
-                XCTFail(error.localizedDescription)
+                XCTFail("\(error)")
             }
         }
         
@@ -27,7 +27,7 @@
                 XCTAssertEqual(lexer.tokens[0], .intLiteral(89))
                 XCTAssertEqual(lexer.tokens[2], .intLiteral(103))
             } catch {
-                XCTFail(error.localizedDescription)
+                XCTFail("\(error)")
             }
         }
         
@@ -39,7 +39,7 @@
                 XCTAssertEqual(lexer.tokens[0], .floatLiteral(55.13))
                 XCTAssertEqual(lexer.tokens[2], .floatLiteral(90.7776))
             } catch {
-                XCTFail(error.localizedDescription)
+                XCTFail("\(error)")
             }
         }
         
@@ -67,7 +67,7 @@
                     XCTAssertEqual(token, lexer.tokens[index])
                 }
             } catch {
-                XCTFail(error.localizedDescription)
+                XCTFail("\(error)")
             }
         }
         
@@ -87,7 +87,7 @@
                 let lexer = try Lexer(code: script)
                 XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey")))
             } catch {
-                XCTFail(error.localizedDescription)
+                XCTFail("\(error)")
             }
         }
         
@@ -98,7 +98,7 @@
                 let lexer = try Lexer(code: script)
                 XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey's")))
             } catch {
-                XCTFail(error.localizedDescription)
+                XCTFail("\(error)")
             }
         }
         
@@ -109,7 +109,7 @@
                 let lexer = try Lexer(code: script)
                 XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey")))
             } catch {
-                XCTFail(error.localizedDescription)
+                XCTFail("\(error)")
             }
         }
         
