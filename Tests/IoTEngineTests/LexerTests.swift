@@ -79,4 +79,37 @@
                 XCTAssertNotNil(error as? LexerError)
             }
         }
+        
+        func test_stringLiteralDoubleQuote() {
+            let script = "( \"monkey\" )"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey")))
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
+        }
+        
+        func test_stringLiteralDoubleQuoteWithSaxon() {
+            let script = "( \"monkey's\" )"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey's")))
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
+        }
+        
+        func test_stringLiteralSingleQuote() {
+            let script = "( 'monkey' )"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey")))
+            } catch {
+                XCTFail(error.localizedDescription)
+            }
+        }
     }

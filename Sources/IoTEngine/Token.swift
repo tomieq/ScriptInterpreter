@@ -34,6 +34,7 @@ extension Token {
             "true": { _ in .boolLiteral(true) },
             "false": { _ in .boolLiteral(false) },
             "\"[a-zA-Z_\\-0-9 ']*\"": { .stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "\""))) },
+            "'[a-zA-Z_\\-0-9 ]*'": { .stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "'"))) },
             "\\(": { _ in .bracketOpen },
             "\\)": { _ in .braketClose },
             "if": { _ in .ifStatement },
@@ -51,29 +52,29 @@ extension Token: CustomDebugStringConvertible {
     var debugDescription: String {
         switch self {
         case .floatLiteral(let value):
-            return "Token:floatLiteral(\(value))"
+            return "floatLiteral(\(value))"
         case .intLiteral(let value):
-            return "Token:intLiteral(\(value))"
+            return "intLiteral(\(value))"
         case .bracketOpen:
-            return "Token:("
+            return "("
         case .braketClose:
-            return "Token:)"
+            return ")"
         case .blockOpen:
-            return "Token:{"
+            return "{"
         case .blockClose:
-            return "Token:}"
+            return "}"
         case .ifStatement:
-            return "Token:if"
+            return "if"
         case .boolLiteral(let value):
-            return "Token:boolLiteral(\(value))"
+            return "boolLiteral(\(value))"
         case .stringLiteral(let value):
-            return "Token:string(\(value))"
+            return "stringLiteral(\(value))"
         case .elseStatement:
-            return "Token:else"
+            return "else"
         case .returnStatement:
-            return "Token:return"
+            return "return"
         case .equals:
-            return "Token:equals"
+            return "equals"
         }
     }
 }
