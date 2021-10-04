@@ -31,16 +31,12 @@ class Lexer {
 
     private static func getNextMatch(code: String) throws -> (regex: String, matchingString: String)? {
         
-        let match = Token.generators.map { ($0, code.getMatchingString(regex: $0.key)) }.filter { $0.1 != nil }.first
-        
-        guard let regex = match?.0.key, let matchingString = match?.1, match?.0.value != nil else {
-            if code.count == 0 {
-                return nil
-            } else {
-                throw LexerError.unknownSyntax("unknown token \(code)")
+        for (regex, _) in Token.generators {
+            if let matchingString = code.getMatchingString(regex: regex) {
+                return (regex, matchingString)
             }
         }
-        return (regex, matchingString)
+        return nil
     }
 }
 
