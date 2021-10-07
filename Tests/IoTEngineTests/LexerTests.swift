@@ -137,4 +137,58 @@
                 XCTFail("\(error)")
             }
         }
+        
+        func test_functionWithTwoArguments() {
+            let script = "run(\"left\", 12)"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertEqual(lexer.tokens.first, .functionWithArguments(name: "run"))
+                XCTAssertEqual(lexer.tokens[2], .stringLiteral("left"))
+                XCTAssertEqual(lexer.tokens[3], .comma)
+                XCTAssertEqual(lexer.tokens[4], .intLiteral(12))
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
+        
+        func test_andOperatorWithSpaces() {
+            let script = "if(true && false){}"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertEqual(lexer.tokens[2], .boolLiteral(true))
+                XCTAssertEqual(lexer.tokens[3], .andOperator)
+                XCTAssertEqual(lexer.tokens[4], .boolLiteral(false))
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
+        
+        func test_andOperatorWithoutSpaces() {
+            let script = "if(true&&false){}"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertEqual(lexer.tokens[2], .boolLiteral(true))
+                XCTAssertEqual(lexer.tokens[3], .andOperator)
+                XCTAssertEqual(lexer.tokens[4], .boolLiteral(false))
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
+        
+        func test_orOperatorWithSpaces() {
+            let script = "if(true || false){}"
+            
+            do {
+                let lexer = try Lexer(code: script)
+                XCTAssertEqual(lexer.tokens[2], .boolLiteral(true))
+                XCTAssertEqual(lexer.tokens[3], .orOperator)
+                XCTAssertEqual(lexer.tokens[4], .boolLiteral(false))
+            } catch {
+                XCTFail("\(error)")
+            }
+        }
+        
     }

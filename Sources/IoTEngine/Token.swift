@@ -23,6 +23,9 @@ enum Token: Equatable {
     case equals
     case function(name: String)
     case functionWithArguments(name: String)
+    case comma
+    case andOperator
+    case orOperator
 }
 
 // MARK: regex for tokens
@@ -36,9 +39,12 @@ extension Token {
         generators.append(TokenGenerator(regex: "true", resolver: { _ in [.boolLiteral(true)] }))
         generators.append(TokenGenerator(regex: "false", resolver: { _ in [.boolLiteral(false)] }))
         generators.append(TokenGenerator(regex: "if", resolver: { _ in [.ifStatement] }))
+        generators.append(TokenGenerator(regex: "&&", resolver: { _ in [.andOperator] }))
+        generators.append(TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }))
         generators.append(TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }))
         generators.append(TokenGenerator(regex: "\\}", resolver: { _ in [.blockClose] }))
         generators.append(TokenGenerator(regex: "==", resolver: { _ in [.equals] }))
+        generators.append(TokenGenerator(regex: ",", resolver: { _ in [.comma] }))
         generators.append(TokenGenerator(regex: "else", resolver: { _ in [.elseStatement] }))
         generators.append(TokenGenerator(regex: "return", resolver: { _ in [.returnStatement] }))
         generators.append(TokenGenerator(regex: "\\(", resolver: { _ in [.bracketOpen] }))
@@ -91,6 +97,12 @@ extension Token: CustomDebugStringConvertible {
             return "function:\(name)"
         case .functionWithArguments(let name):
             return "functionWithArguments:\(name)"
+        case .comma:
+            return ","
+        case .andOperator:
+            return "and"
+        case .orOperator:
+            return "or"
         }
     }
 }
