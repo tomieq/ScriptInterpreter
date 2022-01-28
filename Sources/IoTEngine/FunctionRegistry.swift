@@ -1,5 +1,5 @@
 //
-//  SymbolTable.swift
+//  FunctionRegistry.swift
 //  
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class SymbolTable {
+class FunctionRegistry {
     private var functions: [String:()->()] = [:]
     
     func registerFunc(name: String, function: @escaping ()->()) {
