@@ -19,7 +19,8 @@ class ParserTests: XCTestCase {
             let script = "increaseCounter()"
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
             XCTAssertEqual(spy.callCounter, 0)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.callCounter, 1)
@@ -33,6 +34,7 @@ class ParserTests: XCTestCase {
         
         let spy = FunctionCallSpy()
         let functionRegistry = FunctionRegistry()
+        let valueRegistry = ValueRegistry()
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseByOne))
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addTwo", function: spy.increaseByTwo))
         
@@ -40,7 +42,7 @@ class ParserTests: XCTestCase {
         let script = "increaseCounter() addTwo()"
         let lexer = try Lexer(code: script)
         let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-        let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
+        let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
         XCTAssertEqual(spy.callCounter, 0)
         XCTAssertNoThrow(try parser.execute())
         XCTAssertEqual(spy.callCounter, 3)
@@ -56,7 +58,8 @@ class ParserTests: XCTestCase {
         do {
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
             XCTAssertEqual(spy.received.count, 0)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.received.count, 4)

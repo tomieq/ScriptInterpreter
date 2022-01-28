@@ -10,10 +10,12 @@ import Foundation
 class Parser {
     private let lexicalAnalizer: LexicalAnalyzer
     private let functionRegistry: FunctionRegistry
+    private let valueRegistry: ValueRegistry
     
-    init(lexicalAnalizer: LexicalAnalyzer, functionRegistry: FunctionRegistry) {
+    init(lexicalAnalizer: LexicalAnalyzer, functionRegistry: FunctionRegistry, valueRegistry: ValueRegistry) {
         self.lexicalAnalizer = lexicalAnalizer
         self.functionRegistry = functionRegistry
+        self.valueRegistry = valueRegistry
     }
     
     func execute() throws {
