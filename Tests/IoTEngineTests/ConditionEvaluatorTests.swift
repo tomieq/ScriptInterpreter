@@ -81,4 +81,26 @@ class ConditionEvaluatorTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_stringEqualsTrue() {
+        let code = "\"piramids\" == \"piramids\""
+        do {
+            let lexer = try Lexer(code: code)
+            let evaluator = ConditionEvaluator()
+            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_stringEqualsFalse() {
+        let code = "\"piramids\" == \"Piramids\""
+        do {
+            let lexer = try Lexer(code: code)
+            let evaluator = ConditionEvaluator()
+            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
