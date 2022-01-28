@@ -12,4 +12,17 @@ enum Value {
     case integer(Int)
     case float(Float)
     case bool(Bool)
+    
+    var type: String {
+        switch self {
+        case .string(_):
+            return "String"
+        case .integer(_):
+            return "Int"
+        case .float(_):
+            return "Float"
+        case .bool(_):
+            return "Bool"
+        }
+    }
 }
