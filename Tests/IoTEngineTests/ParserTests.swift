@@ -9,7 +9,6 @@ import XCTest
 
 class ParserTests: XCTestCase {
 
-
     func test_parsingAndCallingSimpleFunction() throws {
         
         let spy = FunctionCallSpy()
@@ -26,7 +25,7 @@ class ParserTests: XCTestCase {
             XCTAssertEqual(spy.callCounter, 1)
             
         } catch {
-            
+            XCTFail(error.localizedDescription)
         }
     }
     
@@ -66,7 +65,7 @@ class ParserTests: XCTestCase {
             XCTAssertEqual(spy.received[safeIndex: 2], .string("works"))
             XCTAssertEqual(spy.received[safeIndex: 3], .float(3.14))
         } catch {
-            XCTAssert(false, error.localizedDescription)
+            XCTFail(error.localizedDescription)
         }
     }
 }

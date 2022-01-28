@@ -26,7 +26,7 @@ class LexicalAnalyzerTests: XCTestCase {
             XCTAssertEqual(arguments.first, .floatLiteral(12.3))
             XCTAssertEqual(arguments.last, .stringLiteral("monkey"))
         } catch {
-            XCTAssert(false, error.localizedDescription)
+            XCTFail(error.localizedDescription)
         }
     }
 }
