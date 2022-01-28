@@ -18,7 +18,7 @@ class FunctionRegistryTests: XCTestCase {
         XCTAssertNoThrow(try sut.registerFunc(name: "spy", function: spy.spyFunction))
         
         XCTAssertEqual(spy.callCounter, 0)
-        sut.callFunction(name: "spy")
+        XCTAssertNoThrow(try sut.callFunction(name: "spy"))
         XCTAssertEqual(spy.callCounter, 1)
 
     }
@@ -30,7 +30,7 @@ class FunctionRegistryTests: XCTestCase {
         XCTAssertNoThrow(try sut.registerFunc(name: "receive", function: spy.receive))
         
         XCTAssertEqual(spy.received.count, 0)
-        sut.callFunction(name: "receive", args: [.string("lego")])
+        XCTAssertNoThrow(try sut.callFunction(name: "receive", args: [.string("lego")]))
         XCTAssertEqual(spy.received.count, 1)
     }
 
@@ -48,6 +48,13 @@ class FunctionRegistryTests: XCTestCase {
         let sut = FunctionRegistry()
         XCTAssertNoThrow(try sut.registerFunc(name: "receive", function: spy.receive))
         XCTAssertThrowsError(try sut.registerFunc(name: "receive", function: spy.receive))
+    }
+    
+    func test_callFunctionThatWasNotRegistered() {
+        
+        let sut = FunctionRegistry()
+        XCTAssertThrowsError(try sut.callFunction(name: "nonExisting"))
+        XCTAssertThrowsError(try sut.callFunction(name: "random", args: [.bool(false)]))
     }
 }
 

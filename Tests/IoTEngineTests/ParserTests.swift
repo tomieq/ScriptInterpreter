@@ -21,7 +21,7 @@ class ParserTests: XCTestCase {
             let lexer = try Lexer(code: script)
             let parser = Parser(lexer: lexer, functionRegistry: functionRegistry)
             XCTAssertEqual(spy.callCounter, 0)
-            parser.execute()
+            XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.callCounter, 1)
             
         } catch {
@@ -41,7 +41,7 @@ class ParserTests: XCTestCase {
             let lexer = try Lexer(code: script)
             let parser = Parser(lexer: lexer, functionRegistry: functionRegistry)
             XCTAssertEqual(spy.callCounter, 0)
-            parser.execute()
+            XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.callCounter, 3)
             
         } catch {

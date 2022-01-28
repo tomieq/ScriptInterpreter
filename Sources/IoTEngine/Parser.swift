@@ -16,11 +16,11 @@ class Parser {
         self.functionRegistry = functionRegistry
     }
     
-    func execute() {
+    func execute() throws {
         for token in self.lexer.tokens {
             switch token {
             case .function(let name):
-                self.functionRegistry.callFunction(name: name)
+                try self.functionRegistry.callFunction(name: name)
             default:
                 break
             }

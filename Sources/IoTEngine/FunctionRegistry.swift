@@ -9,6 +9,7 @@ import Foundation
 
 enum FunctionRegistryError: Error {
     case functionAlreadyRegistered(name: String)
+    case functionNotFound(signature: String)
 }
 
 class FunctionRegistry {
@@ -29,11 +30,19 @@ class FunctionRegistry {
         self.functionsWithArgs[name] = function
     }
     
-    func callFunction(name: String) {
-        self.functions[name]?()
+    func callFunction(name: String) throws {
+        if let function = self.functions[name] {
+            function()
+        } else {
+            throw FunctionRegistryError.functionNotFound(signature: "\(name)()")
+        }
     }
-    
-    func callFunction(name: String, args: [Value]) {
-        self.functionsWithArgs[name]?(args)
+
+    func callFunction(name: String, args: [Value]) throws {
+        if let function = self.functionsWithArgs[name] {
+            function(args)
+        } else {
+            throw FunctionRegistryError.functionNotFound(signature: "\(name)(\(args.map{$0.type}.joined(separator: ", "))")
+        }
     }
 }
