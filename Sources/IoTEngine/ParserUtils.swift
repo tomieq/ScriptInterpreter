@@ -33,10 +33,17 @@ class ParserUtils {
         guard case .bracketOpen = openingToken else {
             return []
         }
+        var brackerCounter = 1
         var result: [Token] = []
         var nextIndex = index + 1
-        while let nextToken = tokens[safeIndex: nextIndex]{
+        while let nextToken = tokens[safeIndex: nextIndex] {
+            if nextToken == .bracketOpen {
+                brackerCounter += 1
+            }
             if nextToken == .bracketClose {
+                brackerCounter -= 1
+            }
+            if brackerCounter == 0 {
                 break
             }
             result.append(nextToken)

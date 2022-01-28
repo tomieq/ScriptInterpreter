@@ -46,9 +46,20 @@ class ParserUtilsTests: XCTestCase {
         let code = " open(10, false, 1.0)\n data = 50;"
         do {
             let lexer = try Lexer(code: code)
-            print(lexer.tokens)
             let tokens = ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 1, tokens: lexer.tokens)
             XCTAssertEqual(tokens.count, 5)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_getTokensBetweenBracketsNestedBrackets() {
+        let code = "var age = ( 1 + 5 + (10 - 4) )"
+        do {
+            let lexer = try Lexer(code: code)
+            let tokens = ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 3, tokens: lexer.tokens)
+            print(tokens)
+            XCTAssertEqual(tokens.count, 9)
         } catch {
             XCTFail(error.localizedDescription)
         }
