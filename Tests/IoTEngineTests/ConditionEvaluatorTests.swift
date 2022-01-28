@@ -37,4 +37,48 @@ class ConditionEvaluatorTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_integerEqualsTrue() {
+        let code = "10 == 10"
+        do {
+            let lexer = try Lexer(code: code)
+            let evaluator = ConditionEvaluator()
+            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_integerEqualsFalse() {
+        let code = "10 == 11"
+        do {
+            let lexer = try Lexer(code: code)
+            let evaluator = ConditionEvaluator()
+            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_integerNotEqualsTrue() {
+        let code = "10 != 11"
+        do {
+            let lexer = try Lexer(code: code)
+            let evaluator = ConditionEvaluator()
+            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_integerNotEqualsFalse() {
+        let code = "10 != 10"
+        do {
+            let lexer = try Lexer(code: code)
+            let evaluator = ConditionEvaluator()
+            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
