@@ -26,6 +26,7 @@ enum Token: Equatable {
     case blockOpen
     case blockClose
     case equals
+    case functionDefinition(type: String)
     case function(name: String)
     case functionWithArguments(name: String)
     case comma
@@ -44,6 +45,8 @@ extension Token {
         
         generators.append(TokenGenerator(regex: "let", resolver: { _ in [.variableDefinition(type: "let")] }))
         generators.append(TokenGenerator(regex: "var", resolver: { _ in [.variableDefinition(type: "var")] }))
+        generators.append(TokenGenerator(regex: "function", resolver: { _ in [.functionDefinition(type: "function")] }))
+        generators.append(TokenGenerator(regex: "func", resolver: { _ in [.functionDefinition(type: "func")] }))
         generators.append(TokenGenerator(regex: "true", resolver: { _ in [.boolLiteral(true)] }))
         generators.append(TokenGenerator(regex: "false", resolver: { _ in [.boolLiteral(false)] }))
         generators.append(TokenGenerator(regex: "if", resolver: { _ in [.ifStatement] }))
@@ -129,6 +132,8 @@ extension Token: CustomDebugStringConvertible {
             return "+"
         case .sublime:
             return "-"
+        case .functionDefinition(let type):
+            return "functionDefinition(\(type))"
         }
     }
 }

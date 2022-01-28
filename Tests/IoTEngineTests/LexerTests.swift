@@ -230,4 +230,30 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
+    
+    func test_functionDefinition() {
+        let script = "function exec() { print(\"error\") }"
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .functionDefinition(type: "function"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 1], .function(name: "exec"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 2], .blockOpen)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func test_functionDefinitionWithArguments() {
+        let script = "func exec(counter) { print(counter) }"
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .functionDefinition(type: "func"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 1], .functionWithArguments(name: "exec"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 2], .bracketOpen)
+            XCTAssertEqual(lexer.tokens[safeIndex: 3], .variable(name: "counter"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 4], .bracketClose)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 }
