@@ -151,8 +151,21 @@ class VariableParserTests: XCTestCase {
             XCTAssertNoThrow(try parser.parse(into: valueRegistry))
             XCTAssertEqual(valueRegistry.getValue(name: "age"), .integer(20))
             let leftTokens = parser.leftTokens
-            print(leftTokens)
             XCTAssertEqual(leftTokens.count, 5)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_internalFunctionVariablesAreOmmited() {
+        let script = "var temperature = 21.4; function disable() { var flag = false; }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = VariableParser(tokens: lexer.tokens)
+            let valueRegistry = ValueRegistry()
+            XCTAssertNoThrow(try parser.parse(into: valueRegistry))
+            XCTAssertEqual(valueRegistry.getValue(name: "temperature"), .float(21.4))
+            XCTAssertFalse(valueRegistry.valueExists(name: "flag"))
         } catch {
             XCTFail(error.localizedDescription)
         }

@@ -49,6 +49,9 @@ class VariableParser {
                         break
                     }
                 }
+            case .blockOpen:
+                let tokensInBlock = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: index, tokens: self.tokens)
+                index += tokensInBlock.count + 1
             default:
                 break
             }
