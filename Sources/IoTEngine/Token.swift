@@ -13,6 +13,7 @@ enum Token: Equatable {
     case intLiteral(Int)
     case stringLiteral(String)
     case boolLiteral(Bool)
+    case variable(name: String)
     case bracketOpen
     case bracketClose
     case ifStatement
@@ -40,6 +41,7 @@ extension Token {
         generators.append(TokenGenerator(regex: "true", resolver: { _ in [.boolLiteral(true)] }))
         generators.append(TokenGenerator(regex: "false", resolver: { _ in [.boolLiteral(false)] }))
         generators.append(TokenGenerator(regex: "if", resolver: { _ in [.ifStatement] }))
+        generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
         generators.append(TokenGenerator(regex: "&&", resolver: { _ in [.andOperator] }))
         generators.append(TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }))
         generators.append(TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }))
@@ -56,7 +58,8 @@ extension Token {
         generators.append(TokenGenerator(regex: "\"[a-zA-Z_\\-0-9 ']*\"", resolver: { [.stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "\"")))] }))
         generators.append(TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { [.function(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()")))] }))
         generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", resolver: { [.functionWithArguments(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))), .bracketOpen] }))
-        generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
+        generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)", resolver: { [.variable(name: $0)] }))
+        
         return generators
     }
 }
@@ -107,6 +110,8 @@ extension Token: CustomDebugStringConvertible {
             return "or"
         case .semicolon:
             return ";"
+        case .variable(let name):
+            return "variable(\(name)"
         }
     }
 }

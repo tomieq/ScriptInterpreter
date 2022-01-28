@@ -71,12 +71,15 @@ final class LexerTests: XCTestCase {
         }
     }
     
-    func test_InvalidFloatNumber() {
+    func test_variable() {
         
-        let script = " if (unknownToken) { return }"
+        let script = " if (someVar) { return }"
         
-        XCTAssertThrowsError(try Lexer(code: script)){ error in
-            XCTAssertNotNil(error as? LexerError)
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 2], .variable(name: "someVar"))
+        } catch {
+            XCTFail("\(error)")
         }
     }
     
