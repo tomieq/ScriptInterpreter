@@ -256,4 +256,16 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
+    
+    func test_conditionCheckWithNotEqual() {
+        let script = "72 != 10"
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .intLiteral(72))
+            XCTAssertEqual(lexer.tokens[safeIndex: 1], .notEqual)
+            XCTAssertEqual(lexer.tokens[safeIndex: 2], .intLiteral(10))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 }

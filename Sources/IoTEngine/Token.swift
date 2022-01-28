@@ -25,7 +25,8 @@ enum Token: Equatable {
     case returnStatement
     case blockOpen
     case blockClose
-    case equals
+    case equal
+    case notEqual
     case functionDefinition(type: String)
     case function(name: String)
     case functionWithArguments(name: String)
@@ -57,7 +58,8 @@ extension Token {
         generators.append(TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }))
         generators.append(TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }))
         generators.append(TokenGenerator(regex: "\\}", resolver: { _ in [.blockClose] }))
-        generators.append(TokenGenerator(regex: "==", resolver: { _ in [.equals] }))
+        generators.append(TokenGenerator(regex: "==", resolver: { _ in [.equal] }))
+        generators.append(TokenGenerator(regex: "\\!=", resolver: { _ in [.notEqual] }))
         generators.append(TokenGenerator(regex: ",", resolver: { _ in [.comma] }))
         generators.append(TokenGenerator(regex: "else", resolver: { _ in [.elseStatement] }))
         generators.append(TokenGenerator(regex: "return", resolver: { _ in [.returnStatement] }))
@@ -108,8 +110,10 @@ extension Token: CustomDebugStringConvertible {
             return "else"
         case .returnStatement:
             return "return"
-        case .equals:
-            return "equals"
+        case .equal:
+            return "=="
+        case .notEqual:
+            return "!="
         case .function(let name):
             return "function:\(name)"
         case .functionWithArguments(let name):
