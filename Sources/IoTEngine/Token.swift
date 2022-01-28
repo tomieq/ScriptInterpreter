@@ -14,6 +14,7 @@ enum Token: Equatable {
     case stringLiteral(String)
     case boolLiteral(Bool)
     case variable(name: String)
+    case assign
     case bracketOpen
     case bracketClose
     case ifStatement
@@ -50,6 +51,7 @@ extension Token {
         generators.append(TokenGenerator(regex: ",", resolver: { _ in [.comma] }))
         generators.append(TokenGenerator(regex: "else", resolver: { _ in [.elseStatement] }))
         generators.append(TokenGenerator(regex: "return", resolver: { _ in [.returnStatement] }))
+        generators.append(TokenGenerator(regex: "=", resolver: { _ in [.assign] }))
         generators.append(TokenGenerator(regex: "\\(", resolver: { _ in [.bracketOpen] }))
         generators.append(TokenGenerator(regex: "\\)", resolver: { _ in [.bracketClose] }))
         generators.append(TokenGenerator(regex: "\\-?([0-9]*\\.[0-9]*)", resolver: { [.floatLiteral(Float($0)!)] }))
@@ -112,6 +114,8 @@ extension Token: CustomDebugStringConvertible {
             return ";"
         case .variable(let name):
             return "variable(\(name)"
+        case .assign:
+            return "="
         }
     }
 }
