@@ -18,8 +18,7 @@ class ParserTests: XCTestCase {
         do {
             let script = "increaseCounter()"
             let lexer = try Lexer(code: script)
-            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
             XCTAssertEqual(spy.callCounter, 0)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.callCounter, 1)
@@ -39,8 +38,7 @@ class ParserTests: XCTestCase {
 
         let script = "increaseCounter() addTwo()"
         let lexer = try Lexer(code: script)
-        let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-        let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
+        let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
         XCTAssertEqual(spy.callCounter, 0)
         XCTAssertNoThrow(try parser.execute())
         XCTAssertEqual(spy.callCounter, 3)
@@ -55,8 +53,7 @@ class ParserTests: XCTestCase {
         let script = "addValues(true, 20, 'works', 3.14)"
         do {
             let lexer = try Lexer(code: script)
-            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
             XCTAssertEqual(spy.received.count, 0)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.received.count, 4)

@@ -12,17 +12,15 @@ enum ParserError: Error {
 }
 
 class Parser {
-    private let lexicalAnalizer: LexicalAnalyzer
     private let functionRegistry: ExternalFunctionRegistry
     private let valueRegistry: ValueRegistry
     
     private var tokens: [Token]
     
-    init(lexicalAnalizer: LexicalAnalyzer, functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), valueRegistry: ValueRegistry = ValueRegistry()) {
-        self.lexicalAnalizer = lexicalAnalizer
+    init(tokens: [Token], functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), valueRegistry: ValueRegistry = ValueRegistry()) {
         self.functionRegistry = functionRegistry
         self.valueRegistry = valueRegistry
-        self.tokens = self.lexicalAnalizer.lexer.tokens
+        self.tokens = tokens
     }
     
     func execute() throws {
