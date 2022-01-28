@@ -30,15 +30,17 @@ class Parser {
         for (index, token) in tokensCopy.enumerated() {
             switch token {
             case .variableDefinition(let definitionType):
-                let tokenIndex = index + 1
-                let consumedTokens = try self.initVariable(variableTokenIndex: tokenIndex, definitionType: definitionType)
+                var tokenIndex = index + 1
+                while let consumedTokens = try self.initVariable(variableTokenIndex: tokenIndex, definitionType: definitionType) {
+                    tokenIndex += consumedTokens
+                }
             default:
                 break
             }
         }
     }
     
-    private func initVariable(variableTokenIndex pos: Int, definitionType: String) throws -> Int {
+    private func initVariable(variableTokenIndex pos: Int, definitionType: String) throws -> Int? {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
             throw ParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
@@ -56,7 +58,10 @@ class Parser {
         } else {
             self.valueRegistry.registerValue(name: name, value: nil)
         }
-        return usedTokens
+        if let lastToken = self.tokens[safeIndex: pos + usedTokens], case .comma = lastToken {
+            return usedTokens + 1
+        }
+        return nil
     }
     
     func execute() throws {

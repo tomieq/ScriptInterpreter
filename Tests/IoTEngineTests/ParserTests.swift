@@ -151,6 +151,59 @@ class ParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_initMultipleNilVariables() {
+
+        let script = "var milage, color, make;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertTrue(valueRegistry.valueExists(name: "milage"))
+            XCTAssertTrue(valueRegistry.valueExists(name: "color"))
+            XCTAssertTrue(valueRegistry.valueExists(name: "make"))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_initMixedVariables() {
+        let script = "var age = 38, style, flag = true;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertTrue(valueRegistry.valueExists(name: "style"))
+            XCTAssertEqual(valueRegistry.getValue(name: "age"), .integer(38))
+            XCTAssertEqual(valueRegistry.getValue(name: "flag"), .bool(true))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_initVariablesMultipleLines() {
+        let script = "var color = \"red\"\nvar number = 13; var size = 8.9;\nvar flag = false;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(valueRegistry.getValue(name: "color"), .string("red"))
+            XCTAssertEqual(valueRegistry.getValue(name: "number"), .integer(13))
+            XCTAssertEqual(valueRegistry.getValue(name: "size"), .float(8.9))
+            XCTAssertEqual(valueRegistry.getValue(name: "flag"), .bool(false))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
 
 fileprivate class FunctionCallSpy {
