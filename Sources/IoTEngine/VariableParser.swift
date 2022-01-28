@@ -34,21 +34,29 @@ class VariableParser {
     }
     
     func parse(into valueRegistry: ValueRegistry) throws {
-        for (index, token) in self.tokens.enumerated() {
+        var index = 0
+        while let token = self.tokens[safeIndex: index] {
+            
             switch token {
             case .variableDefinition(let definitionType):
-                self.consumedTokenIndices.append(index)
-                var tokenIndex = index + 1
-                while let consumedTokens = try self.initVariable(variableTokenIndex: tokenIndex, definitionType: definitionType, valueRegistry: valueRegistry) {
-                    tokenIndex += consumedTokens
+                while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, valueRegistry: valueRegistry) {
+                    
+                    let usedTokenRange = (index...(index + data.usedTokens))
+                    self.consumedTokenIndices.append(contentsOf: usedTokenRange)
+                    
+                    index += data.usedTokens
+                    if !data.shouldParseFurther {
+                        break
+                    }
                 }
             default:
                 break
             }
+            index += 1
         }
     }
     
-    private func initVariable(variableTokenIndex pos: Int, definitionType: String, valueRegistry: ValueRegistry) throws -> Int? {
+    private func initVariable(variableTokenIndex pos: Int, definitionType: String, valueRegistry: ValueRegistry) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
             throw VariableParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
@@ -67,16 +75,14 @@ class VariableParser {
         } else {
             valueRegistry.registerValue(name: name, value: nil)
         }
-        if let lastToken = self.tokens[safeIndex: pos + usedTokens], case .comma = lastToken {
+        let lastToken = self.tokens[safeIndex: pos + usedTokens]
+        if case .comma = lastToken {
             shouldParseFurther = true
             usedTokens += 1
         }
-        let usedTokenRange = (pos...(pos + usedTokens))
-        self.consumedTokenIndices.append(contentsOf: usedTokenRange)
-        
-        if shouldParseFurther {
-            return usedTokens
+        if case .semicolon = lastToken {
+            usedTokens += 1
         }
-        return nil
+        return (shouldParseFurther, usedTokens)
     }
 }
