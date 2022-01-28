@@ -31,18 +31,32 @@ class Parser {
             switch token {
             case .variableDefinition(let definitionType):
                 let tokenIndex = index + 1
-                try self.initVariable(variableTokenIndex: tokenIndex, definitionType: definitionType)
+                let consumedTokens = try self.initVariable(variableTokenIndex: tokenIndex, definitionType: definitionType)
             default:
                 break
             }
         }
     }
     
-    private func initVariable(variableTokenIndex pos: Int, definitionType: String) throws {
+    private func initVariable(variableTokenIndex pos: Int, definitionType: String) throws -> Int {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
-            throw ParserError.syntaxError(description: "Invalid \(definitionType) usage!")
+            throw ParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
-        self.valueRegistry.registerValue(name: name, value: nil)
+        var usedTokens = 1
+        if let nextToken = self.tokens[safeIndex: pos + 1], case .assign = nextToken {
+            
+            guard let valueToken = self.tokens[safeIndex: pos + 2] else {
+                throw ParserError.syntaxError(description: "Value not found for assigning variable \(name)")
+            }
+            guard let value = self.token2Value(valueToken) else {
+                throw ParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
+            }
+            self.valueRegistry.registerValue(name: name, value: value)
+            usedTokens += 2
+        } else {
+            self.valueRegistry.registerValue(name: name, value: nil)
+        }
+        return usedTokens
     }
     
     func execute() throws {

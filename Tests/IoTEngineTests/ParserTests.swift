@@ -87,6 +87,70 @@ class ParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_initBoolVariable() {
+        
+        let script = "var agreed = false;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(valueRegistry.getValue(name: "agreed"), .bool(false))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_initIntegerVariable() {
+        
+        let script = "var weight = 82;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(valueRegistry.getValue(name: "weight"), .integer(82))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_initStringVariable() {
+        
+        let script = "var name = \"Thomas\";"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(valueRegistry.getValue(name: "name"), .string("Thomas"))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_initFloatVariable() {
+        
+        let script = "var length = 50.9;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(valueRegistry.getValue(name: "length"), .float(50.9))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
 
 fileprivate class FunctionCallSpy {
