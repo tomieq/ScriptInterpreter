@@ -35,6 +35,7 @@ class Parser {
     func execute() throws {
         let valueParser = VariableParser(tokens: self.tokens)
         try valueParser.parse(into: self.valueRegistry)
+        self.tokens = valueParser.leftTokens
         
         for (index, token) in self.tokens.enumerated() {
             switch token {
