@@ -9,7 +9,7 @@ import XCTest
 
 class ParserTests: XCTestCase {
 
-    func test_parsingAndCallingSimpleFunction() throws {
+    func test_parsingAndCallingSimpleExternalFunction() throws {
         
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
@@ -28,7 +28,7 @@ class ParserTests: XCTestCase {
         }
     }
     
-    func test_parsingAndCallingTwoFunctions() throws {
+    func test_parsingAndCallingTwoExternalFunctions() throws {
         
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
@@ -45,7 +45,7 @@ class ParserTests: XCTestCase {
 
     }
     
-    func test_callFunctionWithBoolArgument() {
+    func test_callExternalFunctionWithArguments() {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addValues", function: spy.addValues))
@@ -61,6 +61,24 @@ class ParserTests: XCTestCase {
             XCTAssertEqual(spy.received[safeIndex: 1], .integer(20))
             XCTAssertEqual(spy.received[safeIndex: 2], .string("works"))
             XCTAssertEqual(spy.received[safeIndex: 3], .float(3.14))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_callExternalFunctionWithVariableValue() {
+        let spy = FunctionCallSpy()
+        let functionRegistry = ExternalFunctionRegistry()
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addValues", function: spy.addValues))
+        
+        let script = "var number = 55; addValues(number);"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
+            XCTAssertEqual(spy.received.count, 0)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(spy.received.count, 1)
+            XCTAssertEqual(spy.received[safeIndex: 0], .integer(55))
         } catch {
             XCTFail(error.localizedDescription)
         }
