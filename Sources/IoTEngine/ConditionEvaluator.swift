@@ -27,6 +27,15 @@ class ConditionEvaluator {
         guard tokens.count > 0 else {
             throw ConditionEvaluatorError.syntaxError(info: "Empty condition")
         }
-        return true
+        return try self.evaluateBoolVariable(token: tokens.first!)
+    }
+    
+    private func evaluateBoolVariable(token: Token) throws -> Bool {
+        switch token {
+        case .boolLiteral(let value):
+            return value
+        default:
+            throw ConditionEvaluatorError.syntaxError(info: "Condition checking requires bool variable")
+        }
     }
 }
