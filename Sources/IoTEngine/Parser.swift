@@ -11,6 +11,15 @@ enum ParserError: Error {
     case syntaxError(description: String)
 }
 
+extension ParserError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .syntaxError(let info):
+            return NSLocalizedString("ParserError.syntaxError: \(info)", comment: "ParserError")
+        }
+    }
+}
+
 class Parser {
     private let functionRegistry: ExternalFunctionRegistry
     private let valueRegistry: ValueRegistry

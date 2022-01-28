@@ -11,6 +11,15 @@ enum VariableParserError: Error {
     case syntaxError(description: String)
 }
 
+extension VariableParserError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .syntaxError(let info):
+            return NSLocalizedString("VariableParserError.syntaxError: \(info)", comment: "VariableParserError")
+        }
+    }
+}
+
 class VariableParser {
     let tokens: [Token]
     

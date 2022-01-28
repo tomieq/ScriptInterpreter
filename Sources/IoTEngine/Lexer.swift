@@ -12,6 +12,17 @@ enum LexerError: Swift.Error {
     case invalidRegex(String)
 }
 
+extension LexerError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .unknownSyntax(let info):
+            return NSLocalizedString("LexerError.unknownSyntax: \(info)", comment: "LexerError")
+        case .invalidRegex(let info):
+            return NSLocalizedString("LexerError.invalidRegex: \(info)", comment: "LexerError")
+        }
+    }
+}
+
 class Lexer {
     let tokens: [Token]
 
