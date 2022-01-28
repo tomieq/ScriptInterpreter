@@ -204,6 +204,22 @@ class ParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_assignVariableFromOtherVariable() {
+        let script = "var age = 20; var ageCopy = age;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(valueRegistry.getValue(name: "age"), .integer(20))
+            XCTAssertEqual(valueRegistry.getValue(name: "ageCopy"), .integer(20))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
 
 fileprivate class FunctionCallSpy {

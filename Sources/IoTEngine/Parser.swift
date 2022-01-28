@@ -90,6 +90,8 @@ class Parser {
             return .bool(value)
         case .floatLiteral(let value):
             return .float(value)
+        case .variable(let name):
+            return self.valueRegistry.getValue(name: name)
         default:
             return nil
         }
