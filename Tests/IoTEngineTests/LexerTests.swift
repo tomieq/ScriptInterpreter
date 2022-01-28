@@ -1,7 +1,7 @@
     import XCTest
     @testable import IoTEngine
 
-    final class lexerTests: XCTestCase {
+    final class LexerTests: XCTestCase {
 
         func test_initWithEmptyCode() {
             XCTAssertNoThrow(try Lexer(code: ""))
