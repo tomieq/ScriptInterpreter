@@ -25,23 +25,28 @@ class Parser {
         self.tokens = self.lexicalAnalizer.lexer.tokens
     }
     
-    private func initVariableRegistry() throws {
-        for (index, token) in self.tokens.enumerated() {
+    private func consumeTokensForInitVariablesInRegistry() throws {
+        let tokensCopy = self.tokens
+        for (index, token) in tokensCopy.enumerated() {
             switch token {
             case .variableDefinition(let definitionType):
-                var pos = index + 1
-                guard case .variable(let name) = self.tokens[safeIndex: pos] else {
-                    throw ParserError.syntaxError(description: "Invalid \(definitionType) usage!")
-                }
-                self.valueRegistry.registerValue(name: name, value: nil)
+                let tokenIndex = index + 1
+                try self.initVariable(variableTokenIndex: tokenIndex, definitionType: definitionType)
             default:
                 break
             }
         }
     }
     
+    private func initVariable(variableTokenIndex pos: Int, definitionType: String) throws {
+        guard case .variable(let name) = self.tokens[safeIndex: pos] else {
+            throw ParserError.syntaxError(description: "Invalid \(definitionType) usage!")
+        }
+        self.valueRegistry.registerValue(name: name, value: nil)
+    }
+    
     func execute() throws {
-        try self.initVariableRegistry()
+        try self.consumeTokensForInitVariablesInRegistry()
         for (index, token) in self.tokens.enumerated() {
             switch token {
             case .function(let name):
