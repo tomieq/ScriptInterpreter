@@ -13,7 +13,7 @@ enum Token: Equatable {
     case intLiteral(Int)
     case stringLiteral(String)
     case boolLiteral(Bool)
-    case variableDefinition
+    case variableDefinition(type: String)
     case variable(name: String)
     case assign
     case bracketOpen
@@ -40,8 +40,8 @@ extension Token {
     private static func makeTokenGenerators() -> [TokenGenerator] {
         var generators: [TokenGenerator] = []
         
-        generators.append(TokenGenerator(regex: "let", resolver: { _ in [.variableDefinition] }))
-        generators.append(TokenGenerator(regex: "var", resolver: { _ in [.variableDefinition] }))
+        generators.append(TokenGenerator(regex: "let", resolver: { _ in [.variableDefinition(type: "let")] }))
+        generators.append(TokenGenerator(regex: "var", resolver: { _ in [.variableDefinition(type: "var")] }))
         generators.append(TokenGenerator(regex: "true", resolver: { _ in [.boolLiteral(true)] }))
         generators.append(TokenGenerator(regex: "false", resolver: { _ in [.boolLiteral(false)] }))
         generators.append(TokenGenerator(regex: "if", resolver: { _ in [.ifStatement] }))
@@ -117,8 +117,8 @@ extension Token: CustomDebugStringConvertible {
             return ";"
         case .variable(let name):
             return "variable(\(name)"
-        case .variableDefinition:
-            return "variableDefinition"
+        case .variableDefinition(let type):
+            return "variableDefinition(\(type)"
         case .assign:
             return "="
         }
