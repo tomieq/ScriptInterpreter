@@ -26,21 +26,25 @@ class ParserUtils {
     }
     
     static func getTokensBetweenBrackets(indexOfOpeningBracket index: Int, tokens: [Token]) -> [Token] {
+        return ParserUtils.getTokensClosedBetween(searchable: tokens, openingIndex: index, barriers: (.bracketOpen, .bracketClose))
+    }
+    
+    private static func getTokensClosedBetween(searchable tokens: [Token], openingIndex index: Int, barriers: (start: Token, end: Token)) -> [Token] {
         guard let openingToken = tokens[safeIndex: index] else {
             return []
         }
         
-        guard case .bracketOpen = openingToken else {
+        guard case barriers.start = openingToken else {
             return []
         }
         var brackerCounter = 1
         var result: [Token] = []
         var nextIndex = index + 1
         while let nextToken = tokens[safeIndex: nextIndex] {
-            if nextToken == .bracketOpen {
+            if nextToken == barriers.start {
                 brackerCounter += 1
             }
-            if nextToken == .bracketClose {
+            if nextToken == barriers.end {
                 brackerCounter -= 1
             }
             if brackerCounter == 0 {
