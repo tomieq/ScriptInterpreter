@@ -1,5 +1,5 @@
 //
-//  ValueParserTests.swift
+//  VariableParserTests.swift
 //  
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
@@ -9,7 +9,7 @@ import Foundation
 import XCTest
 @testable import IoTEngine
 
-class ValueParserTests: XCTestCase {
+class VariableParserTests: XCTestCase {
 
     func test_initNilVariable() {
         
