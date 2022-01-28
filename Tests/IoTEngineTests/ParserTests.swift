@@ -19,8 +19,7 @@ class ParserTests: XCTestCase {
             let script = "increaseCounter()"
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let valueRegistry = ValueRegistry()
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
             XCTAssertEqual(spy.callCounter, 0)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.callCounter, 1)
@@ -34,7 +33,6 @@ class ParserTests: XCTestCase {
         
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
-        let valueRegistry = ValueRegistry()
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseByOne))
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addTwo", function: spy.increaseByTwo))
         
@@ -42,7 +40,7 @@ class ParserTests: XCTestCase {
         let script = "increaseCounter() addTwo()"
         let lexer = try Lexer(code: script)
         let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-        let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+        let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
         XCTAssertEqual(spy.callCounter, 0)
         XCTAssertNoThrow(try parser.execute())
         XCTAssertEqual(spy.callCounter, 3)
@@ -58,8 +56,7 @@ class ParserTests: XCTestCase {
         do {
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let valueRegistry = ValueRegistry()
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
             XCTAssertEqual(spy.received.count, 0)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(spy.received.count, 4)
@@ -78,9 +75,8 @@ class ParserTests: XCTestCase {
         do {
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let functionRegistry = ExternalFunctionRegistry()
             let valueRegistry = ValueRegistry()
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, valueRegistry: valueRegistry)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertTrue(valueRegistry.valueExists(name: "distance"))
         } catch {
@@ -94,9 +90,8 @@ class ParserTests: XCTestCase {
         do {
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let functionRegistry = ExternalFunctionRegistry()
             let valueRegistry = ValueRegistry()
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, valueRegistry: valueRegistry)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(valueRegistry.getValue(name: "agreed"), .bool(false))
         } catch {
@@ -110,9 +105,8 @@ class ParserTests: XCTestCase {
         do {
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let functionRegistry = ExternalFunctionRegistry()
             let valueRegistry = ValueRegistry()
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, valueRegistry: valueRegistry)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(valueRegistry.getValue(name: "weight"), .integer(82))
         } catch {
@@ -126,9 +120,8 @@ class ParserTests: XCTestCase {
         do {
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
-            let functionRegistry = ExternalFunctionRegistry()
             let valueRegistry = ValueRegistry()
-            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, valueRegistry: valueRegistry)
             XCTAssertNoThrow(try parser.execute())
             XCTAssertEqual(valueRegistry.getValue(name: "name"), .string("Thomas"))
         } catch {

@@ -18,7 +18,7 @@ class Parser {
     
     private var tokens: [Token]
     
-    init(lexicalAnalizer: LexicalAnalyzer, functionRegistry: ExternalFunctionRegistry, valueRegistry: ValueRegistry) {
+    init(lexicalAnalizer: LexicalAnalyzer, functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), valueRegistry: ValueRegistry = ValueRegistry()) {
         self.lexicalAnalizer = lexicalAnalizer
         self.functionRegistry = functionRegistry
         self.valueRegistry = valueRegistry
