@@ -26,6 +26,7 @@ enum Token: Equatable {
     case comma
     case andOperator
     case orOperator
+    case semicolon
 }
 
 // MARK: regex for tokens
@@ -55,6 +56,7 @@ extension Token {
         generators.append(TokenGenerator(regex: "\"[a-zA-Z_\\-0-9 ']*\"", resolver: { [.stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "\"")))] }))
         generators.append(TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { [.function(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()")))] }))
         generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", resolver: { [.functionWithArguments(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))), .bracketOpen] }))
+        generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
         return generators
     }
 }
@@ -103,6 +105,8 @@ extension Token: CustomDebugStringConvertible {
             return "and"
         case .orOperator:
             return "or"
+        case .semicolon:
+            return ";"
         }
     }
 }

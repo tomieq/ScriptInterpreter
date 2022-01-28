@@ -191,4 +191,14 @@ final class LexerTests: XCTestCase {
         }
     }
     
+    func test_recogniseSemicolon() {
+        let script = "execute();"
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .function(name: "execute"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 1], .semicolon)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 }
