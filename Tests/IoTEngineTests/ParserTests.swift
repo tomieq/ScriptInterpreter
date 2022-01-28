@@ -14,7 +14,7 @@ class ParserTests: XCTestCase {
         
         let spy = FunctionCallSpy()
         let functionRegistry = FunctionRegistry()
-        functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseByOne)
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseByOne))
         
         do {
             let script = "increaseCounter()"
@@ -33,8 +33,8 @@ class ParserTests: XCTestCase {
         
         let spy = FunctionCallSpy()
         let functionRegistry = FunctionRegistry()
-        functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseByOne)
-        functionRegistry.registerFunc(name: "addTwo", function: spy.increaseByTwo)
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseByOne))
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addTwo", function: spy.increaseByTwo))
         
         do {
             let script = "increaseCounter() addTwo()"

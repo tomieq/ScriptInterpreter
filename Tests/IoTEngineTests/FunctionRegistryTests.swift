@@ -15,24 +15,40 @@ class FunctionRegistryTests: XCTestCase {
         let spy = FunctionCallSpy()
         
         let sut = FunctionRegistry()
-        sut.registerFunc(name: "spy", function: spy.spyFunction)
+        XCTAssertNoThrow(try sut.registerFunc(name: "spy", function: spy.spyFunction))
         
         XCTAssertEqual(spy.callCounter, 0)
         sut.callFunction(name: "spy")
         XCTAssertEqual(spy.callCounter, 1)
+
     }
     
     func test_registeringFunctionWithStringArgument() {
         let spy = FunctionCallSpy()
         
         let sut = FunctionRegistry()
-        sut.registerFunc(name: "receive", function: spy.receive)
+        XCTAssertNoThrow(try sut.registerFunc(name: "receive", function: spy.receive))
         
         XCTAssertEqual(spy.received.count, 0)
         sut.callFunction(name: "receive", args: [.string("lego")])
         XCTAssertEqual(spy.received.count, 1)
     }
 
+    func test_registeringTheSameNameFunction() {
+        let spy = FunctionCallSpy()
+        
+        let sut = FunctionRegistry()
+        XCTAssertNoThrow(try sut.registerFunc(name: "spy", function: spy.spyFunction))
+        XCTAssertThrowsError(try sut.registerFunc(name: "spy", function: spy.spyFunction))
+    }
+
+    func test_registeringTheSameNameFunctionWithArgs() {
+        let spy = FunctionCallSpy()
+        
+        let sut = FunctionRegistry()
+        XCTAssertNoThrow(try sut.registerFunc(name: "receive", function: spy.receive))
+        XCTAssertThrowsError(try sut.registerFunc(name: "receive", function: spy.receive))
+    }
 }
 
 fileprivate class FunctionCallSpy {
