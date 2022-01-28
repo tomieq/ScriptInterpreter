@@ -71,6 +71,22 @@ class ParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_initNilVariable() {
+        
+        let script = "var distance;"
+        do {
+            let lexer = try Lexer(code: script)
+            let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
+            let functionRegistry = FunctionRegistry()
+            let valueRegistry = ValueRegistry()
+            let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry, valueRegistry: valueRegistry)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertTrue(valueRegistry.valueExists(name: "distance"))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
 
 fileprivate class FunctionCallSpy {

@@ -7,19 +7,42 @@
 
 import Foundation
 
+enum ParserError: Error {
+    case syntaxError(description: String)
+}
+
 class Parser {
     private let lexicalAnalizer: LexicalAnalyzer
     private let functionRegistry: FunctionRegistry
     private let valueRegistry: ValueRegistry
     
+    private var tokens: [Token]
+    
     init(lexicalAnalizer: LexicalAnalyzer, functionRegistry: FunctionRegistry, valueRegistry: ValueRegistry) {
         self.lexicalAnalizer = lexicalAnalizer
         self.functionRegistry = functionRegistry
         self.valueRegistry = valueRegistry
+        self.tokens = self.lexicalAnalizer.lexer.tokens
+    }
+    
+    private func initVariableRegistry() throws {
+        for (index, token) in self.tokens.enumerated() {
+            switch token {
+            case .variableDefinition(let definitionType):
+                var pos = index + 1
+                guard case .variable(let name) = self.tokens[safeIndex: pos] else {
+                    throw ParserError.syntaxError(description: "Invalid \(definitionType) usage!")
+                }
+                self.valueRegistry.registerValue(name: name, value: nil)
+            default:
+                break
+            }
+        }
     }
     
     func execute() throws {
-        for (index, token) in self.lexicalAnalizer.lexer.tokens.enumerated() {
+        try self.initVariableRegistry()
+        for (index, token) in self.tokens.enumerated() {
             switch token {
             case .function(let name):
                 try self.functionRegistry.callFunction(name: name)
