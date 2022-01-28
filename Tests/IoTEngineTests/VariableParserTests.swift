@@ -141,4 +141,20 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_leftTokens() {
+        let script = "var age = 20, startTime = age; connect(8080); var finishTime = age; var ogr = 6"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = VariableParser(tokens: lexer.tokens)
+            let valueRegistry = ValueRegistry()
+            XCTAssertNoThrow(try parser.parse(into: valueRegistry))
+            XCTAssertEqual(valueRegistry.getValue(name: "age"), .integer(20))
+            let leftTokens = parser.leftTokens
+            print(leftTokens)
+            XCTAssertEqual(leftTokens.count, 5)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }

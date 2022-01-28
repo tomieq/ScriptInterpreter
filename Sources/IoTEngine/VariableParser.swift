@@ -21,16 +21,23 @@ extension VariableParserError: LocalizedError {
 }
 
 class VariableParser {
-    let tokens: [Token]
+    private let tokens: [Token]
+    private var consumedTokenIndices: [Int]
+    
+    var leftTokens: [Token] {
+        return self.tokens.enumerated().filter { (index, token) in !self.consumedTokenIndices.contains(index) }.map{ $0.element }
+    }
     
     init(tokens: [Token]) {
         self.tokens = tokens
+        self.consumedTokenIndices = []
     }
     
     func parse(into valueRegistry: ValueRegistry) throws {
         for (index, token) in self.tokens.enumerated() {
             switch token {
             case .variableDefinition(let definitionType):
+                self.consumedTokenIndices.append(index)
                 var tokenIndex = index + 1
                 while let consumedTokens = try self.initVariable(variableTokenIndex: tokenIndex, definitionType: definitionType, valueRegistry: valueRegistry) {
                     tokenIndex += consumedTokens
@@ -46,6 +53,7 @@ class VariableParser {
             throw VariableParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
         var usedTokens = 1
+        var shouldParseFurther = false
         if let nextToken = self.tokens[safeIndex: pos + 1], case .assign = nextToken {
             
             guard let valueToken = self.tokens[safeIndex: pos + 2] else {
@@ -60,7 +68,14 @@ class VariableParser {
             valueRegistry.registerValue(name: name, value: nil)
         }
         if let lastToken = self.tokens[safeIndex: pos + usedTokens], case .comma = lastToken {
-            return usedTokens + 1
+            shouldParseFurther = true
+            usedTokens += 1
+        }
+        let usedTokenRange = (pos...(pos + usedTokens))
+        self.consumedTokenIndices.append(contentsOf: usedTokenRange)
+        
+        if shouldParseFurther {
+            return usedTokens
         }
         return nil
     }
