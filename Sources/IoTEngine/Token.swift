@@ -16,6 +16,8 @@ enum Token: Equatable {
     case variableDefinition(type: String)
     case variable(name: String)
     case assign
+    case add
+    case sublime
     case bracketOpen
     case bracketClose
     case ifStatement
@@ -46,6 +48,8 @@ extension Token {
         generators.append(TokenGenerator(regex: "false", resolver: { _ in [.boolLiteral(false)] }))
         generators.append(TokenGenerator(regex: "if", resolver: { _ in [.ifStatement] }))
         generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
+        generators.append(TokenGenerator(regex: "\\+", resolver: { _ in [.add] }))
+        generators.append(TokenGenerator(regex: "\\-", resolver: { _ in [.sublime] }))
         generators.append(TokenGenerator(regex: "&&", resolver: { _ in [.andOperator] }))
         generators.append(TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }))
         generators.append(TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }))
@@ -116,11 +120,15 @@ extension Token: CustomDebugStringConvertible {
         case .semicolon:
             return ";"
         case .variable(let name):
-            return "variable(\(name)"
+            return "variable(\(name))"
         case .variableDefinition(let type):
-            return "variableDefinition(\(type)"
+            return "variableDefinition(\(type))"
         case .assign:
             return "="
+        case .add:
+            return "+"
+        case .sublime:
+            return "-"
         }
     }
 }
