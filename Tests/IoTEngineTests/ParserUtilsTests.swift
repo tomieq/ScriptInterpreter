@@ -46,7 +46,7 @@ class ParserUtilsTests: XCTestCase {
         let code = " open(10, false, 1.0)\n data = 50;"
         do {
             let lexer = try Lexer(code: code)
-            let tokens = ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 1, tokens: lexer.tokens)
+            let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 1, tokens: lexer.tokens)
             XCTAssertEqual(tokens.count, 5)
         } catch {
             XCTFail(error.localizedDescription)
@@ -57,9 +57,35 @@ class ParserUtilsTests: XCTestCase {
         let code = "var age = ( 1 + 5 + (10 - 4) )"
         do {
             let lexer = try Lexer(code: code)
-            let tokens = ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 3, tokens: lexer.tokens)
+            let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 3, tokens: lexer.tokens)
             print(tokens)
             XCTAssertEqual(tokens.count, 9)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_getTokensInBlockNoNested() {
+        let code = "var age = 80; function exec() { var lenght = 122.8 }"
+        do {
+            let lexer = try Lexer(code: code)
+            print(lexer.tokens)
+            let tokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: 7, tokens: lexer.tokens)
+            print(tokens)
+            XCTAssertEqual(tokens.count, 4)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_getTokensInBlockNestedData() {
+        let code = "function exec() { var lenght = 122.8 if(true) { print(100) } }"
+        do {
+            let lexer = try Lexer(code: code)
+            print(lexer.tokens)
+            let tokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: 2, tokens: lexer.tokens)
+            print(tokens)
+            XCTAssertEqual(tokens.count, 14)
         } catch {
             XCTFail(error.localizedDescription)
         }

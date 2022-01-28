@@ -7,6 +7,19 @@
 
 import Foundation
 
+enum ParserUtilsError: Error {
+    case invalidOpeningToken(given: Token?, expected: Token)
+}
+
+extension ParserUtilsError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidOpeningToken(let given, let expected):
+            return NSLocalizedString("ParserUtilsError.invalidOpeningToken. Expected \(expected) but found \(given?.debugDescription ?? "nil")", comment: "ParserUtilsError")
+        }
+    }
+}
+
 class ParserUtils {
     static func token2Value(_ token: Token, valueRegistry: ValueRegistry) -> Value? {
         switch token {
@@ -25,17 +38,21 @@ class ParserUtils {
         }
     }
     
-    static func getTokensBetweenBrackets(indexOfOpeningBracket index: Int, tokens: [Token]) -> [Token] {
-        return ParserUtils.getTokensClosedBetween(searchable: tokens, openingIndex: index, barriers: (.bracketOpen, .bracketClose))
+    static func getTokensBetweenBrackets(indexOfOpeningBracket index: Int, tokens: [Token]) throws -> [Token] {
+        return try ParserUtils.getTokensClosedBetween(searchable: tokens, openingIndex: index, barriers: (.bracketOpen, .bracketClose))
     }
     
-    private static func getTokensClosedBetween(searchable tokens: [Token], openingIndex index: Int, barriers: (start: Token, end: Token)) -> [Token] {
+    static func getTokensForBlock(indexOfOpeningBlock index: Int, tokens: [Token]) throws -> [Token] {
+        return try ParserUtils.getTokensClosedBetween(searchable: tokens, openingIndex: index, barriers: (.blockOpen, .blockClose))
+    }
+    
+    private static func getTokensClosedBetween(searchable tokens: [Token], openingIndex index: Int, barriers: (start: Token, end: Token)) throws -> [Token] {
         guard let openingToken = tokens[safeIndex: index] else {
-            return []
+            throw ParserUtilsError.invalidOpeningToken(given: nil, expected: barriers.start)
         }
         
         guard case barriers.start = openingToken else {
-            return []
+            throw ParserUtilsError.invalidOpeningToken(given: openingToken, expected: barriers.start)
         }
         var brackerCounter = 1
         var result: [Token] = []
