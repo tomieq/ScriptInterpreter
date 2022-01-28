@@ -22,13 +22,28 @@ class FunctionRegistryTests: XCTestCase {
         XCTAssertEqual(spy.callCounter, 1)
     }
     
+    func test_registeringFunctionWithStringArgument() {
+        let spy = FunctionCallSpy()
+        
+        let sut = FunctionRegistry()
+        sut.registerFunc(name: "receive", function: spy.receive)
+        
+        XCTAssertEqual(spy.received.count, 0)
+        sut.callFunction(name: "receive", args: [.string("lego")])
+        XCTAssertEqual(spy.received.count, 1)
+    }
 
 }
 
 fileprivate class FunctionCallSpy {
     var callCounter = 0
+    var received: [Value] = []
     
     func spyFunction() {
         self.callCounter += 1
+    }
+    
+    func receive(values: [Value]) {
+        self.received.append(contentsOf: values)
     }
 }
