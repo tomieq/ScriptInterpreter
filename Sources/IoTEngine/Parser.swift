@@ -31,7 +31,7 @@ class Parser {
             case .function(let name):
                 try self.functionRegistry.callFunction(name: name)
             case .functionWithArguments(let name):
-                let tokens = self.lexicalAnalizer.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1)
+                let tokens = ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens).filter { $0 != .comma }
                 try self.functionRegistry.callFunction(name: name, args: tokens.compactMap { ParserUtils.token2Value($0, valueRegistry: self.valueRegistry) })
                 break
             default:

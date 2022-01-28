@@ -24,4 +24,25 @@ class ParserUtils {
             return nil
         }
     }
+    
+    static func getTokensBetweenBrackets(indexOfOpeningBracket index: Int, tokens: [Token]) -> [Token] {
+        guard let openingToken = tokens[safeIndex: index] else {
+            return []
+        }
+        
+        guard case .bracketOpen = openingToken else {
+            return []
+        }
+        var result: [Token] = []
+        var nextIndex = index + 1
+        while let nextToken = tokens[safeIndex: nextIndex]{
+            if nextToken == .bracketClose {
+                break
+            }
+            result.append(nextToken)
+            
+            nextIndex += 1
+        }
+        return result
+    }
 }

@@ -41,4 +41,16 @@ class ParserUtilsTests: XCTestCase {
         let value = ParserUtils.token2Value(.variable(name: "data"), valueRegistry: valueRegistry)
         XCTAssertEqual(value, .integer(1985))
     }
+    
+    func test_getTokensBetweenBracketsNoNested() {
+        let code = " open(10, false, 1.0)\n data = 50;"
+        do {
+            let lexer = try Lexer(code: code)
+            print(lexer.tokens)
+            let tokens = ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 1, tokens: lexer.tokens)
+            XCTAssertEqual(tokens.count, 5)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
