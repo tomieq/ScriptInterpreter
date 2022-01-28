@@ -53,15 +53,18 @@ class ParserTests: XCTestCase {
         let functionRegistry = FunctionRegistry()
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addValues", function: spy.addValues))
         
-        let script = "addValues(true)"
+        let script = "addValues(true, 20, 'works', 3.14)"
         do {
             let lexer = try Lexer(code: script)
             let lexicalAnalizer = LexicalAnalyzer(lexer: lexer)
             let parser = Parser(lexicalAnalizer: lexicalAnalizer, functionRegistry: functionRegistry)
             XCTAssertEqual(spy.received.count, 0)
             XCTAssertNoThrow(try parser.execute())
-            XCTAssertEqual(spy.received.count, 1)
-            XCTAssertTrue(spy.received.contains(Value.bool(true)))
+            XCTAssertEqual(spy.received.count, 4)
+            XCTAssertEqual(spy.received[safeIndex: 0], .bool(true))
+            XCTAssertEqual(spy.received[safeIndex: 1], .integer(20))
+            XCTAssertEqual(spy.received[safeIndex: 2], .string("works"))
+            XCTAssertEqual(spy.received[safeIndex: 3], .float(3.14))
         } catch {
             XCTAssert(false, error.localizedDescription)
         }
