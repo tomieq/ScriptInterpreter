@@ -16,7 +16,7 @@ extension ValueRegistryError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .valueDoesNotExist(let name):
-            return NSLocalizedString("ValueRegistryError.valueDoesNotExist: variable \(name) does not exist", comment: "ValueRegistryError")
+            return NSLocalizedString("ValueRegistryError.valueDoesNotExist: variable \(name) was not defined", comment: "ValueRegistryError")
         case .typeMismatch(let variableName, let existingType, let newType):
             return NSLocalizedString("ValueRegistryError.typeMismatch: variable \(variableName) is \(existingType) but \(newType) is trying to be set", comment: "ValueRegistryError")
         }

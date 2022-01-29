@@ -12,6 +12,17 @@ enum ExternalFunctionRegistryError: Error {
     case functionNotFound(signature: String)
 }
 
+extension ExternalFunctionRegistryError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .functionAlreadyRegistered(let name):
+            return NSLocalizedString("ExternalFunctionRegistryError.functionAlreadyRegistered: function \(name) was registered before", comment: "ExternalFunctionRegistryError")
+        case .functionNotFound(let signature):
+            return NSLocalizedString("ExternalFunctionRegistryError.functionNotFound: function \(signature) was not registered in the context", comment: "ExternalFunctionRegistryError")
+        }
+    }
+}
+
 class ExternalFunctionRegistry {
     private var functions: [String:()->()] = [:]
     private var functionsWithArgs: [String:([Value])->()] = [:]
