@@ -33,13 +33,13 @@ class VariableParser {
         self.consumedTokenIndices = []
     }
     
-    func parse(into valueRegistry: ValueRegistry) throws {
+    func parse(into variableRegistry: VariableRegistry) throws {
         var index = 0
         while let token = self.tokens[safeIndex: index] {
             
             switch token {
             case .variableDefinition(let definitionType):
-                while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, valueRegistry: valueRegistry) {
+                while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, variableRegistry: variableRegistry) {
                     
                     let usedTokenRange = (index...(index + data.usedTokens))
                     self.consumedTokenIndices.append(contentsOf: usedTokenRange)
@@ -59,7 +59,7 @@ class VariableParser {
         }
     }
     
-    private func initVariable(variableTokenIndex pos: Int, definitionType: String, valueRegistry: ValueRegistry) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
+    private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
             throw VariableParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
@@ -70,13 +70,13 @@ class VariableParser {
             guard let valueToken = self.tokens[safeIndex: pos + 2] else {
                 throw VariableParserError.syntaxError(description: "Value not found for assigning variable \(name)")
             }
-            guard let value = ParserUtils.token2Value(valueToken, valueRegistry: valueRegistry) else {
+            guard let value = ParserUtils.token2Value(valueToken, variableRegistry: variableRegistry) else {
                 throw VariableParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
             }
-            valueRegistry.registerValue(name: name, value: value)
+            variableRegistry.registerValue(name: name, value: value)
             usedTokens += 2
         } else {
-            valueRegistry.registerValue(name: name, value: nil)
+            variableRegistry.registerValue(name: name, value: nil)
         }
         let lastToken = self.tokens[safeIndex: pos + usedTokens]
         if case .comma = lastToken {

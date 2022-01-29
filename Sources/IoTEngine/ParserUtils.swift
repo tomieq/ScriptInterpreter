@@ -21,7 +21,7 @@ extension ParserUtilsError: LocalizedError {
 }
 
 class ParserUtils {
-    static func token2Value(_ token: Token, valueRegistry: ValueRegistry) -> Value? {
+    static func token2Value(_ token: Token, variableRegistry: VariableRegistry) -> Value? {
         switch token {
         case .intLiteral(let value):
             return .integer(value)
@@ -32,7 +32,7 @@ class ParserUtils {
         case .floatLiteral(let value):
             return .float(value)
         case .variable(let name):
-            return valueRegistry.getValue(name: name)
+            return variableRegistry.getValue(name: name)
         default:
             return nil
         }

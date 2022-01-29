@@ -28,12 +28,12 @@ enum ValueComparatorResult {
 
 class ValueComparator {
     
-    func compare(left: Token, right: Token, variableRegister: ValueRegistry) throws -> ValueComparatorResult {
+    func compare(left: Token, right: Token, variableRegistry: VariableRegistry) throws -> ValueComparatorResult {
         switch (left, right) {
         case (.intLiteral(let leftValue), .intLiteral(let rightValue)):
             return self.prepareResult(left: leftValue, right: rightValue)
         case (.intLiteral(let literalValue), .variable(let variableName)):
-            guard let variable = ParserUtils.token2Value(right, valueRegistry: variableRegister) else {
+            guard let variable = ParserUtils.token2Value(right, variableRegistry: variableRegistry) else {
                 throw ValueComparatorError.runtimeError(info: "Variable \(variableName) not found!")
             }
             guard case .integer(let value) = variable else {
@@ -41,7 +41,7 @@ class ValueComparator {
             }
             return self.prepareResult(left: literalValue, right: value)
         case (.variable(let variableName), .intLiteral(let literalValue)):
-            guard let variable = ParserUtils.token2Value(left, valueRegistry: variableRegister) else {
+            guard let variable = ParserUtils.token2Value(left, variableRegistry: variableRegistry) else {
                 throw ValueComparatorError.runtimeError(info: "Variable \(variableName) not found!")
             }
             guard case .integer(let value) = variable else {
@@ -51,7 +51,7 @@ class ValueComparator {
         case (.floatLiteral(let leftValue), .floatLiteral(let rightValue)):
             return self.prepareResult(left: leftValue, right: rightValue)
         case (.floatLiteral(let literalValue), .variable(let variableName)):
-            guard let variable = ParserUtils.token2Value(right, valueRegistry: variableRegister) else {
+            guard let variable = ParserUtils.token2Value(right, variableRegistry: variableRegistry) else {
                 throw ValueComparatorError.runtimeError(info: "Variable \(variableName) not found!")
             }
             guard case .float(let value) = variable else {
@@ -59,7 +59,7 @@ class ValueComparator {
             }
             return self.prepareResult(left: literalValue, right: value)
         case (.variable(let variableName), .floatLiteral(let literalValue)):
-            guard let variable = ParserUtils.token2Value(left, valueRegistry: variableRegister) else {
+            guard let variable = ParserUtils.token2Value(left, variableRegistry: variableRegistry) else {
                 throw ValueComparatorError.runtimeError(info: "Variable \(variableName) not found!")
             }
             guard case .float(let value) = variable else {
@@ -67,10 +67,10 @@ class ValueComparator {
             }
             return self.prepareResult(left: value, right: literalValue)
         case (.variable(let leftVariableName), .variable(let rightVariableName)):
-            guard let leftValue = ParserUtils.token2Value(left, valueRegistry: variableRegister) else {
+            guard let leftValue = ParserUtils.token2Value(left, variableRegistry: variableRegistry) else {
                 throw ValueComparatorError.runtimeError(info: "Variable \(leftVariableName) not found!")
             }
-            guard let rightValue = ParserUtils.token2Value(right, valueRegistry: variableRegister) else {
+            guard let rightValue = ParserUtils.token2Value(right, variableRegistry: variableRegistry) else {
                 throw ValueComparatorError.runtimeError(info: "Variable \(rightVariableName) not found!")
             }
             guard rightValue.type == leftValue.type else {

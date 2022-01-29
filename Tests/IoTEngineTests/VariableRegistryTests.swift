@@ -1,5 +1,5 @@
 //
-//  ValueRegistryTests.swift
+//  VariableRegistryTests.swift
 //  
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
@@ -9,17 +9,17 @@ import Foundation
 import XCTest
 @testable import IoTEngine
 
-final class ValueRegistryTests: XCTestCase {
+final class VariableRegistryTests: XCTestCase {
 
     func test_registerNullVariable() {
-        let registry = ValueRegistry()
+        let registry = VariableRegistry()
         XCTAssertFalse(registry.valueExists(name: "amount"))
         registry.registerValue(name: "amount", value: nil)
         XCTAssertTrue(registry.valueExists(name: "amount"))
     }
     
     func test_registerNonNullVariable() {
-        let registry = ValueRegistry()
+        let registry = VariableRegistry()
         XCTAssertFalse(registry.valueExists(name: "amount"))
         registry.registerValue(name: "amount", value: .integer(20))
         XCTAssertTrue(registry.valueExists(name: "amount"))
@@ -27,8 +27,8 @@ final class ValueRegistryTests: XCTestCase {
     }
     
     func test_reisterVariableInHigherNamespace() {
-        let outer = ValueRegistry()
-        let inner = ValueRegistry(upperValueRegistry: outer)
+        let outer = VariableRegistry()
+        let inner = VariableRegistry(topVariableRegistry: outer)
         XCTAssertFalse(outer.valueExists(name: "amount"))
         XCTAssertFalse(inner.valueExists(name: "amount"))
         outer.registerValue(name: "amount", value: .integer(31))
@@ -40,8 +40,8 @@ final class ValueRegistryTests: XCTestCase {
     }
     
     func test_reisterVariableInLowerNamespace() {
-        let outer = ValueRegistry()
-        let inner = ValueRegistry(upperValueRegistry: outer)
+        let outer = VariableRegistry()
+        let inner = VariableRegistry(topVariableRegistry: outer)
         XCTAssertFalse(outer.valueExists(name: "amount"))
         XCTAssertFalse(inner.valueExists(name: "amount"))
         inner.registerValue(name: "amount", value: .integer(31))
@@ -53,8 +53,8 @@ final class ValueRegistryTests: XCTestCase {
     }
     
     func test_reisterVariableInBothNamespaces() {
-        let outer = ValueRegistry()
-        let inner = ValueRegistry(upperValueRegistry: outer)
+        let outer = VariableRegistry()
+        let inner = VariableRegistry(topVariableRegistry: outer)
         XCTAssertFalse(outer.valueExists(name: "amount"))
         XCTAssertFalse(inner.valueExists(name: "amount"))
         
@@ -66,8 +66,8 @@ final class ValueRegistryTests: XCTestCase {
     }
     
     func test_updateVariableInHigherNamespace() {
-        let outer = ValueRegistry()
-        let inner = ValueRegistry(upperValueRegistry: outer)
+        let outer = VariableRegistry()
+        let inner = VariableRegistry(topVariableRegistry: outer)
         
         outer.registerValue(name: "amount", value: .integer(20))
         
@@ -81,8 +81,8 @@ final class ValueRegistryTests: XCTestCase {
     }
     
     func test_updateVariableInLowerNamespace() {
-        let outer = ValueRegistry()
-        let inner = ValueRegistry(upperValueRegistry: outer)
+        let outer = VariableRegistry()
+        let inner = VariableRegistry(topVariableRegistry: outer)
         
         outer.registerValue(name: "amount", value: .integer(20))
         

@@ -12,7 +12,7 @@ import XCTest
 class ValueComparatorTests: XCTestCase {
     
     func testCompareIntegers() {
-        let variableRegister = ValueRegistry()
+        let variableRegister = VariableRegistry()
         variableRegister.registerValue(name: "current", value: .integer(25))
         
         XCTAssertEqual(self.check(.intLiteral(10), .intLiteral(23), variableRegister), .rightGreater)
@@ -30,7 +30,7 @@ class ValueComparatorTests: XCTestCase {
     }
     
     func testCompareFloats() {
-        let variableRegister = ValueRegistry()
+        let variableRegister = VariableRegistry()
         variableRegister.registerValue(name: "current", value: .float(15.3))
         
         XCTAssertEqual(self.check(.floatLiteral(10.8), .floatLiteral(10.9), variableRegister), .rightGreater)
@@ -48,7 +48,7 @@ class ValueComparatorTests: XCTestCase {
     }
     
     func testCompareVariables() {
-        let variableRegister = ValueRegistry()
+        let variableRegister = VariableRegistry()
         variableRegister.registerValue(name: "small", value: .integer(3))
         variableRegister.registerValue(name: "big", value: .integer(99))
         variableRegister.registerValue(name: "pi", value: .float(3.14))
@@ -65,10 +65,10 @@ class ValueComparatorTests: XCTestCase {
         
     }
     
-    private func check(_ left: Token, _ right: Token, _ variableRegister: ValueRegistry) -> ValueComparatorResult? {
+    private func check(_ left: Token, _ right: Token, _ variableRegistry: VariableRegistry) -> ValueComparatorResult? {
         do {
             let comparator = ValueComparator()
-            return try comparator.compare(left: left, right: right, variableRegister: variableRegister)
+            return try comparator.compare(left: left, right: right, variableRegistry: variableRegistry)
         } catch {
             XCTFail(error.localizedDescription)
         }

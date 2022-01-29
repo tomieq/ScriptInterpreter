@@ -1,5 +1,5 @@
 //
-//  ValueRegistry.swift
+//  VariableRegistry.swift
 //  
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
@@ -31,12 +31,12 @@ struct ValueContainer {
     }
 }
 
-class ValueRegistry {
-    private let upperValueRegistry: ValueRegistry?
+class VariableRegistry {
+    private let topVariableRegistry: VariableRegistry?
     private var values: [String: ValueContainer] = [:]
     
-    init(upperValueRegistry: ValueRegistry? = nil) {
-        self.upperValueRegistry = upperValueRegistry
+    init(topVariableRegistry: VariableRegistry? = nil) {
+        self.topVariableRegistry = topVariableRegistry
     }
     
     func registerValue(name: String, value: Value?) {
@@ -53,7 +53,7 @@ class ValueRegistry {
             self.values[name] = ValueContainer(value)
             return
         }
-        if let upperValueRegistry = self.upperValueRegistry {
+        if let upperValueRegistry = self.topVariableRegistry {
             try upperValueRegistry.updateValue(name: name, value: value)
             return
         }
@@ -61,10 +61,10 @@ class ValueRegistry {
     }
     
     func getValue(name: String) -> Value? {
-        return self.values[name]?.value ?? self.upperValueRegistry?.getValue(name: name)
+        return self.values[name]?.value ?? self.topVariableRegistry?.getValue(name: name)
     }
     
     func valueExists(name: String) -> Bool {
-        return self.values[name] != nil || (self.upperValueRegistry?.valueExists(name: name) ?? false)
+        return self.values[name] != nil || (self.topVariableRegistry?.valueExists(name: name) ?? false)
     }
 }

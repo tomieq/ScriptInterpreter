@@ -15,11 +15,11 @@ extension IoTEngineError: LocalizedError {
 
 public class IoTEngine {
     private let functionRegistry: ExternalFunctionRegistry
-    private let valueRegistry: ValueRegistry
+    private let variableRegistry: VariableRegistry
     
     public init() {
         self.functionRegistry = ExternalFunctionRegistry()
-        self.valueRegistry = ValueRegistry()
+        self.variableRegistry = VariableRegistry()
     }
     
     public func registerFunc(name: String, function: @escaping ()->()) throws {
@@ -31,13 +31,13 @@ public class IoTEngine {
     }
     
     public func setupVariable(name: String, value: Value) {
-        self.valueRegistry.registerValue(name: name, value: value)
+        self.variableRegistry.registerValue(name: name, value: value)
     }
     
     public func exec(code: String) throws {
         do {
             let lexer = try Lexer(code: code)
-            let parser = Parser(tokens: lexer.tokens, functionRegistry: self.functionRegistry, valueRegistry: self.valueRegistry)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: self.functionRegistry, variableRegistry: self.variableRegistry)
             try parser.execute()
         } catch {
             throw IoTEngineError.runtimeError(description: error.localizedDescription)

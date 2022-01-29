@@ -22,19 +22,19 @@ extension ParserError: LocalizedError {
 
 class Parser {
     private let functionRegistry: ExternalFunctionRegistry
-    private let valueRegistry: ValueRegistry
+    private let variableRegistry: VariableRegistry
     
     private var tokens: [Token]
     
-    init(tokens: [Token], functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), valueRegistry: ValueRegistry = ValueRegistry()) {
+    init(tokens: [Token], functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), variableRegistry: VariableRegistry = VariableRegistry()) {
         self.functionRegistry = functionRegistry
-        self.valueRegistry = valueRegistry
+        self.variableRegistry = variableRegistry
         self.tokens = tokens
     }
     
     func execute() throws {
         let valueParser = VariableParser(tokens: self.tokens)
-        try valueParser.parse(into: self.valueRegistry)
+        try valueParser.parse(into: self.variableRegistry)
         self.tokens = valueParser.leftTokens
         
         var index = 0
@@ -46,30 +46,30 @@ class Parser {
                 let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
                 index += tokens.count + 1
                 let argumentTokens = tokens.filter { $0 != .comma }
-                try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, valueRegistry: self.valueRegistry) })
+                try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) })
                 break
             case .ifStatement:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getIfBlock(ifTokenIndex: index)
-                let conditionEvaluator = ConditionEvaluator(valueRegistry: self.valueRegistry)
+                let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 let shouldRunMainStatement = try conditionEvaluator.check(tokens: result.conditionTokens)
                 if shouldRunMainStatement {
-                    let valueRegistry = ValueRegistry(upperValueRegistry: self.valueRegistry)
-                    let parser = Parser(tokens: result.mainTokens, functionRegistry: self.functionRegistry, valueRegistry: valueRegistry)
+                    let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                    let parser = Parser(tokens: result.mainTokens, functionRegistry: self.functionRegistry, variableRegistry: variableRegistry)
                     try parser.execute()
                 } else if let elseTokens = result.elseTokens {
-                    let valueRegistry = ValueRegistry(upperValueRegistry: self.valueRegistry)
-                    let parser = Parser(tokens: elseTokens, functionRegistry: self.functionRegistry, valueRegistry: valueRegistry)
+                    let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                    let parser = Parser(tokens: elseTokens, functionRegistry: self.functionRegistry, variableRegistry: variableRegistry)
                     try parser.execute()
                 }
                 index += result.consumedTokens - 1
             case .whileStatement:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getWhileBlock(whileTokenIndex: index)
-                let conditionEvaluator = ConditionEvaluator(valueRegistry: self.valueRegistry)
+                let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
-                    let valueRegistry = ValueRegistry(upperValueRegistry: self.valueRegistry)
-                    let parser = Parser(tokens: result.mainTokens, functionRegistry: self.functionRegistry, valueRegistry: valueRegistry)
+                    let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                    let parser = Parser(tokens: result.mainTokens, functionRegistry: self.functionRegistry, variableRegistry: variableRegistry)
                     try parser.execute()
                 }
                 index += result.consumedTokens - 1
@@ -90,25 +90,25 @@ class Parser {
         }
         switch nextToken {
         case .assign:
-            guard let valueToken = self.tokens[safeIndex: index + 2], let value = ParserUtils.token2Value(valueToken, valueRegistry: self.valueRegistry) else {
+            guard let valueToken = self.tokens[safeIndex: index + 2], let value = ParserUtils.token2Value(valueToken, variableRegistry: self.variableRegistry) else {
                 throw ParserError.syntaxError(description: "Right value for assign variable \(variableName) should be either literal value or variable")
             }
-            try self.valueRegistry.updateValue(name: variableName, value: value)
+            try self.variableRegistry.updateValue(name: variableName, value: value)
             return 2
         case .increment:
-            let variable = self.valueRegistry.getValue(name: variableName)
+            let variable = self.variableRegistry.getValue(name: variableName)
             guard case .integer(let intValue) = variable else {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Increment operation can be applied only for integer type, but \(type) found")
             }
-            try self.valueRegistry.updateValue(name: variableName, value: .integer(intValue + 1))
+            try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue + 1))
         case .decrement:
-            let variable = self.valueRegistry.getValue(name: variableName)
+            let variable = self.variableRegistry.getValue(name: variableName)
             guard case .integer(let intValue) = variable else {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Decrement operation can be applied only for integer type, but \(type) found")
             }
-            try self.valueRegistry.updateValue(name: variableName, value: .integer(intValue - 1))
+            try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue - 1))
             break
         default:
             break

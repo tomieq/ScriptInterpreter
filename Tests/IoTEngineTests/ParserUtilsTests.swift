@@ -12,33 +12,33 @@ import XCTest
 class ParserUtilsTests: XCTestCase {
     
     func test_convertIntTokenToValue() {
-        let valueRegistry = ValueRegistry()
-        let value = ParserUtils.token2Value(.intLiteral(45), valueRegistry: valueRegistry)
+        let variableRegistry = VariableRegistry()
+        let value = ParserUtils.token2Value(.intLiteral(45), variableRegistry: variableRegistry)
         XCTAssertEqual(value, .integer(45))
     }
     
     func test_convertBoolTokenToValue() {
-        let valueRegistry = ValueRegistry()
-        let value = ParserUtils.token2Value(.boolLiteral(true), valueRegistry: valueRegistry)
+        let variableRegistry = VariableRegistry()
+        let value = ParserUtils.token2Value(.boolLiteral(true), variableRegistry: variableRegistry)
         XCTAssertEqual(value, .bool(true))
     }
     
     func test_convertFloatTokenToValue() {
-        let valueRegistry = ValueRegistry()
-        let value = ParserUtils.token2Value(.floatLiteral(9.12), valueRegistry: valueRegistry)
+        let variableRegistry = VariableRegistry()
+        let value = ParserUtils.token2Value(.floatLiteral(9.12), variableRegistry: variableRegistry)
         XCTAssertEqual(value, .float(9.12))
     }
     
     func test_convertStringTokenToValue() {
-        let valueRegistry = ValueRegistry()
-        let value = ParserUtils.token2Value(.stringLiteral("hello world"), valueRegistry: valueRegistry)
+        let variableRegistry = VariableRegistry()
+        let value = ParserUtils.token2Value(.stringLiteral("hello world"), variableRegistry: variableRegistry)
         XCTAssertEqual(value, .string("hello world"))
     }
     
     func test_convertVariableTokenToValue() {
-        let valueRegistry = ValueRegistry()
-        valueRegistry.registerValue(name: "data", value: .integer(1985))
-        let value = ParserUtils.token2Value(.variable(name: "data"), valueRegistry: valueRegistry)
+        let variableRegistry = VariableRegistry()
+        variableRegistry.registerValue(name: "data", value: .integer(1985))
+        let value = ParserUtils.token2Value(.variable(name: "data"), variableRegistry: variableRegistry)
         XCTAssertEqual(value, .integer(1985))
     }
     

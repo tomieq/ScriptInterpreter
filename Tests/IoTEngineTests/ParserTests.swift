@@ -116,7 +116,7 @@ class ParserTests: XCTestCase {
     }
     
     func test_whileStatement() {
-        let console = self.setupSpy(code: "var i = 0; while(i != 5) { i++; print(i) }")
+        let console = self.setupSpy(code: "var i = 0; while(i < 5) { i++; print(i) }")
         print(console.output)
         XCTAssertEqual(console.output.count, 5)
         XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
