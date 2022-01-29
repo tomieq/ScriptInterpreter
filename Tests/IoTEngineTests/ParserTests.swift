@@ -86,6 +86,12 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output.count, 2)
         XCTAssertEqual(console.output[safeIndex: 0], .integer(40))
         XCTAssertEqual(console.output[safeIndex: 1], .integer(50))
+        
+        
+        let console2 = self.setupSpy(code: "var min = 10; var max = 100; var current = 50; print(current); current = min; print(current);")
+        XCTAssertEqual(console2.output.count, 2)
+        XCTAssertEqual(console2.output[safeIndex: 0], .integer(50))
+        XCTAssertEqual(console2.output[safeIndex: 1], .integer(10))
     }
     
     private func setupSpy(code: String) -> FunctionCallSpy {

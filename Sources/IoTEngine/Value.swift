@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Value {
+public enum Value {
     case string(String)
     case integer(Int)
     case float(Float)
