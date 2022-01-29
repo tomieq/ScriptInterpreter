@@ -198,6 +198,19 @@ class ConditionEvaluatorTests: XCTestCase {
         XCTAssertNoThrow(try self.checkFalse(code: "pi == 3.14 && label == 'damaged' && pi < 3.0", variableRegistry: variableRegistry))
     }
     
+    func test_checkOrCondition() {
+        let variableRegistry = VariableRegistry()
+        variableRegistry.registerValue(name: "pi", value: .float(3.14))
+        variableRegistry.registerValue(name: "label", value: .string("damaged"))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "true || false", variableRegistry: variableRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "false || false", variableRegistry: variableRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "pi == 3.14 || false", variableRegistry: variableRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "pi == 30.14 || false", variableRegistry: variableRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "pi == 3.141 || label == 'damaged' || pi < 2.0", variableRegistry: variableRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "pi == 0.1 || label == 'Damaged' || pi < 3.0", variableRegistry: variableRegistry))
+    }
+    
     private func checkTrue(code: String, variableRegistry: VariableRegistry = VariableRegistry()) throws {
         let lexer = try Lexer(code: code)
         let evaluator = ConditionEvaluator(variableRegistry: variableRegistry)
