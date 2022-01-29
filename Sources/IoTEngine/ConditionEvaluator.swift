@@ -87,6 +87,9 @@ class ConditionEvaluator {
             guard let rightVariable = self.valueRegistry.getValue(name: rightName) else {
                       throw ConditionEvaluatorError.syntaxError(info: "Variable \(rightName) not exists or not initialized")
                   }
+            guard leftVariable.type == rightVariable.type else {
+                throw ConditionEvaluatorError.syntaxError(info: "Variables are not comaprable. Left is \(leftVariable.type) but right is \(rightVariable.type)")
+            }
             return leftVariable == rightVariable
             // variations of literals and variables
         case (.variable(let name), .intLiteral(let literalValue)),

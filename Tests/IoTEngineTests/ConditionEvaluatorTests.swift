@@ -88,6 +88,30 @@ class ConditionEvaluatorTests: XCTestCase {
         
     }
     
+    func test_validateErros() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "label", value: .string("damaged"))
+        valueRegistry.registerValue(name: "pi", value: .float(3.14))
+        valueRegistry.registerValue(name: "isSold", value: .bool(true))
+        valueRegistry.registerValue(name: "distance", value: .integer(104))
+        
+        XCTAssertNoThrow(try self.checkThrowsError(code: "200", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "6.75", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "'engine'", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "label", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "distance", valueRegistry: valueRegistry))
+        // invalid comparisons
+        
+        XCTAssertNoThrow(try self.checkThrowsError(code: "label == 300", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "300 == label", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "pi == 300", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "label == pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "isSold == 300", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkThrowsError(code: "300 == isSold", valueRegistry: valueRegistry))
+        
+    }
+    
     private func checkTrue(code: String, valueRegistry: ValueRegistry = ValueRegistry()) throws {
         let lexer = try Lexer(code: code)
         let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
@@ -98,5 +122,11 @@ class ConditionEvaluatorTests: XCTestCase {
         let lexer = try Lexer(code: code)
         let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
         XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
+    }
+    
+    private func checkThrowsError(code: String, valueRegistry: ValueRegistry = ValueRegistry()) throws {
+        let lexer = try Lexer(code: code)
+        let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+        XCTAssertThrowsError(try evaluator.check(tokens: lexer.tokens))
     }
 }
