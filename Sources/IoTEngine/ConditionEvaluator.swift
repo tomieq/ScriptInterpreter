@@ -61,6 +61,10 @@ class ConditionEvaluator {
                 break
             }
         }
+        if tokens.contains(.andOperator) {
+            let segments = tokens.split(by: .andOperator)
+            return try !segments.map { try ConditionEvaluator(variableRegistry: self.variableRegistry).check(tokens: $0) }.contains(false)
+        }
         throw ConditionEvaluatorError.syntaxError(info: "Sorry, only basic condition checking is implemented")
     }
     
