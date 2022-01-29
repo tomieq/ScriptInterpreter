@@ -73,6 +73,13 @@ class Parser {
                     try parser.execute()
                 }
                 index += result.consumedTokens - 1
+            case .blockOpen:
+                // this is Swift-style separate namespace
+                let blockTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: index, tokens: self.tokens)
+                let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                let parser = Parser(tokens: blockTokens, functionRegistry: self.functionRegistry, variableRegistry: variableRegistry)
+                try parser.execute()
+                index += blockTokens.count + 1
             case .variable(let name):
                 index += try self.variableOperation(variableName: name, index: index)
             case .break:

@@ -123,6 +123,16 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
     }
     
+    func test_namespaceVariables() {
+        let console = self.setupSpy(code: "var number = 0; print(number) { var number = 6; print(number) number--; print(number) } number++; print(number)")
+        print(console.output)
+        XCTAssertEqual(console.output.count, 4)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(0))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(6))
+        XCTAssertEqual(console.output[safeIndex: 2], .integer(5))
+        XCTAssertEqual(console.output[safeIndex: 3], .integer(1))
+    }
+    
     func test_updateConstant() {
         self.expectError(code: "let pi = 3.14; pi = 5.5")
     }
