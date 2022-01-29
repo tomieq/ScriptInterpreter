@@ -47,8 +47,7 @@ class BlockParser {
         let mainTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
         currentIndex += mainTokens.count + 2
         var elseTokens: [Token]? = nil
-        
-        print("else token: \(self.tokens[safeIndex: currentIndex])")
+
         if let elseToken = self.tokens[safeIndex: currentIndex], case .elseStatement = elseToken {
             currentIndex += 1
             elseTokens =  try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)

@@ -9,7 +9,7 @@ import XCTest
 
 class ParserTests: XCTestCase {
 
-    func test_parsingAndCallingSimpleExternalFunction() throws {
+    func test_callingExternalFunctionWithoutArgs() throws {
         
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
@@ -28,7 +28,7 @@ class ParserTests: XCTestCase {
         }
     }
     
-    func test_parsingAndCallingTwoExternalFunctions() throws {
+    func test_callingTwoExternalFunctions() throws {
         
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
@@ -48,19 +48,19 @@ class ParserTests: XCTestCase {
     func test_callExternalFunctionWithArguments() {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
-        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addValues", function: spy.addValues))
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
         
-        let script = "addValues(true, 20, 'works', 3.14)"
+        let script = "print(true, 20, 'works', 3.14)"
         do {
             let lexer = try Lexer(code: script)
             let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
-            XCTAssertEqual(spy.received.count, 0)
+            XCTAssertEqual(spy.output.count, 0)
             XCTAssertNoThrow(try parser.execute())
-            XCTAssertEqual(spy.received.count, 4)
-            XCTAssertEqual(spy.received[safeIndex: 0], .bool(true))
-            XCTAssertEqual(spy.received[safeIndex: 1], .integer(20))
-            XCTAssertEqual(spy.received[safeIndex: 2], .string("works"))
-            XCTAssertEqual(spy.received[safeIndex: 3], .float(3.14))
+            XCTAssertEqual(spy.output.count, 4)
+            XCTAssertEqual(spy.output[safeIndex: 0], .bool(true))
+            XCTAssertEqual(spy.output[safeIndex: 1], .integer(20))
+            XCTAssertEqual(spy.output[safeIndex: 2], .string("works"))
+            XCTAssertEqual(spy.output[safeIndex: 3], .float(3.14))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -69,16 +69,53 @@ class ParserTests: XCTestCase {
     func test_callExternalFunctionWithVariableValue() {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
-        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addValues", function: spy.addValues))
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
         
-        let script = "var number = 55; addValues(number);"
+        let script = "var number = 55; print(number);"
         do {
             let lexer = try Lexer(code: script)
             let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
-            XCTAssertEqual(spy.received.count, 0)
+            XCTAssertEqual(spy.output.count, 0)
             XCTAssertNoThrow(try parser.execute())
-            XCTAssertEqual(spy.received.count, 1)
-            XCTAssertEqual(spy.received[safeIndex: 0], .integer(55))
+            XCTAssertEqual(spy.output.count, 1)
+            XCTAssertEqual(spy.output[safeIndex: 0], .integer(55))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_ifElseStatementTrue() {
+        let spy = FunctionCallSpy()
+        let functionRegistry = ExternalFunctionRegistry()
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
+        
+        let script = "var execute = true; if(execute) { print(20) } else { print(21); }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
+            XCTAssertEqual(spy.output.count, 0)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(spy.output.count, 1)
+            XCTAssertEqual(spy.output[safeIndex: 0], .integer(20))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_ifElseStatementFalse() {
+        let spy = FunctionCallSpy()
+        let functionRegistry = ExternalFunctionRegistry()
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
+        
+        let script = "var execute = false; if(execute) { print(20) } else { print(21, 22); }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
+            XCTAssertEqual(spy.output.count, 0)
+            XCTAssertNoThrow(try parser.execute())
+            XCTAssertEqual(spy.output.count, 2)
+            XCTAssertEqual(spy.output[safeIndex: 0], .integer(21))
+            XCTAssertEqual(spy.output[safeIndex: 1], .integer(22))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -87,7 +124,7 @@ class ParserTests: XCTestCase {
 
 fileprivate class FunctionCallSpy {
     var callCounter = 0
-    var received: [Value] = []
+    var output: [Value] = []
     
     func increaseByOne() {
         self.callCounter += 1
@@ -97,7 +134,7 @@ fileprivate class FunctionCallSpy {
         self.callCounter += 2
     }
     
-    func addValues(_ data: [Value]) {
-        self.received.append(contentsOf: data)
+    func print(_ data: [Value]) {
+        self.output.append(contentsOf: data)
     }
 }
