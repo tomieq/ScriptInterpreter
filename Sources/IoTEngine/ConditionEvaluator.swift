@@ -36,21 +36,22 @@ class ConditionEvaluator {
         if tokens.count == 1 {
             return try self.evaluateBoolVariable(token: tokens.first!)
         }
-        if tokens.contains(.equal) {
+        if tokens.count == 3 {
             guard let left = tokens[safeIndex: 0],
+                  let operation = tokens[safeIndex: 1],
                   let right = tokens[safeIndex: 2] else {
                       throw ConditionEvaluatorError.syntaxError(info: "Invalid arguments for condition checking")
                   }
-            return try self.areEqual(left: left, right: right)
+            switch operation {
+            case .equal:
+                return try self.areEqual(left: left, right: right)
+            case .notEqual:
+                return try !self.areEqual(left: left, right: right)
+            default:
+                break
+            }
         }
-        if tokens.contains(.notEqual) {
-            guard let left = tokens[safeIndex: 0],
-                  let right = tokens[safeIndex: 2] else {
-                      throw ConditionEvaluatorError.syntaxError(info: "Invalid arguments for condition checking")
-                  }
-            return try !self.areEqual(left: left, right: right)
-        }
-        return false
+        throw ConditionEvaluatorError.syntaxError(info: "Sorry, only basic condition checking is implemented")
     }
     
     private func evaluateBoolVariable(token: Token) throws -> Bool {
