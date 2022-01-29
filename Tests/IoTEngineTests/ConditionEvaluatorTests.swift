@@ -16,171 +16,87 @@ class ConditionEvaluatorTests: XCTestCase {
         XCTAssertThrowsError(try evaluator.check(tokens: []))
     }
     
-    func test_boolTrue() {
-        let code = "true"
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+    func test_boolLiteral() {
+        XCTAssertNoThrow(try self.checkTrue(code: "true"))
+        XCTAssertNoThrow(try self.checkFalse(code: "false"))
     }
     
-    func test_boolFalse() {
-        let code = "false"
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+    func test_intLiteral() {
+        XCTAssertNoThrow(try self.checkTrue(code: "10 == 10"))
+        XCTAssertNoThrow(try self.checkFalse(code: "10 == 11"))
+        XCTAssertNoThrow(try self.checkTrue(code: "10 != 11"))
+        XCTAssertNoThrow(try self.checkFalse(code: "22 != 22"))
     }
     
-    func test_integerEqualsTrue() {
-        let code = "10 == 10"
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+    func test_stringLiteral() {
+        XCTAssertNoThrow(try self.checkTrue(code: "'topic' == 'topic'"))
+        XCTAssertNoThrow(try self.checkFalse(code: "'topic' == 'Topic'"))
+        XCTAssertNoThrow(try self.checkTrue(code: "'macOS' != 'linux'"))
+        XCTAssertNoThrow(try self.checkFalse(code: "'iOS' != 'iOS'"))
     }
     
-    func test_integerEqualsFalse() {
-        let code = "10 == 11"
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+    func test_integerLiteralWithVariable() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "distance", value: .integer(104))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "distance == 104", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "distance == 500", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "104 == distance", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "800 == distance", valueRegistry: valueRegistry))
+    }
+
+    func test_boolLiteralWithVariable() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "isSold", value: .bool(true))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "isSold == true", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "isSold == false", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "true == isSold", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "false == isSold", valueRegistry: valueRegistry))
+    }
+
+    func test_stringLiteralWithVariable() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "label", value: .string("damaged"))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "label == 'damaged'", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "label == 'installed'", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "'damaged' == label", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "'brother' == label", valueRegistry: valueRegistry))
+    }
+
+    func test_floatLiteralWithVariable() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "pi", value: .float(3.14))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "pi == 3.14", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "pi == 6.20", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "3.14 == pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "9.0 == pi", valueRegistry: valueRegistry))
     }
     
-    func test_integerNotEqualsTrue() {
-        let code = "10 != 11"
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+    func test_compareTwoVariables() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "max", value: .integer(100))
+        valueRegistry.registerValue(name: "current_1", value: .integer(73))
+        valueRegistry.registerValue(name: "current_2", value: .integer(100))
+
+        XCTAssertNoThrow(try self.checkTrue(code: "max != current_1", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "max == current_1", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "max == current_2", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "max != current_2", valueRegistry: valueRegistry))
+        
     }
     
-    func test_integerNotEqualsFalse() {
-        let code = "10 != 10"
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+    private func checkTrue(code: String, valueRegistry: ValueRegistry = ValueRegistry()) throws {
+        let lexer = try Lexer(code: code)
+        let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+        XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
     }
     
-    func test_stringEqualsTrue() {
-        let code = "\"piramids\" == \"piramids\""
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    
-    func test_stringEqualsFalse() {
-        let code = "\"piramids\" == \"Piramids\""
-        do {
-            let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
-            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    
-    func test_variableTrue() {
-        let condition = "distance"
-        do {
-            let lexer = try Lexer(code: condition)
-            let valueRegistry = ValueRegistry()
-            valueRegistry.registerValue(name: "distance", value: .bool(true))
-            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    
-    func test_variableFalse() {
-        let condition = "distance"
-        do {
-            let lexer = try Lexer(code: condition)
-            let valueRegistry = ValueRegistry()
-            valueRegistry.registerValue(name: "distance", value: .bool(false))
-            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
-            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    
-    func test_intVariableComparisonTrue() {
-        let condition = "distance == max"
-        do {
-            let lexer = try Lexer(code: condition)
-            let valueRegistry = ValueRegistry()
-            valueRegistry.registerValue(name: "distance", value: .integer(900))
-            valueRegistry.registerValue(name: "max", value: .integer(900))
-            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    
-    func test_intVariableComparisonFalse() {
-        let condition = "distance == max"
-        do {
-            let lexer = try Lexer(code: condition)
-            let valueRegistry = ValueRegistry()
-            valueRegistry.registerValue(name: "distance", value: .integer(900))
-            valueRegistry.registerValue(name: "max", value: .integer(901))
-            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
-            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    
-    func test_intVariableAndLiteralComparisonTrue() {
-        let condition = "distance == 300"
-        do {
-            let lexer = try Lexer(code: condition)
-            let valueRegistry = ValueRegistry()
-            valueRegistry.registerValue(name: "distance", value: .integer(300))
-            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-    }
-    
-    func test_stringVariableAndLiteralComparisonTrue() {
-        let condition = "name == \"Tom\""
-        do {
-            let lexer = try Lexer(code: condition)
-            let valueRegistry = ValueRegistry()
-            valueRegistry.registerValue(name: "name", value: .string("Tom"))
-            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
-            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+    private func checkFalse(code: String, valueRegistry: ValueRegistry = ValueRegistry()) throws {
+        let lexer = try Lexer(code: code)
+        let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+        XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
     }
 }
