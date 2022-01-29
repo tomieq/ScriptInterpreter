@@ -47,6 +47,16 @@ class ConditionEvaluator {
                 return try self.areEqual(left: left, right: right)
             case .notEqual:
                 return try !self.areEqual(left: left, right: right)
+            case .less:
+                return try ValueComparator().compare(left: left, right: right, variableRegister: self.valueRegistry) == .rightGreater
+            case .greater:
+                return try ValueComparator().compare(left: left, right: right, variableRegister: self.valueRegistry) == .leftGreater
+            case .lessOrEqual:
+                let result = try ValueComparator().compare(left: left, right: right, variableRegister: self.valueRegistry)
+                return [ValueComparatorResult.equal, ValueComparatorResult.rightGreater].contains(result)
+            case .greaterOrEqual:
+                let result = try ValueComparator().compare(left: left, right: right, variableRegister: self.valueRegistry)
+                return [ValueComparatorResult.equal, ValueComparatorResult.leftGreater].contains(result)
             default:
                 break
             }

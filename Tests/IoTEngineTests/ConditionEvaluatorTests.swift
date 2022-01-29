@@ -88,6 +88,79 @@ class ConditionEvaluatorTests: XCTestCase {
         
     }
     
+    func test_lessComparator() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "min", value: .integer(11))
+        valueRegistry.registerValue(name: "max", value: .integer(87))
+        valueRegistry.registerValue(name: "pi", value: .float(3.14))
+        valueRegistry.registerValue(name: "e", value: .float(2.71))
+
+        XCTAssertNoThrow(try self.checkTrue(code: "pi < 4.08", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "e < pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "0.12 < 1.0", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "pi < 4.0", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "0.12 < pi", valueRegistry: valueRegistry))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "2 < 10", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "min < 12", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "min < max", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "0 < max", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkFalse(code: "max < 0", valueRegistry: valueRegistry))
+    }
+    
+    func test_graterComparator() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "min", value: .integer(11))
+        valueRegistry.registerValue(name: "max", value: .integer(87))
+        valueRegistry.registerValue(name: "pi", value: .float(3.14))
+        valueRegistry.registerValue(name: "e", value: .float(2.71))
+
+        XCTAssertNoThrow(try self.checkTrue(code: "4.08 > pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "pi > e", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "1.0 > 0.13", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "4.0 > pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "pi > 3.0", valueRegistry: valueRegistry))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "10 > 3", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "12 > min", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "max > min", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "max > 0", valueRegistry: valueRegistry))
+    }
+    
+    func test_lessOrEqualComparator() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "min", value: .integer(11))
+        valueRegistry.registerValue(name: "pi", value: .float(3.14))
+
+        XCTAssertNoThrow(try self.checkTrue(code: "pi <= 4.08", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "pi <= 3.14", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "0.12 <= 1.0", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "1.1 <= 1.1", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "0.12 <= pi", valueRegistry: valueRegistry))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "2 <= 10", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "10 <= 10", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "min <= 12", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "min <= 11", valueRegistry: valueRegistry))
+    }
+    
+    func test_greaterOrEqualComparator() {
+        let valueRegistry = ValueRegistry()
+        valueRegistry.registerValue(name: "min", value: .integer(11))
+        valueRegistry.registerValue(name: "pi", value: .float(3.14))
+
+        XCTAssertNoThrow(try self.checkTrue(code: "4.08 >= pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "3.14 >= pi", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "1.0 >= 0.12", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "1.1 >= 1.1", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "pi >= .13", valueRegistry: valueRegistry))
+        
+        XCTAssertNoThrow(try self.checkTrue(code: "10 >= 2", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "10 >= 10", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "12 >= min", valueRegistry: valueRegistry))
+        XCTAssertNoThrow(try self.checkTrue(code: "11 >= min", valueRegistry: valueRegistry))
+    }
+    
     func test_validateErros() {
         let valueRegistry = ValueRegistry()
         valueRegistry.registerValue(name: "label", value: .string("damaged"))
