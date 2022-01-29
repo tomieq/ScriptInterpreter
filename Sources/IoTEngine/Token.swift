@@ -34,6 +34,7 @@ enum Token: Equatable {
     case andOperator
     case orOperator
     case semicolon
+    case `break`
 }
 
 // MARK: regex for tokens
@@ -48,6 +49,7 @@ extension Token {
         generators.append(TokenGenerator(regex: "var", resolver: { _ in [.variableDefinition(type: "var")] }))
         generators.append(TokenGenerator(regex: "function", resolver: { _ in [.functionDefinition(type: "function")] }))
         generators.append(TokenGenerator(regex: "func", resolver: { _ in [.functionDefinition(type: "func")] }))
+        generators.append(TokenGenerator(regex: "break", resolver: { _ in [.break] }))
         generators.append(TokenGenerator(regex: "true", resolver: { _ in [.boolLiteral(true)] }))
         generators.append(TokenGenerator(regex: "false", resolver: { _ in [.boolLiteral(false)] }))
         generators.append(TokenGenerator(regex: "if", resolver: { _ in [.ifStatement] }))
@@ -138,6 +140,8 @@ extension Token: CustomDebugStringConvertible {
             return "-"
         case .functionDefinition(let type):
             return "functionDefinition(\(type))"
+        case .break:
+            return "break"
         }
     }
 }

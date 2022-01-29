@@ -71,6 +71,8 @@ class Parser {
                     try self.valueRegistry.updateValue(name: name, value: value)
                     index += 2
                 }
+            case .break:
+                return
             default:
                 break
             }

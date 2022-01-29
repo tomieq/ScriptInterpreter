@@ -94,6 +94,13 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console2.output[safeIndex: 1], .integer(10))
     }
     
+    func test_breakStatement() {
+        let console = self.setupSpy(code: "var age = 40; if(age == 40) { print('one'); break print('two') } print('three') break print('four')")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .string("one"))
+        XCTAssertEqual(console.output[safeIndex: 1], .string("three"))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
