@@ -94,4 +94,13 @@ final class VariableRegistryTests: XCTestCase {
         XCTAssertEqual(outer.getValue(name: "amount"), .integer(50))
         XCTAssertEqual(inner.getValue(name: "amount"), .integer(50))
     }
+    
+    func test_updateConstant() {
+        let registry = VariableRegistry()
+        
+        registry.registerConstant(name: "amount", value: .integer(20))
+        XCTAssertEqual(registry.getValue(name: "amount"), .integer(20))
+        XCTAssertThrowsError(try registry.updateValue(name: "amount", value: .integer(50)))
+        
+    }
 }

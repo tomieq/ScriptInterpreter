@@ -10,6 +10,7 @@ import Foundation
 enum VariableRegistryError: Error {
     case valueDoesNotExist(name: String)
     case typeMismatch(variableName: String, existingType: String, newType: String)
+    case cannotModifyConstant(variableName: String)
 }
 
 extension VariableRegistryError: LocalizedError {
@@ -19,6 +20,8 @@ extension VariableRegistryError: LocalizedError {
             return NSLocalizedString("ValueRegistryError.valueDoesNotExist: variable \(name) was not defined", comment: "ValueRegistryError")
         case .typeMismatch(let variableName, let existingType, let newType):
             return NSLocalizedString("ValueRegistryError.typeMismatch: variable \(variableName) is \(existingType) but \(newType) is trying to be set", comment: "ValueRegistryError")
+        case .cannotModifyConstant(let variableName):
+            return NSLocalizedString("ValueRegistryError.cannotModifyConstant: variable \(variableName) is a constant so it cannot be modified", comment: "ValueRegistryError")
         }
     }
 }
@@ -34,6 +37,7 @@ fileprivate struct ValueContainer {
 class VariableRegistry {
     private let topVariableRegistry: VariableRegistry?
     private var values: [String: ValueContainer] = [:]
+    private var constantNames: [String] = []
     
     init(topVariableRegistry: VariableRegistry? = nil) {
         self.topVariableRegistry = topVariableRegistry
@@ -43,8 +47,16 @@ class VariableRegistry {
         self.values[name] = ValueContainer(value)
     }
     
+    func registerConstant(name: String, value: Value) {
+        self.constantNames.append(name)
+        self.registerValue(name: name, value: value)
+    }
+    
     func updateValue(name: String, value: Value?) throws {
         if let oldValue = self.values[name] {
+            if self.constantNames.contains(name) {
+                throw VariableRegistryError.cannotModifyConstant(variableName: name)
+            }
             if let oldValueType = oldValue.value?.type, let newValueType = value?.type {
                 guard oldValueType == newValueType else {
                     throw VariableRegistryError.typeMismatch(variableName: name, existingType: oldValueType, newType: newValueType)
