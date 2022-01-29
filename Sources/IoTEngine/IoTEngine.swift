@@ -2,7 +2,7 @@ public class IoTEngine {
     private let functionRegistry: ExternalFunctionRegistry
     private let valueRegistry: ValueRegistry
     
-    init() {
+    public init() {
         self.functionRegistry = ExternalFunctionRegistry()
         self.valueRegistry = ValueRegistry()
     }
