@@ -108,6 +108,13 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 1], .integer(10))
     }
     
+    func test_variableDecrement() {
+        let console = self.setupSpy(code: "var distance = 9; print(distance); distance--; print(distance)")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(9))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(8))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()

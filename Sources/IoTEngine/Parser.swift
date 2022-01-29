@@ -94,6 +94,12 @@ class Parser {
             }
             try self.valueRegistry.updateValue(name: variableName, value: .integer(intValue + 1))
         case .decrement:
+            let variable = self.valueRegistry.getValue(name: variableName)
+            guard case .integer(let intValue) = variable else {
+                let type = variable?.type ?? "nil"
+                throw ParserError.syntaxError(description: "Decrement operation can be applied only for integer type, but \(type) found")
+            }
+            try self.valueRegistry.updateValue(name: variableName, value: .integer(intValue - 1))
             break
         default:
             break
