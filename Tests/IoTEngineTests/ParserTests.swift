@@ -62,10 +62,30 @@ class ParserTests: XCTestCase {
     }
     
     func test_variableLocalNamespace() {
-        let spy = self.setupSpy(code: "var execute = true; var amount = 5 ; if(execute) { var amount = 10; print(amount) } print(amount);")
+        let spy = self.setupSpy(code: "var execute = true; var amount = 5 ; if(execute) { let amount = false; print(amount) } print(amount);")
         XCTAssertEqual(spy.output.count, 2)
-        XCTAssertEqual(spy.output[safeIndex: 0], .integer(10))
+        XCTAssertEqual(spy.output[safeIndex: 0], .bool(false))
         XCTAssertEqual(spy.output[safeIndex: 1], .integer(5))
+    }
+    
+    func test_sampleProgram() {
+        let spy = self.setupSpy(code: "print(\"hello\"); print(\"world\"); var counter = 9; if ( counter == 9 ) { print('ok') } else { print('wrong') }")
+        XCTAssertEqual(spy.output.count, 3)
+        XCTAssertEqual(spy.output[safeIndex: 0], .string("hello"))
+        XCTAssertEqual(spy.output[safeIndex: 1], .string("world"))
+        XCTAssertEqual(spy.output[safeIndex: 2], .string("ok"))
+        
+        
+        let console = self.setupSpy(code: "var counter = 12; if ( counter == 9 ) { print('the same') } else { print('different') }")
+        XCTAssertEqual(console.output.count, 1)
+        XCTAssertEqual(console.output[safeIndex: 0], .string("different"))
+    }
+    
+    func test_assignVariable() {
+        let console = self.setupSpy(code: "var age = 40; print(age); age = 50; print(age);")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(40))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(50))
     }
     
     private func setupSpy(code: String) -> FunctionCallSpy {
