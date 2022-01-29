@@ -45,7 +45,7 @@ class ValueRegistry {
     
     func updateValue(name: String, value: Value?) throws {
         if let oldValue = self.values[name] {
-            if let oldValueType = oldValue.value?.type, let newValueType = oldValue.value?.type {
+            if let oldValueType = oldValue.value?.type, let newValueType = value?.type {
                 guard oldValueType == newValueType else {
                     throw ValueRegistryError.typeMismatch(variableName: name, existingType: oldValueType, newType: newValueType)
                 }
