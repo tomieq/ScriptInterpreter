@@ -47,7 +47,7 @@ class VariableRegistry {
         self.values[name] = ValueContainer(value)
     }
     
-    func registerConstant(name: String, value: Value) {
+    func registerConstant(name: String, value: Value?) {
         self.constantNames.append(name)
         self.registerValue(name: name, value: value)
     }

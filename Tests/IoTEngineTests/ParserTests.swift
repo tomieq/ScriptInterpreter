@@ -123,6 +123,10 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
     }
     
+    func test_updateConstant() {
+        self.expectError(code: "let pi = 3.14; pi = 5.5")
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
@@ -137,6 +141,21 @@ class ParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
         return spy
+    }
+    
+    private func expectError(code: String) {
+        let spy = FunctionCallSpy()
+        let functionRegistry = ExternalFunctionRegistry()
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseCounter))
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addTwo", function: spy.addTwo))
+        do {
+            let lexer = try Lexer(code: code)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
+            XCTAssertThrowsError(try parser.execute())
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
     }
 }
 

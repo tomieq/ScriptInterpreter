@@ -222,7 +222,7 @@ final class LexerTests: XCTestCase {
         let script = "let age = 34"
         do {
             let lexer = try Lexer(code: script)
-            XCTAssertEqual(lexer.tokens[safeIndex: 0], .variableDefinition(type: "let"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .constantDefinition(type: "let"))
             XCTAssertEqual(lexer.tokens[safeIndex: 1], .variable(name: "age"))
             XCTAssertEqual(lexer.tokens[safeIndex: 2], .assign)
             XCTAssertEqual(lexer.tokens[safeIndex: 3], .intLiteral(34))
