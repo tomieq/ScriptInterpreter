@@ -22,4 +22,24 @@ extension Array {
         }
     }
     
+    
+}
+
+extension Array where Element == Token {
+    func split(by splitter: Token) -> [[Token]] {
+        var splitted: [[Token]] = []
+        var current: [Token] = []
+        for token in self {
+            if token == splitter {
+                splitted.append(current)
+                current = []
+            } else {
+                current.append(token)
+            }
+        }
+        if !current.isEmpty {
+            splitted.append(current)
+        }
+        return splitted
+    }
 }
