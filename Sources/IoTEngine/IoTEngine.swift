@@ -1,3 +1,18 @@
+import Foundation
+
+public enum IoTEngineError: Error {
+    case runtimeError(description: String)
+}
+
+extension IoTEngineError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .runtimeError(let info):
+            return NSLocalizedString("RuntimeError: \(info)", comment: "IoTEngineError")
+        }
+    }
+}
+
 public class IoTEngine {
     private let functionRegistry: ExternalFunctionRegistry
     private let valueRegistry: ValueRegistry
@@ -20,8 +35,12 @@ public class IoTEngine {
     }
     
     public func exec(code: String) throws {
-        let lexer = try Lexer(code: code)
-        let parser = Parser(tokens: lexer.tokens, functionRegistry: self.functionRegistry, valueRegistry: self.valueRegistry)
-        try parser.execute()
+        do {
+            let lexer = try Lexer(code: code)
+            let parser = Parser(tokens: lexer.tokens, functionRegistry: self.functionRegistry, valueRegistry: self.valueRegistry)
+            try parser.execute()
+        } catch {
+            throw IoTEngineError.runtimeError(description: error.localizedDescription)
+        }
     }
 }
