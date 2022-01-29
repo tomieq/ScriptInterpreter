@@ -44,7 +44,7 @@ class Parser {
                 try self.functionRegistry.callFunction(name: name)
             case .functionWithArguments(let name):
                 let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
-                index += tokens.count
+                index += tokens.count - 1
                 let argumentTokens = tokens.filter { $0 != .comma }
                 try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, valueRegistry: self.valueRegistry) })
                 break
@@ -54,13 +54,15 @@ class Parser {
                 let conditionEvaluator = ConditionEvaluator(valueRegistry: self.valueRegistry)
                 let shouldRunMainStatement = try conditionEvaluator.check(tokens: result.conditionTokens)
                 if shouldRunMainStatement {
-                    let parser = Parser(tokens: result.mainTokens, functionRegistry: self.functionRegistry, valueRegistry: self.valueRegistry)
+                    let valueRegistry = ValueRegistry(upperValueRegistry: self.valueRegistry)
+                    let parser = Parser(tokens: result.mainTokens, functionRegistry: self.functionRegistry, valueRegistry: valueRegistry)
                     try parser.execute()
                 } else if let elseTokens = result.elseTokens {
-                    let parser = Parser(tokens: elseTokens, functionRegistry: self.functionRegistry, valueRegistry: self.valueRegistry)
+                    let valueRegistry = ValueRegistry(upperValueRegistry: self.valueRegistry)
+                    let parser = Parser(tokens: elseTokens, functionRegistry: self.functionRegistry, valueRegistry: valueRegistry)
                     try parser.execute()
                 }
-                index += result.consumedTokens
+                index += result.consumedTokens - 1
             default:
                 break
             }

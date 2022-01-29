@@ -49,6 +49,25 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(spy.output[safeIndex: 1], .integer(22))
     }
     
+    func test_variableNamespaceIfStatement() {
+        let spy = self.setupSpy(code: "var execute = true; var amount = 5 ; if(execute) { print(amount) } else { print(21); }")
+        XCTAssertEqual(spy.output.count, 1)
+        XCTAssertEqual(spy.output[safeIndex: 0], .integer(5))
+    }
+    
+    func test_variableNamespaceElseStatement() {
+        let spy = self.setupSpy(code: "var execute = false; var amount = 5 ; if(execute) { print(50) } else { print(amount); }")
+        XCTAssertEqual(spy.output.count, 1)
+        XCTAssertEqual(spy.output[safeIndex: 0], .integer(5))
+    }
+    
+    func test_variableLocalNamespace() {
+        let spy = self.setupSpy(code: "var execute = true; var amount = 5 ; if(execute) { var amount = 10; print(amount) } print(amount);")
+        XCTAssertEqual(spy.output.count, 2)
+        XCTAssertEqual(spy.output[safeIndex: 0], .integer(10))
+        XCTAssertEqual(spy.output[safeIndex: 1], .integer(5))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
