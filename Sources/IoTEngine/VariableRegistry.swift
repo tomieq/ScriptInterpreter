@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum ValueRegistryError: Error {
+enum VariableRegistryError: Error {
     case valueDoesNotExist(name: String)
     case typeMismatch(variableName: String, existingType: String, newType: String)
 }
 
-extension ValueRegistryError: LocalizedError {
+extension VariableRegistryError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .valueDoesNotExist(let name):
@@ -23,7 +23,7 @@ extension ValueRegistryError: LocalizedError {
     }
 }
 
-struct ValueContainer {
+fileprivate struct ValueContainer {
     var value: Value?
     
     init(_ value: Value?) {
@@ -47,7 +47,7 @@ class VariableRegistry {
         if let oldValue = self.values[name] {
             if let oldValueType = oldValue.value?.type, let newValueType = value?.type {
                 guard oldValueType == newValueType else {
-                    throw ValueRegistryError.typeMismatch(variableName: name, existingType: oldValueType, newType: newValueType)
+                    throw VariableRegistryError.typeMismatch(variableName: name, existingType: oldValueType, newType: newValueType)
                 }
             }
             self.values[name] = ValueContainer(value)
@@ -57,7 +57,7 @@ class VariableRegistry {
             try upperValueRegistry.updateValue(name: name, value: value)
             return
         }
-        throw ValueRegistryError.valueDoesNotExist(name: name)
+        throw VariableRegistryError.valueDoesNotExist(name: name)
     }
     
     func getValue(name: String) -> Value? {
