@@ -12,7 +12,7 @@ import XCTest
 class ConditionEvaluatorTests: XCTestCase {
     
     func test_emptyCondition() {
-        let evaluator = ConditionEvaluator()
+        let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
         XCTAssertThrowsError(try evaluator.check(tokens: []))
     }
     
@@ -20,7 +20,7 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "true"
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
             XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
@@ -31,7 +31,7 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "false"
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
             XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
@@ -42,7 +42,7 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "10 == 10"
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
             XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
@@ -53,7 +53,7 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "10 == 11"
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
             XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
@@ -64,7 +64,7 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "10 != 11"
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
             XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
@@ -75,7 +75,7 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "10 != 10"
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
             XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
@@ -86,7 +86,7 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "\"piramids\" == \"piramids\""
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
             XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
@@ -97,7 +97,33 @@ class ConditionEvaluatorTests: XCTestCase {
         let code = "\"piramids\" == \"Piramids\""
         do {
             let lexer = try Lexer(code: code)
-            let evaluator = ConditionEvaluator()
+            let evaluator = ConditionEvaluator(valueRegistry: ValueRegistry())
+            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_variableTrue() {
+        let condition = "distance"
+        do {
+            let lexer = try Lexer(code: condition)
+            let valueRegistry = ValueRegistry()
+            valueRegistry.registerValue(name: "distance", value: .bool(true))
+            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_variableFalse() {
+        let condition = "distance"
+        do {
+            let lexer = try Lexer(code: condition)
+            let valueRegistry = ValueRegistry()
+            valueRegistry.registerValue(name: "distance", value: .bool(false))
+            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
             XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
         } catch {
             XCTFail(error.localizedDescription)
