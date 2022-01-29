@@ -22,6 +22,7 @@ enum Token: Equatable {
     case bracketClose
     case ifStatement
     case elseStatement
+    case whileStatement
     case returnStatement
     case blockOpen
     case blockClose
@@ -55,6 +56,7 @@ extension Token {
         generators.append(TokenGenerator(regex: "true", resolver: { _ in [.boolLiteral(true)] }))
         generators.append(TokenGenerator(regex: "false", resolver: { _ in [.boolLiteral(false)] }))
         generators.append(TokenGenerator(regex: "if", resolver: { _ in [.ifStatement] }))
+        generators.append(TokenGenerator(regex: "while", resolver: { _ in [.whileStatement] }))
         generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
         generators.append(TokenGenerator(regex: "\\+\\+", resolver: { _ in [.increment] }))
         generators.append(TokenGenerator(regex: "\\-\\-", resolver: { _ in [.decrement] }))
@@ -108,6 +110,8 @@ extension Token: CustomDebugStringConvertible {
             return "}"
         case .ifStatement:
             return "if"
+        case .whileStatement:
+            return "while"
         case .boolLiteral(let value):
             return "boolLiteral(\(value))"
         case .stringLiteral(let value):
