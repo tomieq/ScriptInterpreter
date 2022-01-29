@@ -27,6 +27,10 @@ enum Token: Equatable {
     case blockOpen
     case blockClose
     case equal
+    case less
+    case greater
+    case lessOrEqual
+    case greaterOrEqual
     case increment
     case decrement
     case notEqual
@@ -66,6 +70,10 @@ extension Token {
         generators.append(TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }))
         generators.append(TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }))
         generators.append(TokenGenerator(regex: "\\}", resolver: { _ in [.blockClose] }))
+        generators.append(TokenGenerator(regex: "<=", resolver: { _ in [.lessOrEqual] }))
+        generators.append(TokenGenerator(regex: ">=", resolver: { _ in [.greaterOrEqual] }))
+        generators.append(TokenGenerator(regex: "<", resolver: { _ in [.less] }))
+        generators.append(TokenGenerator(regex: ">", resolver: { _ in [.greater] }))
         generators.append(TokenGenerator(regex: "==", resolver: { _ in [.equal] }))
         generators.append(TokenGenerator(regex: "\\!=", resolver: { _ in [.notEqual] }))
         generators.append(TokenGenerator(regex: ",", resolver: { _ in [.comma] }))
@@ -154,6 +162,14 @@ extension Token: CustomDebugStringConvertible {
             return "++"
         case .decrement:
             return "--"
+        case .less:
+            return "<"
+        case .greater:
+            return ">"
+        case .lessOrEqual:
+            return "<="
+        case .greaterOrEqual:
+            return ">="
         }
     }
 }
