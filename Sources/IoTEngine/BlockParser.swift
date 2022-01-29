@@ -9,6 +9,7 @@ import Foundation
 
 enum BlockParserError: Error {
     case invalidTokenPosition(found: Token?, expected: Token)
+    case syntaxError(info: String)
 }
 
 extension BlockParserError: LocalizedError {
@@ -16,6 +17,8 @@ extension BlockParserError: LocalizedError {
         switch self {
         case .invalidTokenPosition(let found, let expected):
             return NSLocalizedString("BlockParserError.invalidTokenPosition: Expected: \(expected) but found \(found?.debugDescription ?? "nil")", comment: "BlockParserError")
+        case .syntaxError(let info):
+            return NSLocalizedString("BlockParserError.syntaxError: \(info)", comment: "BlockParserError")
         }
     }
 }
@@ -35,10 +38,22 @@ class BlockParser {
     }
     
     func getIfBlock(ifTokenIndex index: Int) throws -> BlockParserResult {
-        guard let entryToken = self.tokens[safeIndex: index] else {
-            throw BlockParserError.invalidTokenPosition(found: nil, expected: .ifStatement)
+        return try self.getBlock(tokenIndex: index, token: .ifStatement)
+    }
+    
+    func getWhileBlock(whileTokenIndex index: Int) throws -> BlockParserResult {
+        let result = try self.getBlock(tokenIndex: index, token: .whileStatement)
+        guard result.elseTokens == nil else {
+            throw BlockParserError.syntaxError(info: "else statement is not allowed after while clause")
         }
-        guard let entryToken = self.tokens[safeIndex: index], case .ifStatement = entryToken else {
+        return result
+    }
+    
+    private func getBlock(tokenIndex index: Int, token: Token) throws -> BlockParserResult {
+        guard let entryToken = self.tokens[safeIndex: index] else {
+            throw BlockParserError.invalidTokenPosition(found: nil, expected: token)
+        }
+        guard let entryToken = self.tokens[safeIndex: index], case token = entryToken else {
             throw BlockParserError.invalidTokenPosition(found: entryToken, expected: .ifStatement)
         }
         var currentIndex = index + 1
@@ -56,5 +71,4 @@ class BlockParser {
         let result = BlockParserResult(conditionTokens: conditionTokens, mainTokens: mainTokens, elseTokens: elseTokens, consumedTokens: currentIndex - index)
         return result
     }
-    
 }

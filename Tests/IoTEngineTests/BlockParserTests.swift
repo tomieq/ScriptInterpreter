@@ -73,4 +73,24 @@ class BlockParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_whileStatement() {
+        let code = "var i = 0; while(i < 5) { i++ }"
+        do {
+            let lexer = try Lexer(code: code)
+            let parser = BlockParser(tokens: lexer.tokens)
+            let result = try parser.getWhileBlock(whileTokenIndex: 5)
+            XCTAssertEqual(result.conditionTokens.count, 3)
+            XCTAssertEqual(result.conditionTokens[safeIndex: 0], .variable(name: "i"))
+            XCTAssertEqual(result.conditionTokens[safeIndex: 1], .less)
+            XCTAssertEqual(result.conditionTokens[safeIndex: 2], .intLiteral(5))
+            XCTAssertEqual(result.mainTokens.count, 2)
+            XCTAssertEqual(result.mainTokens[safeIndex: 0], .variable(name: "i"))
+            XCTAssertEqual(result.mainTokens[safeIndex: 1], .increment)
+            XCTAssertNil(result.elseTokens)
+            XCTAssertEqual(result.consumedTokens, 10)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
