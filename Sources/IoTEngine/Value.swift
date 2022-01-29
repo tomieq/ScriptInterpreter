@@ -27,6 +27,4 @@ enum Value {
     }
 }
 
-extension Value: Equatable {
-    
-}
+extension Value: Equatable {}

@@ -41,14 +41,14 @@ class ConditionEvaluator {
                   let right = tokens[safeIndex: 2] else {
                       throw ConditionEvaluatorError.syntaxError(info: "Invalid arguments for condition checking")
                   }
-            return left == right
+            return try self.areEqual(left: left, right: right)
         }
         if tokens.contains(.notEqual) {
             guard let left = tokens[safeIndex: 0],
                   let right = tokens[safeIndex: 2] else {
                       throw ConditionEvaluatorError.syntaxError(info: "Invalid arguments for condition checking")
                   }
-            return left != right
+            return try !self.areEqual(left: left, right: right)
         }
         return false
     }
@@ -69,6 +69,64 @@ class ConditionEvaluator {
             }
         default:
             throw ConditionEvaluatorError.syntaxError(info: "Condition checking requires bool variable")
+        }
+    }
+    
+    private func areEqual(left: Token, right: Token) throws -> Bool {
+        switch (left, right) {
+            // both literals
+        case (.intLiteral(_), .intLiteral(_)),
+            (.floatLiteral(_), .floatLiteral(_)),
+            (.stringLiteral(_), .stringLiteral(_)),
+            (.boolLiteral(_), .boolLiteral(_)):
+            return left == right
+        case (.variable(let leftName), .variable(let rightName)):
+            guard let leftVariable = self.valueRegistry.getValue(name: leftName) else {
+                      throw ConditionEvaluatorError.syntaxError(info: "Variable \(leftName) not exists or not initialized")
+                  }
+            guard let rightVariable = self.valueRegistry.getValue(name: rightName) else {
+                      throw ConditionEvaluatorError.syntaxError(info: "Variable \(rightName) not exists or not initialized")
+                  }
+            return leftVariable == rightVariable
+            // variations of literals and variables
+        case (.variable(let name), .intLiteral(let literalValue)),
+            (.intLiteral(let literalValue), .variable(let name)):
+            guard let variable = self.valueRegistry.getValue(name: name) else {
+                      throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) not exists or not initialized")
+                  }
+            guard case .integer(let variableValue) = variable else {
+                throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) has incompatible type. Integer expected")
+            }
+            return variableValue == literalValue
+        case (.variable(let name), .floatLiteral(let literalValue)),
+            (.floatLiteral(let literalValue), .variable(let name)):
+            guard let variable = self.valueRegistry.getValue(name: name) else {
+                      throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) not exists or not initialized")
+                  }
+            guard case .float(let variableValue) = variable else {
+                throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) has incompatible type. Float expected")
+            }
+            return variableValue == literalValue
+        case (.variable(let name), .stringLiteral(let literalValue)),
+            (.stringLiteral(let literalValue), .variable(let name)):
+            guard let variable = self.valueRegistry.getValue(name: name) else {
+                      throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) not exists or not initialized")
+                  }
+            guard case .string(let variableValue) = variable else {
+                throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) has incompatible type. String expected")
+            }
+            return variableValue == literalValue
+        case (.variable(let name), .boolLiteral(let literalValue)),
+            (.boolLiteral(let literalValue), .variable(let name)):
+            guard let variable = self.valueRegistry.getValue(name: name) else {
+                      throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) not exists or not initialized")
+                  }
+            guard case .bool(let variableValue) = variable else {
+                throw ConditionEvaluatorError.syntaxError(info: "Variable \(name) has incompatible type. Bool expected")
+            }
+            return variableValue == literalValue
+        default:
+            throw ConditionEvaluatorError.syntaxError(info: "Condition for the types not supported")
         }
     }
 }

@@ -129,4 +129,58 @@ class ConditionEvaluatorTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_intVariableComparisonTrue() {
+        let condition = "distance == max"
+        do {
+            let lexer = try Lexer(code: condition)
+            let valueRegistry = ValueRegistry()
+            valueRegistry.registerValue(name: "distance", value: .integer(900))
+            valueRegistry.registerValue(name: "max", value: .integer(900))
+            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_intVariableComparisonFalse() {
+        let condition = "distance == max"
+        do {
+            let lexer = try Lexer(code: condition)
+            let valueRegistry = ValueRegistry()
+            valueRegistry.registerValue(name: "distance", value: .integer(900))
+            valueRegistry.registerValue(name: "max", value: .integer(901))
+            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+            XCTAssertFalse(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_intVariableAndLiteralComparisonTrue() {
+        let condition = "distance == 300"
+        do {
+            let lexer = try Lexer(code: condition)
+            let valueRegistry = ValueRegistry()
+            valueRegistry.registerValue(name: "distance", value: .integer(300))
+            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_stringVariableAndLiteralComparisonTrue() {
+        let condition = "name == \"Tom\""
+        do {
+            let lexer = try Lexer(code: condition)
+            let valueRegistry = ValueRegistry()
+            valueRegistry.registerValue(name: "name", value: .string("Tom"))
+            let evaluator = ConditionEvaluator(valueRegistry: valueRegistry)
+            XCTAssertTrue(try evaluator.check(tokens: lexer.tokens))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
