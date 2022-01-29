@@ -26,6 +26,8 @@ enum Token: Equatable {
     case blockOpen
     case blockClose
     case equal
+    case increment
+    case decrement
     case notEqual
     case functionDefinition(type: String)
     case function(name: String)
@@ -56,6 +58,8 @@ extension Token {
         generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
         generators.append(TokenGenerator(regex: "\\+", resolver: { _ in [.add] }))
         generators.append(TokenGenerator(regex: "\\-", resolver: { _ in [.sublime] }))
+        generators.append(TokenGenerator(regex: "\\+\\+", resolver: { _ in [.increment] }))
+        generators.append(TokenGenerator(regex: "\\-\\-", resolver: { _ in [.decrement] }))
         generators.append(TokenGenerator(regex: "&&", resolver: { _ in [.andOperator] }))
         generators.append(TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }))
         generators.append(TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }))
@@ -142,6 +146,10 @@ extension Token: CustomDebugStringConvertible {
             return "functionDefinition(\(type))"
         case .break:
             return "break"
+        case .increment:
+            return "++"
+        case .decrement:
+            return "--"
         }
     }
 }
