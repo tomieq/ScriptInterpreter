@@ -53,7 +53,7 @@ class ExternalFunctionRegistry {
         if let function = self.functionsWithArgs[name] {
             function(args)
         } else {
-            throw ExternalFunctionRegistryError.functionNotFound(signature: "\(name)(\(args.map{$0.type}.joined(separator: ", "))")
+            throw ExternalFunctionRegistryError.functionNotFound(signature: "\(name)(\(args.map{$0.type}.joined(separator: ", ")))")
         }
     }
 }
