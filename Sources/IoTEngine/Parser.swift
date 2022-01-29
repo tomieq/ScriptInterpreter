@@ -64,13 +64,7 @@ class Parser {
                 }
                 index += result.consumedTokens - 1
             case .variable(let name):
-                if let nextToken = self.tokens[safeIndex: index + 1], case .assign = nextToken {
-                    guard let valueToken = self.tokens[safeIndex: index + 2], let value = ParserUtils.token2Value(valueToken, valueRegistry: self.valueRegistry) else {
-                        throw ParserError.syntaxError(description: "Right value for assign variable \(name) should be either literal value or variable")
-                    }
-                    try self.valueRegistry.updateValue(name: name, value: value)
-                    index += 2
-                }
+                index += try self.variableOperation(variableName: name, index: index)
             case .break:
                 return
             default:
@@ -78,5 +72,26 @@ class Parser {
             }
             index += 1
         }
+    }
+    
+    private func variableOperation(variableName: String, index: Int) throws -> Int {
+        guard let nextToken = self.tokens[safeIndex: index + 1] else {
+            return 0
+        }
+        switch nextToken {
+        case .assign:
+            guard let valueToken = self.tokens[safeIndex: index + 2], let value = ParserUtils.token2Value(valueToken, valueRegistry: self.valueRegistry) else {
+                throw ParserError.syntaxError(description: "Right value for assign variable \(variableName) should be either literal value or variable")
+            }
+            try self.valueRegistry.updateValue(name: variableName, value: value)
+            return 2
+        case .increment:
+            break
+        case .decrement:
+            break
+        default:
+            break
+        }
+        return 0
     }
 }
