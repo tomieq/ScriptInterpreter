@@ -42,7 +42,7 @@ class BlockParser {
     }
     
     func getWhileBlock(whileTokenIndex index: Int) throws -> BlockParserResult {
-        let result = try self.getBlock(tokenIndex: index, token: .whileStatement)
+        let result = try self.getBlock(tokenIndex: index, token: .whileLoop)
         guard result.elseTokens == nil else {
             throw BlockParserError.syntaxError(info: "else statement is not allowed after while clause")
         }

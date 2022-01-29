@@ -63,7 +63,7 @@ class Parser {
                     try parser.execute()
                 }
                 index += result.consumedTokens - 1
-            case .whileStatement:
+            case .whileLoop:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getWhileBlock(whileTokenIndex: index)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
