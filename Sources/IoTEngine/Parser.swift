@@ -37,17 +37,21 @@ class Parser {
         try valueParser.parse(into: self.valueRegistry)
         self.tokens = valueParser.leftTokens
         
-        for (index, token) in self.tokens.enumerated() {
+        var index = 0
+        while let token = self.tokens[safeIndex: index] {
             switch token {
             case .function(let name):
                 try self.functionRegistry.callFunction(name: name)
             case .functionWithArguments(let name):
-                let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens).filter { $0 != .comma }
-                try self.functionRegistry.callFunction(name: name, args: tokens.compactMap { ParserUtils.token2Value($0, valueRegistry: self.valueRegistry) })
+                let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
+                index += tokens.count
+                let argumentTokens = tokens.filter { $0 != .comma }
+                try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, valueRegistry: self.valueRegistry) })
                 break
             default:
                 break
             }
+            index += 1
         }
     }
 }
