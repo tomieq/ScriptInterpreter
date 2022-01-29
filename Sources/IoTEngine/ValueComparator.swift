@@ -48,12 +48,30 @@ class ValueComparator {
                 throw ValueComparatorError.runtimeError(info: "Integer expected but \(variable.type) found!")
             }
             return self.prepareResult(left: value, right: literalValue)
+        case (.floatLiteral(let leftValue), .floatLiteral(let rightValue)):
+            return self.prepareResult(left: leftValue, right: rightValue)
+        case (.floatLiteral(let literalValue), .variable(let variableName)):
+            guard let variable = ParserUtils.token2Value(right, valueRegistry: variableRegister) else {
+                throw ValueComparatorError.runtimeError(info: "Variable \(variableName) not found!")
+            }
+            guard case .float(let value) = variable else {
+                throw ValueComparatorError.runtimeError(info: "Float expected but \(variable.type) found!")
+            }
+            return self.prepareResult(left: literalValue, right: value)
+        case (.variable(let variableName), .floatLiteral(let literalValue)):
+            guard let variable = ParserUtils.token2Value(left, valueRegistry: variableRegister) else {
+                throw ValueComparatorError.runtimeError(info: "Variable \(variableName) not found!")
+            }
+            guard case .float(let value) = variable else {
+                throw ValueComparatorError.runtimeError(info: "Float expected but \(variable.type) found!")
+            }
+            return self.prepareResult(left: value, right: literalValue)
         default:
             throw ValueComparatorError.runtimeError(info: "\(left) and \(right) cannot be compared")
         }
     }
     
-    private func prepareResult(left: Int, right: Int) -> ValueComparatorResult {
+    private func prepareResult<T:Comparable>(left: T, right: T) -> ValueComparatorResult {
         if left == right {
             return .equal
         }

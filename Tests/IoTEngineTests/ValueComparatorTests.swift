@@ -29,6 +29,24 @@ class ValueComparatorTests: XCTestCase {
         XCTAssertEqual(self.check(.intLiteral(88), .variable(name: "current"), variableRegister), .leftGreater)
     }
     
+    func testCompareFloats() {
+        let variableRegister = ValueRegistry()
+        variableRegister.registerValue(name: "current", value: .float(15.3))
+        
+        XCTAssertEqual(self.check(.floatLiteral(10.8), .floatLiteral(10.9), variableRegister), .rightGreater)
+        XCTAssertEqual(self.check(.floatLiteral(33.5), .floatLiteral(33.5), variableRegister), .equal)
+        XCTAssertEqual(self.check(.floatLiteral(100.91), .floatLiteral(99.9), variableRegister), .leftGreater)
+        
+        XCTAssertEqual(self.check(.variable(name: "current"), .floatLiteral(15.3), variableRegister), .equal)
+        XCTAssertEqual(self.check(.variable(name: "current"), .floatLiteral(2.32), variableRegister), .leftGreater)
+        XCTAssertEqual(self.check(.variable(name: "current"), .floatLiteral(103.8), variableRegister), .rightGreater)
+        
+        
+        XCTAssertEqual(self.check(.floatLiteral(15.3), .variable(name: "current"), variableRegister), .equal)
+        XCTAssertEqual(self.check(.floatLiteral(-3.04), .variable(name: "current"), variableRegister), .rightGreater)
+        XCTAssertEqual(self.check(.floatLiteral(23.1), .variable(name: "current"), variableRegister), .leftGreater)
+    }
+    
     private func check(_ left: Token, _ right: Token, _ variableRegister: ValueRegistry) -> ValueComparatorResult? {
         do {
             let comparator = ValueComparator()
