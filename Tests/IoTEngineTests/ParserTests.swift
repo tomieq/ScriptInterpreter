@@ -115,6 +115,14 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 1], .integer(8))
     }
     
+    func test_whileStatement() {
+        let console = self.setupSpy(code: "var i = 0; while(i != 5) { i++; print(i) }")
+        print(console.output)
+        XCTAssertEqual(console.output.count, 5)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
+        XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()

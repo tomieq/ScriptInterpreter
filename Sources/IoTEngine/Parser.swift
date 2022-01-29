@@ -63,6 +63,16 @@ class Parser {
                     try parser.execute()
                 }
                 index += result.consumedTokens - 1
+            case .whileStatement:
+                let blockParser = BlockParser(tokens: self.tokens)
+                let result = try blockParser.getWhileBlock(whileTokenIndex: index)
+                let conditionEvaluator = ConditionEvaluator(valueRegistry: self.valueRegistry)
+                while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
+                    let valueRegistry = ValueRegistry(upperValueRegistry: self.valueRegistry)
+                    let parser = Parser(tokens: result.mainTokens, functionRegistry: self.functionRegistry, valueRegistry: valueRegistry)
+                    try parser.execute()
+                }
+                index += result.consumedTokens - 1
             case .variable(let name):
                 index += try self.variableOperation(variableName: name, index: index)
             case .break:
@@ -78,7 +88,6 @@ class Parser {
         guard let nextToken = self.tokens[safeIndex: index + 1] else {
             return 0
         }
-        print("variableOperation:nextToken:\(nextToken)")
         switch nextToken {
         case .assign:
             guard let valueToken = self.tokens[safeIndex: index + 2], let value = ParserUtils.token2Value(valueToken, valueRegistry: self.valueRegistry) else {
