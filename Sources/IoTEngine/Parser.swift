@@ -44,7 +44,7 @@ class Parser {
                 try self.functionRegistry.callFunction(name: name)
             case .functionWithArguments(let name):
                 let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
-                index += tokens.count - 1
+                index += tokens.count + 1
                 let argumentTokens = tokens.filter { $0 != .comma }
                 try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, valueRegistry: self.valueRegistry) })
                 break
@@ -78,6 +78,7 @@ class Parser {
         guard let nextToken = self.tokens[safeIndex: index + 1] else {
             return 0
         }
+        print("variableOperation:nextToken:\(nextToken)")
         switch nextToken {
         case .assign:
             guard let valueToken = self.tokens[safeIndex: index + 2], let value = ParserUtils.token2Value(valueToken, valueRegistry: self.valueRegistry) else {
@@ -86,7 +87,12 @@ class Parser {
             try self.valueRegistry.updateValue(name: variableName, value: value)
             return 2
         case .increment:
-            break
+            let variable = self.valueRegistry.getValue(name: variableName)
+            guard case .integer(let intValue) = variable else {
+                let type = variable?.type ?? "nil"
+                throw ParserError.syntaxError(description: "Increment operation can be applied only for integer type, but \(type) found")
+            }
+            try self.valueRegistry.updateValue(name: variableName, value: .integer(intValue + 1))
         case .decrement:
             break
         default:
