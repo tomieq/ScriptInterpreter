@@ -47,6 +47,24 @@ class ValueComparatorTests: XCTestCase {
         XCTAssertEqual(self.check(.floatLiteral(23.1), .variable(name: "current"), variableRegister), .leftGreater)
     }
     
+    func testCompareVariables() {
+        let variableRegister = ValueRegistry()
+        variableRegister.registerValue(name: "small", value: .integer(3))
+        variableRegister.registerValue(name: "big", value: .integer(99))
+        variableRegister.registerValue(name: "pi", value: .float(3.14))
+        variableRegister.registerValue(name: "e", value: .float(2.71))
+        
+        
+        XCTAssertEqual(self.check(.variable(name: "small"), .variable(name: "small"), variableRegister), .equal)
+        XCTAssertEqual(self.check(.variable(name: "big"), .variable(name: "small"), variableRegister), .leftGreater)
+        XCTAssertEqual(self.check(.variable(name: "small"), .variable(name: "big"), variableRegister), .rightGreater)
+        
+        XCTAssertEqual(self.check(.variable(name: "pi"), .variable(name: "pi"), variableRegister), .equal)
+        XCTAssertEqual(self.check(.variable(name: "pi"), .variable(name: "e"), variableRegister), .leftGreater)
+        XCTAssertEqual(self.check(.variable(name: "e"), .variable(name: "pi"), variableRegister), .rightGreater)
+        
+    }
+    
     private func check(_ left: Token, _ right: Token, _ variableRegister: ValueRegistry) -> ValueComparatorResult? {
         do {
             let comparator = ValueComparator()
