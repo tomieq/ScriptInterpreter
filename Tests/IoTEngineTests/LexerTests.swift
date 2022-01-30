@@ -53,12 +53,12 @@ final class LexerTests: XCTestCase {
                 .boolLiteral(true),
                 .bracketClose,
                 .blockOpen,
-                .returnStatement,
+                .return,
                 .floatLiteral(89.1),
                 .blockClose,
                 .elseStatement,
                 .blockOpen,
-                .returnStatement,
+                .return,
                 .intLiteral(100),
                 .blockClose
             ]

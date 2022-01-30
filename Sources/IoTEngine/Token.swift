@@ -25,7 +25,6 @@ enum Token: Equatable {
     case elseStatement
     case whileLoop
     case forLoop
-    case returnStatement
     case blockOpen
     case blockClose
     case equal
@@ -86,7 +85,6 @@ extension Token {
         generators.append(TokenGenerator(regex: "\\!=", resolver: { _ in [.notEqual] }))
         generators.append(TokenGenerator(regex: ",", resolver: { _ in [.comma] }))
         generators.append(TokenGenerator(regex: "else", resolver: { _ in [.elseStatement] }))
-        generators.append(TokenGenerator(regex: "return", resolver: { _ in [.returnStatement] }))
         generators.append(TokenGenerator(regex: "=", resolver: { _ in [.assign] }))
         generators.append(TokenGenerator(regex: "\\(", resolver: { _ in [.bracketOpen] }))
         generators.append(TokenGenerator(regex: "\\)", resolver: { _ in [.bracketClose] }))
@@ -136,8 +134,6 @@ extension Token: CustomDebugStringConvertible {
             return "stringLiteral(\(value))"
         case .elseStatement:
             return "else"
-        case .returnStatement:
-            return "return"
         case .equal:
             return "=="
         case .notEqual:
