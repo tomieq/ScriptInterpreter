@@ -39,7 +39,7 @@ public enum Value {
         }
     }
     
-    var asString: String {
+    public var asString: String {
         switch self {
         case .string(let value):
             return value
@@ -54,25 +54,25 @@ public enum Value {
 }
 
 extension Value {
-    var isString: Bool {
+    public var isString: Bool {
         if case .string(_) = self {
             return true
         }
         return false
     }
-    var isBool: Bool {
+    public var isBool: Bool {
         if case .bool(_) = self {
             return true
         }
         return false
     }
-    var isInteger: Bool {
+    public var isInteger: Bool {
         if case .integer(_) = self {
             return true
         }
         return false
     }
-    var isFloat: Bool {
+    public var isFloat: Bool {
         if case .float(_) = self {
             return true
         }
