@@ -34,11 +34,17 @@ public class IoTEngine {
         try self.variableRegistry.registerValue(name: name, value: value)
     }
     
-    public func exec(code: String) throws {
+    public func exec(code: String) throws -> Value? {
         do {
             let lexer = try Lexer(code: code)
             let parser = Parser(tokens: lexer.tokens, functionRegistry: self.functionRegistry, variableRegistry: self.variableRegistry)
-            try parser.execute()
+            let result = try parser.execute()
+            switch result {
+            case .finished, .break:
+                return nil
+            case .return(let value):
+                return value
+            }
         } catch {
             throw IoTEngineError.runtimeError(description: error.localizedDescription)
         }

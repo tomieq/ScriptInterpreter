@@ -20,11 +20,21 @@ class IoTEngineTests: XCTestCase {
         XCTAssertNoThrow(try engine.setupVariable(name: "hour", value: .integer(9)))
         XCTAssertNoThrow(try engine.setupVariable(name: "minute", value: .integer(45)))
         
-        let code = "if(hour == 9 and minute == 45) { print('right time'); } minute = 12; print(minute);"
-        XCTAssertNoThrow(try engine.exec(code: code))
+        let code = "if(hour == 9 and minute == 45) { print('right time'); } minute = 12; print(minute); return minute;"
+        let returnedValue = try? engine.exec(code: code)
         
         XCTAssertEqual(console.output[safeIndex: 0], .string("right time"))
         XCTAssertEqual(console.output[safeIndex: 1], .integer(12))
+        XCTAssertEqual(returnedValue, .integer(12))
+    }
+    
+    func test_returnFromMiddleOfTheCode() {
+        
+        let engine = IoTEngine()
+        let code = "var counter = 0; for(var i = 0; i <= 10; i++) { if(i==5) { return i } } return 100"
+        let returnedValue = try? engine.exec(code: code)
+        
+        XCTAssertEqual(returnedValue, .integer(5))
     }
 }
 
