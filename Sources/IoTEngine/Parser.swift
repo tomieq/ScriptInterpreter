@@ -40,15 +40,16 @@ class Parser {
             switch token {
             case .function(let name):
                 try self.functionRegistry.callFunction(name: name)
+                index += 1
             case .functionWithArguments(let name):
                 let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
-                index += tokens.count + 1
+                index += tokens.count + 2
                 let argumentTokens = tokens.filter { $0 != .comma }
                 try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) })
                 break
             case .variableDefinition(_), .constantDefinition(_):
                 let consumedTokens = try variableParser.parse(variableDefinitionIndex: index, into: self.variableRegistry)
-                index += consumedTokens - 1
+                index += consumedTokens
             case .ifStatement:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getIfBlock(ifTokenIndex: index)
@@ -59,7 +60,7 @@ class Parser {
                 } else if let elseTokens = result.elseTokens {
                     try self.executeSubCode(tokens: elseTokens, variableRegistry: self.variableRegistry)
                 }
-                index += result.consumedTokens - 1
+                index += result.consumedTokens
             case .whileLoop:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getWhileBlock(whileTokenIndex: index)
@@ -67,7 +68,7 @@ class Parser {
                 while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
                     try self.executeSubCode(tokens: result.mainTokens, variableRegistry: self.variableRegistry)
                 }
-                index += result.consumedTokens - 1
+                index += result.consumedTokens
             case .forLoop:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getForBlock(forTokenIndex: index)
@@ -96,15 +97,15 @@ class Parser {
                 // this is Swift-style separate namespace
                 let blockTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: index, tokens: self.tokens)
                 try self.executeSubCode(tokens: blockTokens, variableRegistry: self.variableRegistry)
-                index += blockTokens.count + 1
+                index += blockTokens.count + 2
             case .variable(let name):
-                index += try self.variableOperation(variableName: name, index: index)
+                index += try self.variableOperation(variableName: name, index: index) + 1
             case .break:
                 return
             default:
-                break
+                index += 1
             }
-            index += 1
+            
         }
     }
     

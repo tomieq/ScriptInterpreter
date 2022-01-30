@@ -124,11 +124,12 @@ class ParserTests: XCTestCase {
     }
 
     func test_forLoop() {
-        let console = self.setupSpy(code: "var i = 9; for(var i = 1; i <= 5; i++) { print(i) }")
+        let console = self.setupSpy(code: "var i = 9; for(var i = 1; i <= 5; i++) { print(i) } print(i)")
         print(console.output)
-        XCTAssertEqual(console.output.count, 5)
+        XCTAssertEqual(console.output.count, 6)
         XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
         XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
+        XCTAssertEqual(console.output[safeIndex: 5], .integer(9))
     }
 
     func test_namespaceVariables() {
