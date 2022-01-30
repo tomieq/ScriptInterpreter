@@ -199,6 +199,13 @@ class ParserTests: XCTestCase {
         }
     }
     
+    func test_usingVariableNamesBeginningWithKeywordName() {
+        let console = self.setupSpy(code: "var ifer = 3; var breaker = 10; var elser = 20; var whiler = 9 print(ifer, breaker, elser)")
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(3))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(10))
+        XCTAssertEqual(console.output[safeIndex: 2], .integer(20))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
