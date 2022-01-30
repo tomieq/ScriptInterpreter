@@ -37,7 +37,7 @@ class ParserUtilsTests: XCTestCase {
     
     func test_convertVariableTokenToValue() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "data", value: .integer(1985))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "data", value: .integer(1985)))
         let value = ParserUtils.token2Value(.variable(name: "data"), variableRegistry: variableRegistry)
         XCTAssertEqual(value, .integer(1985))
     }

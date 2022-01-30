@@ -17,10 +17,10 @@ class IoTEngineTests: XCTestCase {
         
         let engine = IoTEngine()
         XCTAssertNoThrow(try engine.registerFunc(name: "print", function: console.print))
-        engine.setupVariable(name: "hour", value: .integer(9))
-        engine.setupVariable(name: "minute", value: .integer(45))
+        XCTAssertNoThrow(try engine.setupVariable(name: "hour", value: .integer(9)))
+        XCTAssertNoThrow(try engine.setupVariable(name: "minute", value: .integer(45)))
         
-        let code = "if(hour == 9) { print('right time'); } minute = 12; print(minute);"
+        let code = "if(hour == 9 and minute == 45) { print('right time'); } minute = 12; print(minute);"
         XCTAssertNoThrow(try engine.exec(code: code))
         
         XCTAssertEqual(console.output[safeIndex: 0], .string("right time"))

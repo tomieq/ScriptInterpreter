@@ -8,6 +8,7 @@
 import Foundation
 
 enum VariableRegistryError: Error {
+    case registerTheSameVariable(name: String)
     case valueDoesNotExist(name: String)
     case typeMismatch(variableName: String, existingType: String, newType: String)
     case cannotModifyConstant(variableName: String)
@@ -16,6 +17,8 @@ enum VariableRegistryError: Error {
 extension VariableRegistryError: LocalizedError {
     public var errorDescription: String? {
         switch self {
+        case .registerTheSameVariable(let name):
+            return NSLocalizedString("ValueRegistryError.registerTheSameVariable: variable \(name) was already registered", comment: "ValueRegistryError")
         case .valueDoesNotExist(let name):
             return NSLocalizedString("ValueRegistryError.valueDoesNotExist: variable \(name) was not defined", comment: "ValueRegistryError")
         case .typeMismatch(let variableName, let existingType, let newType):
@@ -43,13 +46,16 @@ class VariableRegistry {
         self.topVariableRegistry = topVariableRegistry
     }
     
-    func registerValue(name: String, value: Value?) {
+    func registerValue(name: String, value: Value?) throws {
+        if value != nil, self.values[name] != nil {
+            throw VariableRegistryError.registerTheSameVariable(name: name)
+        }
         self.values[name] = ValueContainer(value)
     }
     
-    func registerConstant(name: String, value: Value?) {
+    func registerConstant(name: String, value: Value?) throws {
+        try self.registerValue(name: name, value: value)
         self.constantNames.append(name)
-        self.registerValue(name: name, value: value)
     }
     
     func updateValue(name: String, value: Value?) throws {

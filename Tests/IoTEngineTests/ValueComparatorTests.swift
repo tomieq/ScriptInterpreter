@@ -13,7 +13,7 @@ class ValueComparatorTests: XCTestCase {
     
     func testCompareIntegers() {
         let variableRegister = VariableRegistry()
-        variableRegister.registerValue(name: "current", value: .integer(25))
+        XCTAssertNoThrow(try variableRegister.registerValue(name: "current", value: .integer(25)))
         
         XCTAssertEqual(self.check(.intLiteral(10), .intLiteral(23), variableRegister), .rightGreater)
         XCTAssertEqual(self.check(.intLiteral(33), .intLiteral(33), variableRegister), .equal)
@@ -31,7 +31,7 @@ class ValueComparatorTests: XCTestCase {
     
     func testCompareFloats() {
         let variableRegister = VariableRegistry()
-        variableRegister.registerValue(name: "current", value: .float(15.3))
+        XCTAssertNoThrow(try variableRegister.registerValue(name: "current", value: .float(15.3)))
         
         XCTAssertEqual(self.check(.floatLiteral(10.8), .floatLiteral(10.9), variableRegister), .rightGreater)
         XCTAssertEqual(self.check(.floatLiteral(33.5), .floatLiteral(33.5), variableRegister), .equal)
@@ -49,10 +49,10 @@ class ValueComparatorTests: XCTestCase {
     
     func testCompareVariables() {
         let variableRegister = VariableRegistry()
-        variableRegister.registerValue(name: "small", value: .integer(3))
-        variableRegister.registerValue(name: "big", value: .integer(99))
-        variableRegister.registerValue(name: "pi", value: .float(3.14))
-        variableRegister.registerValue(name: "e", value: .float(2.71))
+        XCTAssertNoThrow(try variableRegister.registerValue(name: "small", value: .integer(3)))
+        XCTAssertNoThrow(try variableRegister.registerValue(name: "big", value: .integer(99)))
+        XCTAssertNoThrow(try variableRegister.registerValue(name: "pi", value: .float(3.14)))
+        XCTAssertNoThrow(try variableRegister.registerValue(name: "e", value: .float(2.71)))
         
         
         XCTAssertEqual(self.check(.variable(name: "small"), .variable(name: "small"), variableRegister), .equal)

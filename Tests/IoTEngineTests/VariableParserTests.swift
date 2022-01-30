@@ -119,7 +119,7 @@ class VariableParserTests: XCTestCase {
             let lexer = try Lexer(code: script)
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
-            variableRegistry.registerValue(name: "age", value: .integer(20))
+            XCTAssertNoThrow(try variableRegistry.registerValue(name: "age", value: .integer(20)))
             let consumedTokens = try parser.parse(variableDefinitionIndex: 0, into: variableRegistry)
             XCTAssertEqual(variableRegistry.getValue(name: "ageCopy"), .integer(20))
             XCTAssertEqual(consumedTokens, 5)

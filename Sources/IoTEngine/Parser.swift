@@ -84,7 +84,7 @@ class Parser {
                 }
                 // create for loop namespace and register initial value
                 let forLoopVariableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
-                forLoopVariableRegistry.registerValue(name: controlVariableName, value: .integer(controlVariableInitialValue))
+                try forLoopVariableRegistry.registerValue(name: controlVariableName, value: .integer(controlVariableInitialValue))
                 // append statement 3 to be executed after each loop
                 var forLoopTokens = result.mainTokens
                 forLoopTokens.append(contentsOf: forLoopControlTokens[2])

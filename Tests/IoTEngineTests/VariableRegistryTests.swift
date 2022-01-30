@@ -14,14 +14,14 @@ final class VariableRegistryTests: XCTestCase {
     func test_registerNullVariable() {
         let registry = VariableRegistry()
         XCTAssertFalse(registry.valueExists(name: "amount"))
-        registry.registerValue(name: "amount", value: nil)
+        XCTAssertNoThrow(try registry.registerValue(name: "amount", value: nil))
         XCTAssertTrue(registry.valueExists(name: "amount"))
     }
     
     func test_registerNonNullVariable() {
         let registry = VariableRegistry()
         XCTAssertFalse(registry.valueExists(name: "amount"))
-        registry.registerValue(name: "amount", value: .integer(20))
+        XCTAssertNoThrow(try registry.registerValue(name: "amount", value: .integer(20)))
         XCTAssertTrue(registry.valueExists(name: "amount"))
         XCTAssertEqual(registry.getValue(name: "amount"), .integer(20))
     }
@@ -31,7 +31,7 @@ final class VariableRegistryTests: XCTestCase {
         let inner = VariableRegistry(topVariableRegistry: outer)
         XCTAssertFalse(outer.valueExists(name: "amount"))
         XCTAssertFalse(inner.valueExists(name: "amount"))
-        outer.registerValue(name: "amount", value: .integer(31))
+        XCTAssertNoThrow(try outer.registerValue(name: "amount", value: .integer(31)))
         XCTAssertTrue(outer.valueExists(name: "amount"))
         XCTAssertTrue(inner.valueExists(name: "amount"))
         
@@ -44,7 +44,7 @@ final class VariableRegistryTests: XCTestCase {
         let inner = VariableRegistry(topVariableRegistry: outer)
         XCTAssertFalse(outer.valueExists(name: "amount"))
         XCTAssertFalse(inner.valueExists(name: "amount"))
-        inner.registerValue(name: "amount", value: .integer(31))
+        XCTAssertNoThrow(try inner.registerValue(name: "amount", value: .integer(31)))
         XCTAssertFalse(outer.valueExists(name: "amount"))
         XCTAssertTrue(inner.valueExists(name: "amount"))
         
@@ -58,8 +58,8 @@ final class VariableRegistryTests: XCTestCase {
         XCTAssertFalse(outer.valueExists(name: "amount"))
         XCTAssertFalse(inner.valueExists(name: "amount"))
         
-        outer.registerValue(name: "amount", value: .integer(20))
-        inner.registerValue(name: "amount", value: .integer(100))
+        XCTAssertNoThrow(try outer.registerValue(name: "amount", value: .integer(20)))
+        XCTAssertNoThrow(try inner.registerValue(name: "amount", value: .integer(100)))
         
         XCTAssertEqual(outer.getValue(name: "amount"), .integer(20))
         XCTAssertEqual(inner.getValue(name: "amount"), .integer(100))
@@ -69,7 +69,7 @@ final class VariableRegistryTests: XCTestCase {
         let outer = VariableRegistry()
         let inner = VariableRegistry(topVariableRegistry: outer)
         
-        outer.registerValue(name: "amount", value: .integer(20))
+        XCTAssertNoThrow(try outer.registerValue(name: "amount", value: .integer(20)))
         
         XCTAssertEqual(outer.getValue(name: "amount"), .integer(20))
         XCTAssertEqual(inner.getValue(name: "amount"), .integer(20))
@@ -84,7 +84,7 @@ final class VariableRegistryTests: XCTestCase {
         let outer = VariableRegistry()
         let inner = VariableRegistry(topVariableRegistry: outer)
         
-        outer.registerValue(name: "amount", value: .integer(20))
+        XCTAssertNoThrow(try outer.registerValue(name: "amount", value: .integer(20)))
         
         XCTAssertEqual(outer.getValue(name: "amount"), .integer(20))
         XCTAssertEqual(inner.getValue(name: "amount"), .integer(20))
@@ -98,7 +98,7 @@ final class VariableRegistryTests: XCTestCase {
     func test_updateConstant() {
         let registry = VariableRegistry()
         
-        registry.registerConstant(name: "amount", value: .integer(20))
+        XCTAssertNoThrow(try registry.registerConstant(name: "amount", value: .integer(20)))
         XCTAssertEqual(registry.getValue(name: "amount"), .integer(20))
         XCTAssertThrowsError(try registry.updateValue(name: "amount", value: .integer(50)))
         

@@ -30,8 +30,8 @@ public class IoTEngine {
         try self.functionRegistry.registerFunc(name: name, function: function)
     }
     
-    public func setupVariable(name: String, value: Value) {
-        self.variableRegistry.registerValue(name: name, value: value)
+    public func setupVariable(name: String, value: Value) throws {
+        try self.variableRegistry.registerValue(name: name, value: value)
     }
     
     public func exec(code: String) throws {

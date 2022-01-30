@@ -37,7 +37,7 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_integerLiteralWithVariable() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "distance", value: .integer(104))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "distance", value: .integer(104)))
         
         XCTAssertNoThrow(try self.checkTrue(code: "distance == 104", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkFalse(code: "distance == 500", variableRegistry: variableRegistry))
@@ -47,7 +47,7 @@ class ConditionEvaluatorTests: XCTestCase {
 
     func test_boolLiteralWithVariable() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "isSold", value: .bool(true))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "isSold", value: .bool(true)))
         
         XCTAssertNoThrow(try self.checkTrue(code: "isSold == true", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkFalse(code: "isSold == false", variableRegistry: variableRegistry))
@@ -57,7 +57,7 @@ class ConditionEvaluatorTests: XCTestCase {
 
     func test_stringLiteralWithVariable() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "label", value: .string("damaged"))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "label", value: .string("damaged")))
         
         XCTAssertNoThrow(try self.checkTrue(code: "label == 'damaged'", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkFalse(code: "label == 'installed'", variableRegistry: variableRegistry))
@@ -67,7 +67,7 @@ class ConditionEvaluatorTests: XCTestCase {
 
     func test_floatLiteralWithVariable() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
         
         XCTAssertNoThrow(try self.checkTrue(code: "pi == 3.14", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkFalse(code: "pi == 6.20", variableRegistry: variableRegistry))
@@ -77,9 +77,9 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_compareTwoVariables() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "max", value: .integer(100))
-        variableRegistry.registerValue(name: "current_1", value: .integer(73))
-        variableRegistry.registerValue(name: "current_2", value: .integer(100))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "max", value: .integer(100)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "current_1", value: .integer(73)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "current_2", value: .integer(100)))
 
         XCTAssertNoThrow(try self.checkTrue(code: "max != current_1", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkFalse(code: "max == current_1", variableRegistry: variableRegistry))
@@ -90,10 +90,10 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_lessComparator() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "min", value: .integer(11))
-        variableRegistry.registerValue(name: "max", value: .integer(87))
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
-        variableRegistry.registerValue(name: "e", value: .float(2.71))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "min", value: .integer(11)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "max", value: .integer(87)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "e", value: .float(2.71)))
 
         XCTAssertNoThrow(try self.checkTrue(code: "pi < 4.08", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkTrue(code: "e < pi", variableRegistry: variableRegistry))
@@ -110,10 +110,10 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_graterComparator() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "min", value: .integer(11))
-        variableRegistry.registerValue(name: "max", value: .integer(87))
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
-        variableRegistry.registerValue(name: "e", value: .float(2.71))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "min", value: .integer(11)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "max", value: .integer(87)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "e", value: .float(2.71)))
 
         XCTAssertNoThrow(try self.checkTrue(code: "4.08 > pi", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkTrue(code: "pi > e", variableRegistry: variableRegistry))
@@ -129,8 +129,8 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_lessOrEqualComparator() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "min", value: .integer(11))
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "min", value: .integer(11)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
 
         XCTAssertNoThrow(try self.checkTrue(code: "pi <= 4.08", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkTrue(code: "pi <= 3.14", variableRegistry: variableRegistry))
@@ -146,8 +146,8 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_greaterOrEqualComparator() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "min", value: .integer(11))
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "min", value: .integer(11)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
 
         XCTAssertNoThrow(try self.checkTrue(code: "4.08 >= pi", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkTrue(code: "3.14 >= pi", variableRegistry: variableRegistry))
@@ -163,10 +163,10 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_validateErros() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "label", value: .string("damaged"))
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
-        variableRegistry.registerValue(name: "isSold", value: .bool(true))
-        variableRegistry.registerValue(name: "distance", value: .integer(104))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "label", value: .string("damaged")))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "isSold", value: .bool(true)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "distance", value: .integer(104)))
         
         XCTAssertNoThrow(try self.checkThrowsError(code: "200", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkThrowsError(code: "6.75", variableRegistry: variableRegistry))
@@ -187,8 +187,8 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_checkAndCondition() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
-        variableRegistry.registerValue(name: "label", value: .string("damaged"))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "label", value: .string("damaged")))
         
         XCTAssertNoThrow(try self.checkTrue(code: "true && true", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkFalse(code: "true && false", variableRegistry: variableRegistry))
@@ -200,8 +200,8 @@ class ConditionEvaluatorTests: XCTestCase {
     
     func test_checkOrCondition() {
         let variableRegistry = VariableRegistry()
-        variableRegistry.registerValue(name: "pi", value: .float(3.14))
-        variableRegistry.registerValue(name: "label", value: .string("damaged"))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "pi", value: .float(3.14)))
+        XCTAssertNoThrow(try variableRegistry.registerValue(name: "label", value: .string("damaged")))
         
         XCTAssertNoThrow(try self.checkTrue(code: "true || false", variableRegistry: variableRegistry))
         XCTAssertNoThrow(try self.checkFalse(code: "false || false", variableRegistry: variableRegistry))
