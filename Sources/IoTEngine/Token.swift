@@ -16,6 +16,7 @@ enum Token: Equatable {
     case variableDefinition(type: String)
     case constantDefinition(type: String)
     case variable(name: String)
+    case `nil`
     case assign
     case add
     case sublime
@@ -57,6 +58,9 @@ extension Token {
         generators.append(TokenGenerator(regex: "let", resolver: { _ in [.constantDefinition(type: "let")] }))
         generators.append(TokenGenerator(regex: "const", resolver: { _ in [.constantDefinition(type: "const")] }))
         generators.append(TokenGenerator(regex: "var", resolver: { _ in [.variableDefinition(type: "var")] }))
+        generators.append(TokenGenerator(regex: "nil", resolver: { _ in [.nil] }))
+        generators.append(TokenGenerator(regex: "null", resolver: { _ in [.nil] }))
+        generators.append(TokenGenerator(regex: "Null", resolver: { _ in [.nil] }))
         generators.append(TokenGenerator(regex: "function", resolver: { _ in [.functionDefinition(type: "function")] }))
         generators.append(TokenGenerator(regex: "func", resolver: { _ in [.functionDefinition(type: "func")] }))
         generators.append(TokenGenerator(regex: "break", resolver: { _ in [.break] }))
@@ -156,6 +160,8 @@ extension Token: CustomDebugStringConvertible {
             return "variableDefinition(\(type))"
         case .constantDefinition(let type):
             return "constantDefinition(\(type))"
+        case .nil:
+            return "nil"
         case .assign:
             return "="
         case .add:
