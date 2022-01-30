@@ -68,10 +68,14 @@ class VariableParser {
             guard let valueToken = self.tokens[safeIndex: pos + 2] else {
                 throw VariableParserError.syntaxError(description: "Value not found for assigning variable \(name)")
             }
-            guard let value = ParserUtils.token2Value(valueToken, variableRegistry: variableRegistry) else {
-                throw VariableParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
+            if case .nil = valueToken {
+                try registerFuncion(name, nil)
+            } else {
+                guard let value = ParserUtils.token2Value(valueToken, variableRegistry: variableRegistry) else {
+                    throw VariableParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
+                }
+                try registerFuncion(name, value)
             }
-            try registerFuncion(name, value)
             usedTokens += 2
         } else {
             try registerFuncion(name, nil)
