@@ -115,14 +115,22 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 1], .integer(8))
     }
     
-    func test_whileStatement() {
+    func test_whileLoop() {
         let console = self.setupSpy(code: "var i = 0; while(i < 5) { i++; print(i) }")
         print(console.output)
         XCTAssertEqual(console.output.count, 5)
         XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
         XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
     }
-    
+
+    func test_forLoop() {
+        let console = self.setupSpy(code: "var i = 9; for(var i = 1; i <= 5; i++) { print(i) }")
+        print(console.output)
+        XCTAssertEqual(console.output.count, 5)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
+        XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
+    }
+
     func test_namespaceVariables() {
         let console = self.setupSpy(code: "var number = 0; print(number) { var number = 6; print(number) number--; print(number) } number++; print(number)")
         print(console.output)

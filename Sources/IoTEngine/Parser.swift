@@ -74,6 +74,32 @@ class Parser {
                     try parser.execute()
                 }
                 index += result.consumedTokens - 1
+            case .forLoop:
+                let blockParser = BlockParser(tokens: self.tokens)
+                let result = try blockParser.getForBlock(forTokenIndex: index)
+                let forLoopControlTokens = result.conditionTokens.split(by: .semicolon)
+                guard forLoopControlTokens.count == 3 else {
+                    throw ParserError.syntaxError(description: "For loop requires 3 statements: initial state, the condition and code that is executed after main block")
+                }
+                guard case .variableDefinition(_) = forLoopControlTokens[0][safeIndex: 0],
+                      case .variable(let controlVariableName) = forLoopControlTokens[0][safeIndex: 1],
+                      case .assign = forLoopControlTokens[0][safeIndex: 2],
+                      case .intLiteral(let controlVariableInitialValue) = forLoopControlTokens[0][safeIndex: 3] else {
+                    throw ParserError.syntaxError(description: "For loop error: initial state statement need to init variable")
+                }
+                // create for loop namespace and register initial value
+                let forLoopVariableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                forLoopVariableRegistry.registerValue(name: controlVariableName, value: .integer(controlVariableInitialValue))
+                // append statement 3 to be executed after each loop
+                var forLoopTokens = result.mainTokens
+                forLoopTokens.append(contentsOf: forLoopControlTokens[2])
+                let conditionEvaluator = ConditionEvaluator(variableRegistry: forLoopVariableRegistry)
+                while (try conditionEvaluator.check(tokens: forLoopControlTokens[1])) {
+                    let variableRegistry = VariableRegistry(topVariableRegistry: forLoopVariableRegistry)
+                    let parser = Parser(tokens: forLoopTokens, functionRegistry: self.functionRegistry, variableRegistry: variableRegistry)
+                    try parser.execute()
+                }
+                index += result.consumedTokens
             case .blockOpen:
                 // this is Swift-style separate namespace
                 let blockTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: index, tokens: self.tokens)
