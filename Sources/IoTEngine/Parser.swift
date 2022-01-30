@@ -50,7 +50,7 @@ class Parser {
                 index += 1
             case .functionWithArguments(let name):
                 let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
-                index += tokens.count + 2
+                index += tokens.count + 3
                 let argumentTokens = tokens.filter { $0 != .comma }
                 try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) })
                 break
@@ -151,8 +151,10 @@ class Parser {
                     return .return(returned)
                 }
                 return .return(nil)
-            default:
+            case .semicolon:
                 index += 1
+            default:
+                throw ParserError.syntaxError(description: "Unexpected sign found: \(token)")
             }
         }
         return .finished
@@ -176,6 +178,7 @@ class Parser {
                 throw ParserError.syntaxError(description: "Increment operation can be applied only for integer type, but \(type) found")
             }
             try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue + 1))
+            return 1
         case .decrement:
             let variable = self.variableRegistry.getValue(name: variableName)
             guard case .integer(let intValue) = variable else {
@@ -183,7 +186,7 @@ class Parser {
                 throw ParserError.syntaxError(description: "Decrement operation can be applied only for integer type, but \(type) found")
             }
             try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue - 1))
-            break
+            return 1
         default:
             break
         }
