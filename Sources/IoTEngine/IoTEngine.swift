@@ -34,6 +34,10 @@ public class IoTEngine {
         try self.variableRegistry.registerValue(name: name, value: value)
     }
     
+    public func setupConstant(name: String, value: Value) throws {
+        try self.variableRegistry.registerConstant(name: name, value: value)
+    }
+    
     public func exec(code: String) throws -> Value? {
         do {
             let lexer = try Lexer(code: code)
