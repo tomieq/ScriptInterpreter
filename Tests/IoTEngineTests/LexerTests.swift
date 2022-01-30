@@ -105,12 +105,34 @@ final class LexerTests: XCTestCase {
         }
     }
     
+    func test_stringLiteralDoubleQuoteWithInterpolatedVariable() {
+        let script = "( \"monkey eats\\(variable)\" )"
+        
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey eats\\(variable)")))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+    
     func test_stringLiteralSingleQuote() {
         let script = "( 'monkey' )"
         
         do {
             let lexer = try Lexer(code: script)
             XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey")))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+    
+    func test_stringLiteralSingleQuoteWithInterpolatedVariable() {
+        let script = "( 'monkey eats \\(banana)' )"
+        
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey eats \\(banana)")))
         } catch {
             XCTFail("\(error)")
         }
