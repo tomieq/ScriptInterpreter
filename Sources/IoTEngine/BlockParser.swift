@@ -66,7 +66,6 @@ class BlockParser {
         }
         var currentIndex = index + 1
         let conditionTokens  = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
-        print("ConditionTokens[\(currentIndex)...]:\(conditionTokens)")
         currentIndex += conditionTokens.count + 2
         let mainTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
         currentIndex += mainTokens.count + 2

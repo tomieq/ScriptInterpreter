@@ -58,7 +58,6 @@ class ParserUtilsTests: XCTestCase {
         do {
             let lexer = try Lexer(code: code)
             let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: 3, tokens: lexer.tokens)
-            print(tokens)
             XCTAssertEqual(tokens.count, 9)
         } catch {
             XCTFail(error.localizedDescription)
@@ -69,9 +68,7 @@ class ParserUtilsTests: XCTestCase {
         let code = "var age = 80; function exec() { var lenght = 122.8 }"
         do {
             let lexer = try Lexer(code: code)
-            print(lexer.tokens)
             let tokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: 7, tokens: lexer.tokens)
-            print(tokens)
             XCTAssertEqual(tokens.count, 4)
         } catch {
             XCTFail(error.localizedDescription)
@@ -82,9 +79,7 @@ class ParserUtilsTests: XCTestCase {
         let code = "function exec() { var lenght = 122.8 if(true) { print(100) } }"
         do {
             let lexer = try Lexer(code: code)
-            print(lexer.tokens)
             let tokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: 2, tokens: lexer.tokens)
-            print(tokens)
             XCTAssertEqual(tokens.count, 14)
         } catch {
             XCTFail(error.localizedDescription)
