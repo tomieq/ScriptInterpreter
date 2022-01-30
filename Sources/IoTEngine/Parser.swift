@@ -63,17 +63,37 @@ class Parser {
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 let shouldRunMainStatement = try conditionEvaluator.check(tokens: result.conditionTokens)
                 if shouldRunMainStatement {
-                    try self.executeSubCode(tokens: result.mainTokens, variableRegistry: self.variableRegistry)
+                    let result = try self.executeSubCode(tokens: result.mainTokens, variableRegistry: self.variableRegistry)
+                    switch result {
+                    case .finished:
+                        break
+                    case .break, .return(_):
+                        return result
+                    }
                 } else if let elseTokens = result.elseTokens {
-                    try self.executeSubCode(tokens: elseTokens, variableRegistry: self.variableRegistry)
+                    let result = try self.executeSubCode(tokens: elseTokens, variableRegistry: self.variableRegistry)
+                    switch result {
+                    case .finished:
+                        break
+                    case .break, .return(_):
+                        return result
+                    }
                 }
                 index += result.consumedTokens
             case .whileLoop:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getWhileBlock(whileTokenIndex: index)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
-                while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
-                    try self.executeSubCode(tokens: result.mainTokens, variableRegistry: self.variableRegistry)
+                whileLoop: while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
+                    let result = try self.executeSubCode(tokens: result.mainTokens, variableRegistry: self.variableRegistry)
+                    switch result {
+                    case .finished:
+                        break
+                    case .return(_):
+                        return result
+                    case .break:
+                        break whileLoop
+                    }
                 }
                 index += result.consumedTokens
             case .forLoop:
@@ -96,14 +116,30 @@ class Parser {
                 var forLoopTokens = result.mainTokens
                 forLoopTokens.append(contentsOf: forLoopControlTokens[2])
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: forLoopVariableRegistry)
-                while (try conditionEvaluator.check(tokens: forLoopControlTokens[1])) {
-                    try self.executeSubCode(tokens: forLoopTokens, variableRegistry: forLoopVariableRegistry)
+                forLoop: while (try conditionEvaluator.check(tokens: forLoopControlTokens[1])) {
+                    let result = try self.executeSubCode(tokens: forLoopTokens, variableRegistry: forLoopVariableRegistry)
+                    switch result {
+                    case .finished:
+                        break
+                    case .return(_):
+                        return result
+                    case .break:
+                        break forLoop
+                    }
                 }
                 index += result.consumedTokens
             case .blockOpen:
                 // this is Swift-style separate namespace
                 let blockTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: index, tokens: self.tokens)
-                try self.executeSubCode(tokens: blockTokens, variableRegistry: self.variableRegistry)
+                let result = try self.executeSubCode(tokens: blockTokens, variableRegistry: self.variableRegistry)
+                switch result {
+                case .finished:
+                    break
+                case .return(_):
+                    return result
+                case .break:
+                    break
+                }
                 index += blockTokens.count + 2
             case .variable(let name):
                 index += try self.variableOperation(variableName: name, index: index) + 1
@@ -154,9 +190,9 @@ class Parser {
         return 0
     }
     
-    private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws {
+    private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
         let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry)
         let parser = Parser(tokens: tokens, functionRegistry: self.functionRegistry, variableRegistry: variableRegistry)
-        try parser.execute()
+        return try parser.execute()
     }
 }

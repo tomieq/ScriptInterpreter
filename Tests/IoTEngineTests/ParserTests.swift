@@ -121,6 +121,21 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
         XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
     }
+    
+    func test_breakWhileLoop() {
+        let console = self.setupSpy(code: "var i = 0; while(i <= 5) { i++; print(i) if(i==2){ break } } print(3.14)")
+        XCTAssertEqual(console.output.count, 3)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(2))
+        XCTAssertEqual(console.output[safeIndex: 2], .float(3.14))
+    }
+    
+    func test_returnWhileLoop() {
+        let console = self.setupSpy(code: "var i = 0; while(i <= 5) { i++; print(i) if(i==2){ return } }  print(3.14)")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(2))
+    }
 
     func test_forLoop() {
         let console = self.setupSpy(code: "var i = 9; for(var i = 1; i <= 5; i++) { print(i) } print(i)")
@@ -128,6 +143,21 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
         XCTAssertEqual(console.output[safeIndex: 4], .integer(5))
         XCTAssertEqual(console.output[safeIndex: 5], .integer(9))
+    }
+    
+    func test_breakInForLoop() {
+        let console = self.setupSpy(code: "for(var i = 1; i <= 5; i++) { print(i) if(i==2){break} } print(10)")
+        XCTAssertEqual(console.output.count, 3)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(2))
+        XCTAssertEqual(console.output[safeIndex: 2], .integer(10))
+    }
+    
+    func test_returnFromForLoop() {
+        let console = self.setupSpy(code: "for(var i = 1; i <= 5; i++) { print(i) if(i==2){return} } print(10)")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(2))
     }
 
     func test_namespaceVariables() {
