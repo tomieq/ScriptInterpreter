@@ -94,13 +94,6 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console2.output[safeIndex: 1], .integer(10))
     }
     
-    func test_breakStatement() {
-        let console = self.setupSpy(code: "var age = 40; if(age == 40) { print('one'); break print('two') } print('three') break print('four')")
-        XCTAssertEqual(console.output.count, 2)
-        XCTAssertEqual(console.output[safeIndex: 0], .string("one"))
-        XCTAssertEqual(console.output[safeIndex: 1], .string("three"))
-    }
-    
     func test_variableIncrement() {
         let console = self.setupSpy(code: "var distance = 9; print(distance); distance++; print(distance)")
         XCTAssertEqual(console.output.count, 2)
@@ -179,6 +172,17 @@ class ParserTests: XCTestCase {
             let parser = Parser(tokens: lexer.tokens)
             let result = try parser.execute()
             XCTAssertEqual(result, .return(.integer(32)))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_returnedValueInterpolation() {
+        do {
+            let lexer = try Lexer(code: "let distance = 89; var speed = 51; speed = 38; return 'Car travelled \\(distance) with \\(speed) speed'")
+            let parser = Parser(tokens: lexer.tokens)
+            let result = try parser.execute()
+            XCTAssertEqual(result, .return(.string("Car travelled 89 with 38 speed")))
         } catch {
             XCTFail(error.localizedDescription)
         }

@@ -26,7 +26,11 @@ class ParserUtils {
         case .intLiteral(let value):
             return .integer(value)
         case .stringLiteral(let value):
-            return .string(value)
+            do {
+                return try .string(value).interpolated(with: variableRegistry)
+            } catch {
+                return .string(value)
+            }
         case .boolLiteral(let value):
             return .bool(value)
         case .floatLiteral(let value):
