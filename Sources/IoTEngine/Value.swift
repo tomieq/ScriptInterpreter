@@ -38,11 +38,8 @@ public enum Value {
             return "Bool"
         }
     }
-}
-
-extension Value: Equatable {}
-extension Value: CustomStringConvertible {
-    public var description: String {
+    
+    var asString: String {
         switch self {
         case .string(let value):
             return value
@@ -57,6 +54,40 @@ extension Value: CustomStringConvertible {
 }
 
 extension Value {
+    var isString: Bool {
+        if case .string(_) = self {
+            return true
+        }
+        return false
+    }
+    var isBool: Bool {
+        if case .bool(_) = self {
+            return true
+        }
+        return false
+    }
+    var isInteger: Bool {
+        if case .integer(_) = self {
+            return true
+        }
+        return false
+    }
+    var isFloat: Bool {
+        if case .float(_) = self {
+            return true
+        }
+        return false
+    }
+}
+
+extension Value: Equatable {}
+extension Value: CustomStringConvertible {
+    public var description: String {
+        self.asString
+    }
+}
+
+extension Value {
     func interpolated(with variableRegistry: VariableRegistry) throws -> Value {
         guard case .string(let txt) = self else {
             return self
@@ -64,7 +95,7 @@ extension Value {
         var interpolated = txt
         for match in self.matches(for: "\\\\\\(([a-zA-Z0-9_]+)\\)", in: txt) {
             let variableName = match.trimmingCharacters(in: CharacterSet(charactersIn: "\\()"))
-            guard let txt = variableRegistry.getValue(name: variableName)?.description else {
+            guard let txt = variableRegistry.getValue(name: variableName)?.asString else {
                 throw ValueError.variableNotFound(info: "Error with String interpolation. Variable \(variableName) not registered")
             }
             interpolated = interpolated.replacingOccurrences(of: "\(match)", with: txt, options: [], range: nil)
