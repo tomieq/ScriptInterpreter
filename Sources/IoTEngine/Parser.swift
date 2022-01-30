@@ -20,6 +20,12 @@ extension ParserError: LocalizedError {
     }
 }
 
+enum ParserExecResult: Equatable {
+    case finished
+    case `return`(Value?)
+    case `break`
+}
+
 class Parser {
     private let functionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
@@ -32,7 +38,8 @@ class Parser {
         self.tokens = tokens
     }
     
-    func execute() throws {
+    @discardableResult
+    func execute() throws -> ParserExecResult {
         let variableParser = VariableParser(tokens: self.tokens)
         
         var index = 0
@@ -101,12 +108,18 @@ class Parser {
             case .variable(let name):
                 index += try self.variableOperation(variableName: name, index: index) + 1
             case .break:
-                return
+                return .break
+            case .return:
+                if let returnedToken = self.tokens[safeIndex: index + 1],
+                   let returned = ParserUtils.token2Value(returnedToken, variableRegistry: self.variableRegistry) {
+                    return .return(returned)
+                }
+                return .return(nil)
             default:
                 index += 1
             }
-            
         }
+        return .finished
     }
     
     private func variableOperation(variableName: String, index: Int) throws -> Int {

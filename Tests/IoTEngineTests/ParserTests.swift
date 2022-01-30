@@ -143,6 +143,28 @@ class ParserTests: XCTestCase {
         self.expectError(code: "let pi = 3.14; pi = 5.5")
     }
     
+    func test_returnLiteralValue() {
+        do {
+            let lexer = try Lexer(code: "return 32")
+            let parser = Parser(tokens: lexer.tokens)
+            let result = try parser.execute()
+            XCTAssertEqual(result, .return(.integer(32)))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_returnVariable() {
+        do {
+            let lexer = try Lexer(code: "let pi = 3.14; return pi")
+            let parser = Parser(tokens: lexer.tokens)
+            let result = try parser.execute()
+            XCTAssertEqual(result, .return(.float(3.14)))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
