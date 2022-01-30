@@ -7,6 +7,19 @@
 
 import Foundation
 
+enum ValueError: Error {
+    case variableNotFound(info: String)
+}
+
+extension ValueError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .variableNotFound(let info):
+            return NSLocalizedString("ValueError.variableNotFound \(info) ", comment: "ValueError")
+        }
+    }
+}
+
 public enum Value {
     case string(String)
     case integer(Int)
@@ -39,6 +52,37 @@ extension Value: CustomStringConvertible {
             return "\(value)"
         case .bool(let value):
             return "\(value)"
+        }
+    }
+}
+
+extension Value {
+    func interpolated(with variableRegistry: VariableRegistry) throws -> Value {
+        guard case .string(let txt) = self else {
+            return self
+        }
+        var interpolated = txt
+        for match in self.matches(for: "\\\\\\(([a-zA-Z0-9_]+)\\)", in: txt) {
+            let variableName = match.trimmingCharacters(in: CharacterSet(charactersIn: "\\()"))
+            guard let txt = variableRegistry.getValue(name: variableName)?.description else {
+                throw ValueError.variableNotFound(info: "Error with String interpolation. Variable \(variableName) not registered")
+            }
+            interpolated = interpolated.replacingOccurrences(of: "\(match)", with: txt, options: [], range: nil)
+        }
+        return .string(interpolated)
+    }
+    
+    private func matches(for regex: String, in text: String) -> [String] {
+        
+        do {
+            let regex = try NSRegularExpression(pattern: regex)
+            let results = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+            return results.map {
+                String(text[Range($0.range, in: text)!])
+            }
+        } catch let error {
+            print("invalid regex: \(error.localizedDescription)")
+            return []
         }
     }
 }
