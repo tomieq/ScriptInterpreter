@@ -33,9 +33,7 @@ class Parser {
     }
     
     func execute() throws {
-        let valueParser = VariableParser(tokens: self.tokens)
-        try valueParser.parse(into: self.variableRegistry)
-        self.tokens = valueParser.leftTokens
+        let variableParser = VariableParser(tokens: self.tokens)
         
         var index = 0
         while let token = self.tokens[safeIndex: index] {
@@ -48,6 +46,9 @@ class Parser {
                 let argumentTokens = tokens.filter { $0 != .comma }
                 try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) })
                 break
+            case .variableDefinition(_), .constantDefinition(_):
+                let consumedTokens = try variableParser.parse(variableDefinitionIndex: index, into: self.variableRegistry)
+                index += consumedTokens - 1
             case .ifStatement:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getIfBlock(ifTokenIndex: index)

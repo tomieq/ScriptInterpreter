@@ -22,52 +22,39 @@ extension VariableParserError: LocalizedError {
 
 class VariableParser {
     private let tokens: [Token]
-    private var consumedTokenIndices: [Int]
-    
-    var leftTokens: [Token] {
-        return self.tokens.enumerated().filter { (index, token) in !self.consumedTokenIndices.contains(index) }.map{ $0.element }
-    }
     
     init(tokens: [Token]) {
         self.tokens = tokens
-        self.consumedTokenIndices = []
     }
     
-    func parse(into variableRegistry: VariableRegistry) throws {
-        var index = 0
-        while let token = self.tokens[safeIndex: index] {
-            
-            switch token {
-            case .variableDefinition(let definitionType):
-                while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerValue) {
-                    
-                    let usedTokenRange = (index...(index + data.usedTokens))
-                    self.consumedTokenIndices.append(contentsOf: usedTokenRange)
-                    
-                    index += data.usedTokens
-                    if !data.shouldParseFurther {
-                        break
-                    }
-                }
-            case .constantDefinition(let definitionType):
-                while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerConstant) {
-                    
-                    let usedTokenRange = (index...(index + data.usedTokens))
-                    self.consumedTokenIndices.append(contentsOf: usedTokenRange)
-                    
-                    index += data.usedTokens
-                    if !data.shouldParseFurther {
-                        break
-                    }
-                }
-            case .blockOpen:
-                let tokensInBlock = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: index, tokens: self.tokens)
-                index += tokensInBlock.count + 1
-            default:
-                break
-            }
-            index += 1
+    func parse(variableDefinitionIndex index: Int, into variableRegistry: VariableRegistry) throws -> Int {
+
+        
+        guard let token = self.tokens[safeIndex: index] else {
+            throw VariableParserError.syntaxError(description: "Token not found at index \(index)")
         }
+        var usedTokens = 1
+        switch token {
+        case .variableDefinition(let definitionType):
+            while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerValue) {
+                
+                usedTokens += data.usedTokens
+                if !data.shouldParseFurther {
+                    break
+                }
+            }
+        case .constantDefinition(let definitionType):
+            while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerConstant) {
+                
+                usedTokens += data.usedTokens
+                if !data.shouldParseFurther {
+                    break
+                }
+            }
+        default:
+            throw VariableParserError.syntaxError(description: "Inproper token found at index \(index): \(token)")
+        }
+        return usedTokens
     }
     
     private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFuncion: (String, Value?) -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
