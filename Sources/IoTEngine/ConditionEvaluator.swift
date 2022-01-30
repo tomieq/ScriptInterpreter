@@ -57,6 +57,8 @@ class ConditionEvaluator {
             case .greaterOrEqual:
                 let result = try ValueComparator().compare(left: left, right: right, variableRegistry: self.variableRegistry)
                 return [ValueComparatorResult.equal, ValueComparatorResult.leftGreater].contains(result)
+            case .assign:
+                throw ConditionEvaluatorError.syntaxError(info: "Did you mean `==` instead of `=`?")
             default:
                 break
             }
