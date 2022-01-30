@@ -29,24 +29,24 @@ class VariableParser {
     
     func parse(variableDefinitionIndex index: Int, into variableRegistry: VariableRegistry) throws -> Int {
 
-        
-        guard let token = self.tokens[safeIndex: index] else {
+        var currentIndex = index
+        guard let token = self.tokens[safeIndex: currentIndex] else {
             throw VariableParserError.syntaxError(description: "Token not found at index \(index)")
         }
-        var usedTokens = 1
+        currentIndex += 1
         switch token {
         case .variableDefinition(let definitionType):
-            while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerValue) {
+            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerValue) {
                 
-                usedTokens += data.usedTokens
+                currentIndex += data.usedTokens
                 if !data.shouldParseFurther {
                     break
                 }
             }
         case .constantDefinition(let definitionType):
-            while let data = try self.initVariable(variableTokenIndex: index + 1, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerConstant) {
+            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerConstant) {
                 
-                usedTokens += data.usedTokens
+                currentIndex += data.usedTokens
                 if !data.shouldParseFurther {
                     break
                 }
@@ -54,7 +54,7 @@ class VariableParser {
         default:
             throw VariableParserError.syntaxError(description: "Inproper token found at index \(index): \(token)")
         }
-        return usedTokens
+        return currentIndex - index
     }
     
     private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFuncion: (String, Value?) -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
