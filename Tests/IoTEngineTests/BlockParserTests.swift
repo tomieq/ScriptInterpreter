@@ -93,4 +93,23 @@ class BlockParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_forStatement() {
+        let code = "var i = 0; for(var i = 0; i < 5; i++) { ; }"
+        do {
+            let lexer = try Lexer(code: code)
+            let parser = BlockParser(tokens: lexer.tokens)
+            let result = try parser.getForBlock(forTokenIndex: 5)
+            XCTAssertEqual(result.conditionTokens.count, 11)
+            XCTAssertEqual(result.conditionTokens[safeIndex: 0], .variableDefinition(type: "var"))
+            XCTAssertEqual(result.conditionTokens[safeIndex: 1], .variable(name: "i"))
+            XCTAssertEqual(result.conditionTokens[safeIndex: 2], .assign)
+            XCTAssertEqual(result.conditionTokens[safeIndex: 3], .intLiteral(0))
+            XCTAssertEqual(result.mainTokens.count, 1)
+            XCTAssertEqual(result.mainTokens[safeIndex: 0], .semicolon)
+            XCTAssertNil(result.elseTokens)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }

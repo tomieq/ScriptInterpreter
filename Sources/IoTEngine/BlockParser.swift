@@ -49,15 +49,24 @@ class BlockParser {
         return result
     }
     
+    func getForBlock(forTokenIndex index: Int) throws -> BlockParserResult {
+        let result = try self.getBlock(tokenIndex: index, token: .forLoop)
+        guard result.elseTokens == nil else {
+            throw BlockParserError.syntaxError(info: "else statement is not allowed after for clause")
+        }
+        return result
+    }
+    
     private func getBlock(tokenIndex index: Int, token: Token) throws -> BlockParserResult {
         guard let entryToken = self.tokens[safeIndex: index] else {
             throw BlockParserError.invalidTokenPosition(found: nil, expected: token)
         }
         guard let entryToken = self.tokens[safeIndex: index], case token = entryToken else {
-            throw BlockParserError.invalidTokenPosition(found: entryToken, expected: .ifStatement)
+            throw BlockParserError.invalidTokenPosition(found: entryToken, expected: token)
         }
         var currentIndex = index + 1
         let conditionTokens  = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
+        print("ConditionTokens[\(currentIndex)...]:\(conditionTokens)")
         currentIndex += conditionTokens.count + 2
         let mainTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
         currentIndex += mainTokens.count + 2
