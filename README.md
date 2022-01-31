@@ -88,7 +88,7 @@ try engine.setupConstant(name: "welcome", value: .string("Hello world"))
 try engine.setupVariable(name: "isDone", value: .bool(false))
 ```
 
-## Does ScriptInterpreter supports loops?
+## Does ScriptInterpreter support loops?
 
 Yes! Both while and for(JavaScript-style)
 Sample while-script:
@@ -108,3 +108,41 @@ for(var i = 0; i < 3; i++) {
 print(i) <- this will print 90, as `i` in main loop is in different namespace than `i` in for-loop
 ```
 Above scripts will call `rotate` function 3 times
+
+## Can I have returned result from executed script?
+
+Yes, if your script returns any value, it will be mapped into `Value` and returned by `exec(_) function`.
+Let's say you have script like this:
+```
+let distance = 50
+var speed = 92
+
+if (distance > 100) {
+    speed = 90
+    return speed
+} else {
+    return speed
+}
+```
+
+The returned value can be obtained by calling:
+```
+let engine = ScriptInterpreter()
+let script = // obtain your script
+
+let result = try engine.exec(code: script)
+```
+
+## Does ScriptInterpreter support String interpolation?
+
+Yes, you can use Swift-like String interpolation:
+```
+var color = "blue"
+var text = "The walls are \(color)"
+print(text)
+let size = 85
+let info = "The size is \(size)"
+print(info)
+```
+Above code will produce: "The walls are blue", "The size is 85"
+
