@@ -5,7 +5,7 @@
 //
 
 import XCTest
-@testable import IoTEngine
+@testable import ScriptInterpreter
 
 class ParserTests: XCTestCase {
 

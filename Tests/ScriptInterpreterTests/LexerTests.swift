@@ -1,5 +1,5 @@
 import XCTest
-@testable import IoTEngine
+@testable import ScriptInterpreter
 
 final class LexerTests: XCTestCase {
 
