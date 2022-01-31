@@ -1,10 +1,10 @@
 import Foundation
 
-public enum IoTEngineError: Error {
+public enum ScriptInterpreterError: Error {
     case runtimeError(description: String)
 }
 
-extension IoTEngineError: LocalizedError {
+extension ScriptInterpreterError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .runtimeError(let info):
@@ -13,7 +13,7 @@ extension IoTEngineError: LocalizedError {
     }
 }
 
-public class IoTEngine {
+public class ScriptInterpreter {
     private let functionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     
@@ -50,7 +50,7 @@ public class IoTEngine {
                 return value
             }
         } catch {
-            throw IoTEngineError.runtimeError(description: error.localizedDescription)
+            throw ScriptInterpreterError.runtimeError(description: error.localizedDescription)
         }
     }
 }

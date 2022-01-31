@@ -9,13 +9,13 @@ import Foundation
 import XCTest
 @testable import IoTEngine
 
-class IoTEngineTests: XCTestCase {
+class ScriptInterpreterTests: XCTestCase {
     
     func test_sampleCode() {
         
         let console = Console()
         
-        let engine = IoTEngine()
+        let engine = ScriptInterpreter()
         XCTAssertNoThrow(try engine.registerFunc(name: "print", function: console.print))
         XCTAssertNoThrow(try engine.setupVariable(name: "hour", value: .integer(9)))
         XCTAssertNoThrow(try engine.setupVariable(name: "minute", value: .integer(45)))
@@ -30,7 +30,7 @@ class IoTEngineTests: XCTestCase {
     
     func test_returnFromMiddleOfTheCode() {
         
-        let engine = IoTEngine()
+        let engine = ScriptInterpreter()
         let code = "var counter = 0; for(var i = 0; i <= 10; i++) { if(i==5) { return i } } return 100"
         let returnedValue = try? engine.exec(code: code)
         
