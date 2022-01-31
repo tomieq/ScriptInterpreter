@@ -3,7 +3,7 @@
 ScriptInterpreter is a library that interprets and executes code passed at runtime.
 The library is written in pure Swift, but it accepts scripts in Swift and JavaScript.
 
-Some sample scenario is that you delploy your Swift app to the server and listen for incoming scripts. When one arrives it is parsed and executed.
+Some sample scenario is that you deploy your Swift app to the server and it listena for incoming scripts. When one arrives it is parsed and executed.
 
 ## Can I expose my Swift functions to the script?
 
@@ -37,7 +37,7 @@ try engine.registerFunc(name: "print", function: myHandler.print)
 
 ```
 From now on, all the scripts that will be passed to `engine.exec(code:)` may invoke `lightMeUp()` function and the ScriptInterpreter will call `myHandler.turnOnLight()`.
-You can register functions that accept parameters or without.
+You can register functions with parameters or without them.
 
 The script passed to ScriptInterpreter may look like this:
 ```
@@ -50,7 +50,7 @@ if(hour > 17) {
 
 ## Can I work with variables?
 
-Yes, ScriptInterpreter creates namespaces in which you can create and update variables. It supports strings, integers, boolean and float. There are variables and constants.
+Yes, ScriptInterpreter creates internal namespaces in which you can create and update variables. It supports strings, integers, boolean and float. There are variables and constants.
 Sample script:
 ```
 var counter = 0
@@ -61,20 +61,20 @@ if (isBroken) {
     counter = 10
 }
 ```
-Swift-like namespaces:
+Isolated namespaces:
 ```
-var amount = 3
-print(amount)
+var amount = 3;
+print(amount);
 {
-    var amount = 10
-    print(amount)
-    amount++
-    print(amount)
+    var amount = 10;
+    print(amount);
+    amount++;
+    print(amount);
 }
-amount--
-print(amount)
+amount--;
+print(amount);
 ```
-Above code run in ScriptInterpreter will print: 3, 10, 11, 2
+Above code run in ScriptInterpreter will print: 3, 10, 11, 2. Notice that you can use semicolons `;` or skip them
 
 Look at the `ParserTests` - you will find more examples
 
