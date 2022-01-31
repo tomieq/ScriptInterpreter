@@ -24,17 +24,17 @@ extension ExternalFunctionRegistryError: LocalizedError {
 }
 
 class ExternalFunctionRegistry {
-    private var functions: [String:()->()] = [:]
-    private var functionsWithArgs: [String:([Value])->()] = [:]
+    private var functions: [String:() throws ->()] = [:]
+    private var functionsWithArgs: [String:([Value]) throws ->()] = [:]
     
-    func registerFunc(name: String, function: @escaping ()->()) throws {
+    func registerFunc(name: String, function: @escaping () throws ->()) throws {
         if self.functions.keys.contains(name) {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.functions[name] = function
     }
     
-    func registerFunc(name: String, function: @escaping ([Value])->()) throws {
+    func registerFunc(name: String, function: @escaping ([Value]) throws ->()) throws {
         if self.functionsWithArgs.keys.contains(name) {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
@@ -43,7 +43,7 @@ class ExternalFunctionRegistry {
     
     func callFunction(name: String) throws {
         if let function = self.functions[name] {
-            function()
+            try function()
         } else {
             throw ExternalFunctionRegistryError.functionNotFound(signature: "\(name)()")
         }
@@ -51,7 +51,7 @@ class ExternalFunctionRegistry {
 
     func callFunction(name: String, args: [Value]) throws {
         if let function = self.functionsWithArgs[name] {
-            function(args)
+            try function(args)
         } else {
             throw ExternalFunctionRegistryError.functionNotFound(signature: "\(name)(\(args.map{$0.type}.joined(separator: ", ")))")
         }

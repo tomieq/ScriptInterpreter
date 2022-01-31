@@ -166,6 +166,10 @@ class ParserTests: XCTestCase {
         self.expectError(code: "let pi = 3.14; pi = 5.5")
     }
     
+    func test_callThrowingFunction() {
+        self.expectError(code: "let pi = 3.14; error()")
+    }
+    
     func test_returnLiteralValue() {
         do {
             let lexer = try Lexer(code: "return 32")
@@ -212,6 +216,7 @@ class ParserTests: XCTestCase {
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseCounter))
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addTwo", function: spy.addTwo))
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "error", function: spy.error))
         do {
             let lexer = try Lexer(code: code)
             let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
@@ -228,6 +233,7 @@ class ParserTests: XCTestCase {
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "increaseCounter", function: spy.increaseCounter))
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "addTwo", function: spy.addTwo))
+        XCTAssertNoThrow(try functionRegistry.registerFunc(name: "error", function: spy.error))
         do {
             let lexer = try Lexer(code: code)
             let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
@@ -252,5 +258,9 @@ fileprivate class FunctionCallSpy {
     
     func print(_ data: [Value]) {
         self.output.append(contentsOf: data)
+    }
+    
+    func error() throws {
+        throw ParserError.syntaxError(description: "TestError")
     }
 }

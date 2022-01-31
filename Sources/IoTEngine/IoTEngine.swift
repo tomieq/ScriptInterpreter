@@ -22,11 +22,11 @@ public class IoTEngine {
         self.variableRegistry = VariableRegistry()
     }
     
-    public func registerFunc(name: String, function: @escaping ()->()) throws {
+    public func registerFunc(name: String, function: @escaping () throws ->()) throws {
         try self.functionRegistry.registerFunc(name: name, function: function)
     }
     
-    public func registerFunc(name: String, function: @escaping ([Value])->()) throws {
+    public func registerFunc(name: String, function: @escaping ([Value]) throws ->()) throws {
         try self.functionRegistry.registerFunc(name: name, function: function)
     }
     
