@@ -31,7 +31,7 @@ let myHandler = Handler()
 
 let engine = ScriptInterpreter()
 try engine.registerFunc(name: "lightMeUp", function: myHandler.turnOnLight)
-try engine.registerFunc(name: "makeDarkness", function: myHandler.turnOnLight)
+try engine.registerFunc(name: "makeDarkness", function: myHandler.turnOffLight)
 try engine.registerFunc(name: "setTemperature", function: myHandler.setTemperature)
 try engine.registerFunc(name: "print", function: myHandler.print)
 
@@ -77,6 +77,16 @@ print(amount)
 Above code run in ScriptInterpreter will print: 3, 10, 11, 2
 
 Look at the `ParserTests` - you will find more examples
+
+## Can I set variable/constant so that are accessible by the script?
+
+Yes, of course. You can register variable or constant that will be visible to the script:
+```
+let engine = ScriptInterpreter()
+try engine.setupConstant(name: "hour", value: .integer(23))
+try engine.setupConstant(name: "welcome", value: .string("Hello world"))
+try engine.setupVariable(name: "isDone", value: .bool(false))
+```
 
 ## Does ScriptInterpreter supports loops?
 
