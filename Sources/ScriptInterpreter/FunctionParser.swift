@@ -67,10 +67,9 @@ class FunctionParser {
             throw FunctionParserError.syntaxError(description: "After function definition function name is required, token index = \(index)")
         }
         let body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
-        currentIndex += body.count
+        currentIndex += body.count + 2
         let function = LocalFunction(name: functionName, argumentNames: argumentNames, body: body)
         functionRegistry.register(function)
-        
         return currentIndex - index
     }
     
