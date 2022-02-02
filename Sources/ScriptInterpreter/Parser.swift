@@ -152,9 +152,21 @@ class Parser {
             case .break:
                 return .break
             case .return:
-                if let returnedToken = self.tokens[safeIndex: self.currentIndex + 1],
-                   let returned = ParserUtils.token2Value(returnedToken, variableRegistry: self.variableRegistry) {
-                    return .return(returned)
+                self.currentIndex += 1
+                if let returnedToken = self.tokens[safeIndex: self.currentIndex] {
+                    if returnedToken.isLiteral || returnedToken.isVariable {
+                        let returned = ParserUtils.token2Value(returnedToken, variableRegistry: self.variableRegistry)
+                        return .return(returned)
+                    }
+                    if returnedToken.isFunction {
+                        let result = try self.invokeFunction()
+                        switch result {
+                        case .finished, .break:
+                            break
+                        case .return(let optionalValue):
+                            return .return(optionalValue)
+                        }
+                    }
                 }
                 return .return(nil)
             case .semicolon:
