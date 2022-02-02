@@ -189,3 +189,38 @@ extension Token: CustomDebugStringConvertible {
         }
     }
 }
+
+extension Token {
+    var isFunction: Bool {
+        if case .function(_) = self {
+            return true
+        }
+        if case .functionWithArguments(_) = self {
+            return true
+        }
+        return false
+    }
+    
+    var isVariable: Bool {
+        if case .variable(_) = self {
+            return true
+        }
+        return false
+    }
+
+    var isLiteral: Bool {
+        if case .stringLiteral(_) = self {
+            return true
+        }
+        if case .floatLiteral(_) = self {
+            return true
+        }
+        if case .boolLiteral(_) = self {
+            return true
+        }
+        if case .intLiteral(_) = self {
+            return true
+        }
+        return false
+    }
+}
