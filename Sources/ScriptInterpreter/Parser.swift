@@ -33,7 +33,10 @@ class Parser {
     
     private var tokens: [Token]
     
-    init(tokens: [Token], externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(), variableRegistry: VariableRegistry = VariableRegistry()) {
+    init(tokens: [Token],
+         externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(),
+         localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(),
+         variableRegistry: VariableRegistry = VariableRegistry()) {
         self.externalFunctionRegistry = externalFunctionRegistry
         self.localFunctionRegistry = localFunctionRegistry
         self.variableRegistry = variableRegistry
@@ -43,21 +46,35 @@ class Parser {
     @discardableResult
     func execute() throws -> ParserExecResult {
         let variableParser = VariableParser(tokens: self.tokens)
+        let functionParser = FunctionParser(tokens: self.tokens)
         
         var index = 0
         while let token = self.tokens[safeIndex: index] {
             switch token {
             case .function(let name):
-                try self.externalFunctionRegistry.callFunction(name: name)
+                if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
+                    let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                    let result = try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
+                } else {
+                    try self.externalFunctionRegistry.callFunction(name: name)
+                }
                 index += 1
             case .functionWithArguments(let name):
                 let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
                 index += tokens.count + 3
                 let argumentTokens = tokens.filter { $0 != .comma }
-                try self.externalFunctionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) })
+                let argumentValues = argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
+                if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
+                } else {
+                    try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues)
+                }
+                
                 break
             case .variableDefinition(_), .constantDefinition(_):
                 let consumedTokens = try variableParser.parse(variableDefinitionIndex: index, into: self.variableRegistry)
+                index += consumedTokens
+            case .functionDefinition(_):
+                let consumedTokens = try functionParser.parse(functionTokenIndex: index, into: self.localFunctionRegistry)
                 index += consumedTokens
             case .ifStatement:
                 let blockParser = BlockParser(tokens: self.tokens)
