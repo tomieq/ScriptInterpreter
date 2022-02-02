@@ -26,7 +26,15 @@ public class ScriptInterpreter {
         try self.functionRegistry.registerFunc(name: name, function: function)
     }
     
+    public func registerFunc(name: String, function: @escaping () throws -> Value) throws {
+        try self.functionRegistry.registerFunc(name: name, function: function)
+    }
+    
     public func registerFunc(name: String, function: @escaping ([Value]) throws ->()) throws {
+        try self.functionRegistry.registerFunc(name: name, function: function)
+    }
+    
+    public func registerFunc(name: String, function: @escaping ([Value]) throws -> Value) throws {
         try self.functionRegistry.registerFunc(name: name, function: function)
     }
     

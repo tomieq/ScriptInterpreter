@@ -189,8 +189,7 @@ class Parser {
                 let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
                 return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
             } else {
-                try self.externalFunctionRegistry.callFunction(name: name)
-                return .return(nil)
+                return .return(try self.externalFunctionRegistry.callFunction(name: name))
             }
             
         case .functionWithArguments(let name):
@@ -210,8 +209,7 @@ class Parser {
                 try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerValue(name: name, value: argumentValues[index]) }
                 return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
             } else {
-                try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues)
-                return .return(nil)
+                return .return(try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues))
             }
         default:
             throw ParserError.internalError(description: "invokeFunction called on \(token) token")
