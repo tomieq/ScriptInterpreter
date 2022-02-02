@@ -217,6 +217,15 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 1], .integer(0))
     }
     
+    func test_defineFunctionWitArguments() {
+        let console = self.setupSpy(code: "var number = 0; func dump(a, b){ var number = 3; print(a, b, number) } dump(1, 2) print(number)")
+        XCTAssertEqual(console.output.count, 4)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(1))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(2))
+        XCTAssertEqual(console.output[safeIndex: 2], .integer(3))
+        XCTAssertEqual(console.output[safeIndex: 3], .integer(0))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()

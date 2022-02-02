@@ -65,6 +65,12 @@ class Parser {
                 let argumentTokens = tokens.filter { $0 != .comma }
                 let argumentValues = argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
                 if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
+                    let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                    guard localFunction.argumentNames.count == argumentValues.count else {
+                        throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(argumentValues)")
+                    }
+                    try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerValue(name: name, value: argumentValues[index]) }
+                    let result = try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
                 } else {
                     try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues)
                 }
