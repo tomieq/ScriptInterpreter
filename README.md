@@ -3,7 +3,7 @@
 ScriptInterpreter is a library that interprets and executes code passed at runtime.
 The library is written in pure Swift, but it accepts scripts in Swift and JavaScript.
 
-Some sample scenario is that you deploy your Swift app to the server and it listena for incoming scripts. When one arrives it is parsed and executed.
+Some sample scenario is that you deploy your Swift app to the server and it listens for incoming scripts. When one arrives it is parsed and executed.
 
 ## Can I expose my Swift functions to the script?
 
@@ -51,6 +51,7 @@ if(hour > 17) {
 ## Can I work with variables?
 
 Yes, ScriptInterpreter creates internal namespaces in which you can create and update variables. It supports strings, integers, boolean and float. There are variables and constants.
+Constants might be defined with keyword `let` or `const`.
 Sample script:
 ```
 var counter = 0
@@ -90,7 +91,7 @@ try engine.setupVariable(name: "isDone", value: .bool(false))
 
 ## Does ScriptInterpreter support loops?
 
-Yes! Both while and for(JavaScript-style)
+Yes! Both while and for(JavaScript-style).
 Sample while-script:
 ```
 var counter = 0
@@ -128,7 +129,7 @@ if (distance > 100) {
 The returned value can be obtained by calling:
 ```
 let engine = ScriptInterpreter()
-let script = // obtain your script
+let script = // your script here
 
 let result = try engine.exec(code: script)
 ```
