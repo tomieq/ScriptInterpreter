@@ -146,3 +146,16 @@ print(info)
 ```
 Above code will produce: "The walls are blue", "The size is 85"
 
+## Can my script define helper functions?
+
+Yes, you can define functions in your script. You can use keyword `func` or `function`.
+Example script:
+```
+var number = 0
+func updateNumber(newVal) {
+    number = newVal
+}
+updateNumber(8)
+return number
+```
+Execution of above code will return 8
