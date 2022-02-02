@@ -226,6 +226,12 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 3], .integer(0))
     }
     
+    func test_updateGlobalVariableInFunction() {
+        let console = self.setupSpy(code: "var number = 0; func updateNumber(newVal){ number = newVal; } updateNumber(8) print(number)")
+        XCTAssertEqual(console.output.count, 1)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(8))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
