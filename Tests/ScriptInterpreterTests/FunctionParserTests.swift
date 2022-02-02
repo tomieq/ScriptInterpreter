@@ -20,6 +20,15 @@ class FunctionParserTests: XCTestCase {
         XCTAssertEqual(function?.body, [])
     }
     
+    func test_functionWithoutArguments() {
+        let functionRegistry = self.getFunctionRegistry(code: "func escalate() { print(4) }")
+        let function = functionRegistry.getFunction(name: "escalate")
+        XCTAssertNotNil(function)
+        XCTAssertEqual(function?.name, "escalate")
+        XCTAssertEqual(function?.argumentNames, [])
+        XCTAssertEqual(function?.body, [.functionWithArguments(name: "print"), .bracketOpen, .intLiteral(4), .bracketClose])
+    }
+    
     private func getFunctionRegistry(code: String) -> LocalFunctionRegistry {
         let functionRegistry = LocalFunctionRegistry()
         do{

@@ -41,18 +41,21 @@ class FunctionParser {
             throw FunctionParserError.syntaxError(description: "Function name token not found at index \(index)")
         }
         var functionName = ""
+        var body: [Token] = []
         
         switch functionNameToken {
         case .function(let name):
             functionName = name
             currentIndex += 1
+            body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
+            currentIndex += body.count
         case .functionWithArguments(let name):
             functionName = name
         default:
             throw FunctionParserError.syntaxError(description: "After function definition function name is required, token index = \(index)")
         }
         
-        let function = LocalFunction(name: functionName, argumentNames: [], body: [])
+        let function = LocalFunction(name: functionName, argumentNames: [], body: body)
         functionRegistry.register(function)
         
         return currentIndex - index
