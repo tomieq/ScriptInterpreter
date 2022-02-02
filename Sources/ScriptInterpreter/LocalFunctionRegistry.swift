@@ -15,9 +15,11 @@ struct LocalFunction {
 
 class LocalFunctionRegistry {
     private var functions: [String:LocalFunction]
+    private let topFunctionRegistry: LocalFunctionRegistry?
     
-    init() {
+    init(topFunctionRegistry: LocalFunctionRegistry? = nil) {
         self.functions = [:]
+        self.topFunctionRegistry = topFunctionRegistry
     }
     
     func register(_ localFunction: LocalFunction) {
@@ -25,6 +27,6 @@ class LocalFunctionRegistry {
     }
     
     func getFunction(name: String) -> LocalFunction? {
-        return self.functions[name]
+        return self.functions[name] ?? self.topFunctionRegistry?.getFunction(name: name)
     }
 }
