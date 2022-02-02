@@ -30,6 +30,7 @@ class Parser {
     private let externalFunctionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
+    private var currentIndex = 0
     
     private var tokens: [Token]
     
@@ -48,8 +49,8 @@ class Parser {
         let variableParser = VariableParser(tokens: self.tokens)
         let functionParser = FunctionParser(tokens: self.tokens)
         
-        var index = 0
-        while let token = self.tokens[safeIndex: index] {
+
+        while let token = self.tokens[safeIndex: self.currentIndex] {
             switch token {
             case .function(let name):
                 if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
@@ -58,10 +59,10 @@ class Parser {
                 } else {
                     try self.externalFunctionRegistry.callFunction(name: name)
                 }
-                index += 1
+                self.currentIndex += 1
             case .functionWithArguments(let name):
-                let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
-                index += tokens.count + 3
+                let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex + 1, tokens: self.tokens)
+                self.currentIndex += tokens.count + 3
                 let argumentTokens = tokens.filter { $0 != .comma }
                 let argumentValues = argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
                 if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
@@ -77,14 +78,14 @@ class Parser {
                 
                 break
             case .variableDefinition(_), .constantDefinition(_):
-                let consumedTokens = try variableParser.parse(variableDefinitionIndex: index, into: self.variableRegistry)
-                index += consumedTokens
+                let consumedTokens = try variableParser.parse(variableDefinitionIndex: self.currentIndex, into: self.variableRegistry)
+                self.currentIndex += consumedTokens
             case .functionDefinition(_):
-                let consumedTokens = try functionParser.parse(functionTokenIndex: index, into: self.localFunctionRegistry)
-                index += consumedTokens
+                let consumedTokens = try functionParser.parse(functionTokenIndex: self.currentIndex, into: self.localFunctionRegistry)
+                self.currentIndex += consumedTokens
             case .ifStatement:
                 let blockParser = BlockParser(tokens: self.tokens)
-                let result = try blockParser.getIfBlock(ifTokenIndex: index)
+                let result = try blockParser.getIfBlock(ifTokenIndex: self.currentIndex)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 let shouldRunMainStatement = try conditionEvaluator.check(tokens: result.conditionTokens)
                 if shouldRunMainStatement {
@@ -104,10 +105,10 @@ class Parser {
                         return result
                     }
                 }
-                index += result.consumedTokens
+                self.currentIndex += result.consumedTokens
             case .whileLoop:
                 let blockParser = BlockParser(tokens: self.tokens)
-                let result = try blockParser.getWhileBlock(whileTokenIndex: index)
+                let result = try blockParser.getWhileBlock(whileTokenIndex: self.currentIndex)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 whileLoop: while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
                     let result = try self.executeSubCode(tokens: result.mainTokens, variableRegistry: self.variableRegistry)
@@ -120,10 +121,10 @@ class Parser {
                         break whileLoop
                     }
                 }
-                index += result.consumedTokens
+                self.currentIndex += result.consumedTokens
             case .forLoop:
                 let blockParser = BlockParser(tokens: self.tokens)
-                let result = try blockParser.getForBlock(forTokenIndex: index)
+                let result = try blockParser.getForBlock(forTokenIndex: self.currentIndex)
                 let forLoopControlTokens = result.conditionTokens.split(by: .semicolon)
                 guard forLoopControlTokens.count == 3 else {
                     throw ParserError.syntaxError(description: "For loop requires 3 statements: initial state, the condition and code that is executed after main block")
@@ -152,10 +153,10 @@ class Parser {
                         break forLoop
                     }
                 }
-                index += result.consumedTokens
+                self.currentIndex += result.consumedTokens
             case .blockOpen:
                 // this is Swift-style separate namespace
-                let blockTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: index, tokens: self.tokens)
+                let blockTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: self.currentIndex, tokens: self.tokens)
                 let result = try self.executeSubCode(tokens: blockTokens, variableRegistry: self.variableRegistry)
                 switch result {
                 case .finished:
@@ -165,19 +166,19 @@ class Parser {
                 case .break:
                     break
                 }
-                index += blockTokens.count + 2
+                self.currentIndex += blockTokens.count + 2
             case .variable(let name):
-                index += try self.variableOperation(variableName: name, index: index) + 1
+                self.currentIndex += try self.variableOperation(variableName: name, index: self.currentIndex) + 1
             case .break:
                 return .break
             case .return:
-                if let returnedToken = self.tokens[safeIndex: index + 1],
+                if let returnedToken = self.tokens[safeIndex:  self.currentIndex + 1],
                    let returned = ParserUtils.token2Value(returnedToken, variableRegistry: self.variableRegistry) {
                     return .return(returned)
                 }
                 return .return(nil)
             case .semicolon:
-                index += 1
+                self.currentIndex += 1
             default:
                 throw ParserError.syntaxError(description: "Unexpected sign found: \(token)")
             }
