@@ -38,6 +38,15 @@ class FunctionParserTests: XCTestCase {
         XCTAssertEqual(function?.body, [])
     }
     
+    func test_functionWithArguments() {
+        let functionRegistry = self.getFunctionRegistry(code: "func sleep(seconds) { wait(seconds) }")
+        let function = functionRegistry.getFunction(name: "sleep")
+        XCTAssertNotNil(function)
+        XCTAssertEqual(function?.name, "sleep")
+        XCTAssertEqual(function?.argumentNames, ["seconds"])
+        XCTAssertEqual(function?.body, [.functionWithArguments(name: "wait"), .bracketOpen, .variable(name: "seconds"), .bracketClose])
+    }
+    
     private func getFunctionRegistry(code: String) -> LocalFunctionRegistry {
         let functionRegistry = LocalFunctionRegistry()
         do{

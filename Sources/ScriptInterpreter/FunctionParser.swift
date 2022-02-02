@@ -42,14 +42,11 @@ class FunctionParser {
         }
         var functionName = ""
         var argumentNames: [String] = []
-        var body: [Token] = []
         
         switch functionNameToken {
         case .function(let name):
             functionName = name
             currentIndex += 1
-            body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
-            currentIndex += body.count
         case .functionWithArguments(let name):
             currentIndex += 1
             functionName = name
@@ -68,7 +65,8 @@ class FunctionParser {
         default:
             throw FunctionParserError.syntaxError(description: "After function definition function name is required, token index = \(index)")
         }
-        
+        let body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
+        currentIndex += body.count
         let function = LocalFunction(name: functionName, argumentNames: argumentNames, body: body)
         functionRegistry.register(function)
         
