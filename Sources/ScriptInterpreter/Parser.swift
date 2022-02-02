@@ -148,11 +148,11 @@ class Parser {
                 }
                 self.currentIndex += blockTokens.count + 2
             case .variable(let name):
-                self.currentIndex += try self.variableOperation(variableName: name, index: self.currentIndex) + 1
+                try self.variableOperation(variableName: name)
             case .break:
                 return .break
             case .return:
-                if let returnedToken = self.tokens[safeIndex:  self.currentIndex + 1],
+                if let returnedToken = self.tokens[safeIndex: self.currentIndex + 1],
                    let returned = ParserUtils.token2Value(returnedToken, variableRegistry: self.variableRegistry) {
                     return .return(returned)
                 }
@@ -185,7 +185,11 @@ class Parser {
             let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex + 1, tokens: self.tokens)
             self.currentIndex += tokens.count + 3
             let argumentTokens = tokens.filter { $0 != .comma }
-            let argumentValues = argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
+            let optionalArgumentValues = argumentTokens.map { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
+            if optionalArgumentValues.contains(nil) {
+                throw ParserError.syntaxError(description: "Passed invalid arguments: \(optionalArgumentValues) to function \(name)")
+            }
+            let argumentValues = optionalArgumentValues.compactMap{ $0 }
             if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
                 let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
                 guard localFunction.argumentNames.count == argumentValues.count else {
@@ -202,37 +206,59 @@ class Parser {
         }
     }
     
-    private func variableOperation(variableName: String, index: Int) throws -> Int {
-        guard let nextToken = self.tokens[safeIndex: index + 1] else {
-            return 0
+    private func variableOperation(variableName: String) throws {
+        self.currentIndex += 1
+        guard let nextToken = self.tokens[safeIndex: self.currentIndex] else {
+            return
         }
+        
         switch nextToken {
         case .assign:
-            guard let valueToken = self.tokens[safeIndex: index + 2], let value = ParserUtils.token2Value(valueToken, variableRegistry: self.variableRegistry) else {
-                throw ParserError.syntaxError(description: "Right value for assign variable \(variableName) should be either literal value or variable")
+            self.currentIndex += 1
+            guard let valueToken = self.tokens[safeIndex: self.currentIndex] else {
+                throw ParserError.syntaxError(description: "Missing right value for assign variable \(variableName)")
             }
-            try self.variableRegistry.updateValue(name: variableName, value: value)
-            return 2
+            if valueToken.isLiteral || valueToken.isVariable {
+                guard let value = ParserUtils.token2Value(valueToken, variableRegistry: self.variableRegistry) else {
+                    throw ParserError.syntaxError(description: "Right value for assign variable \(variableName) should be either literal value or variable")
+                }
+                try self.variableRegistry.updateValue(name: variableName, value: value)
+                self.currentIndex += 1
+                return
+            }
+            if valueToken.isFunction {
+                let result = try self.invokeFunction()
+                switch result {
+                case .finished, .break:
+                    break
+                case .return(let optionalValue):
+                    if let value = optionalValue {
+                        try self.variableRegistry.updateValue(name: variableName, value: value)
+                        return
+                    }
+                }
+                throw ParserError.syntaxError(description: "Could not assign value to variable `\(variableName)` - function did not return any value")
+            }
+            throw ParserError.syntaxError(description: "Invalid syntax after `\(variableName) =` - found \(valueToken)")
         case .increment:
+            self.currentIndex += 1
             let variable = self.variableRegistry.getValue(name: variableName)
             guard case .integer(let intValue) = variable else {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Increment operation can be applied only for integer type, but \(type) found")
             }
             try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue + 1))
-            return 1
         case .decrement:
+            self.currentIndex += 1
             let variable = self.variableRegistry.getValue(name: variableName)
             guard case .integer(let intValue) = variable else {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Decrement operation can be applied only for integer type, but \(type) found")
             }
             try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue - 1))
-            return 1
         default:
             break
         }
-        return 0
     }
     
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {

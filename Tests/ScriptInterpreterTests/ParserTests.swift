@@ -203,6 +203,17 @@ class ParserTests: XCTestCase {
         }
     }
     
+    func test_returnLiteral() {
+        do {
+            let lexer = try Lexer(code: "return 8")
+            let parser = Parser(tokens: lexer.tokens)
+            let result = try parser.execute()
+            XCTAssertEqual(result, .return(.integer(8)))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
     func test_usingVariableNamesBeginningWithKeywordName() {
         let console = self.setupSpy(code: "var ifer = 3; var breaker = 10; var elser = 20; var whiler = 9 print(ifer, breaker, elser)")
         XCTAssertEqual(console.output[safeIndex: 0], .integer(3))
@@ -228,6 +239,12 @@ class ParserTests: XCTestCase {
     
     func test_updateGlobalVariableInFunction() {
         let console = self.setupSpy(code: "var number = 0; func updateNumber(newVal){ number = newVal; } updateNumber(8) print(number)")
+        XCTAssertEqual(console.output.count, 1)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(8))
+    }
+    
+    func test_assignFunctionReturnValueToVariable() {
+        let console = self.setupSpy(code: "var distance = 4 func getValue(){ return 8 }  distance = getValue() print(distance)")
         XCTAssertEqual(console.output.count, 1)
         XCTAssertEqual(console.output[safeIndex: 0], .integer(8))
     }
