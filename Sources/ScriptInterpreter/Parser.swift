@@ -9,6 +9,7 @@ import Foundation
 
 enum ParserError: Error {
     case syntaxError(description: String)
+    case internalError(description: String)
 }
 
 extension ParserError: LocalizedError {
@@ -16,6 +17,8 @@ extension ParserError: LocalizedError {
         switch self {
         case .syntaxError(let info):
             return NSLocalizedString("ParserError.syntaxError: \(info)", comment: "ParserError")
+        case .internalError(let info):
+            return NSLocalizedString("ParserError.internalError: \(info)", comment: "ParserError")
         }
     }
 }
@@ -52,31 +55,8 @@ class Parser {
 
         while let token = self.tokens[safeIndex: self.currentIndex] {
             switch token {
-            case .function(let name):
-                if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
-                    let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
-                    let result = try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
-                } else {
-                    try self.externalFunctionRegistry.callFunction(name: name)
-                }
-                self.currentIndex += 1
-            case .functionWithArguments(let name):
-                let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex + 1, tokens: self.tokens)
-                self.currentIndex += tokens.count + 3
-                let argumentTokens = tokens.filter { $0 != .comma }
-                let argumentValues = argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
-                if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
-                    let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
-                    guard localFunction.argumentNames.count == argumentValues.count else {
-                        throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(argumentValues)")
-                    }
-                    try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerValue(name: name, value: argumentValues[index]) }
-                    let result = try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
-                } else {
-                    try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues)
-                }
-                
-                break
+            case .function(_), .functionWithArguments(_):
+                _ = try self.invokeFunction()
             case .variableDefinition(_), .constantDefinition(_):
                 let consumedTokens = try variableParser.parse(variableDefinitionIndex: self.currentIndex, into: self.variableRegistry)
                 self.currentIndex += consumedTokens
@@ -184,6 +164,42 @@ class Parser {
             }
         }
         return .finished
+    }
+    
+    private func invokeFunction() throws -> ParserExecResult {
+        guard let token = self.tokens[safeIndex: self.currentIndex] else {
+            throw ParserError.internalError(description: "invokeFunction called on nil token")
+        }
+        switch token {
+        case .function(let name):
+            self.currentIndex += 1
+            if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
+                let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
+            } else {
+                try self.externalFunctionRegistry.callFunction(name: name)
+                return .return(nil)
+            }
+            
+        case .functionWithArguments(let name):
+            let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex + 1, tokens: self.tokens)
+            self.currentIndex += tokens.count + 3
+            let argumentTokens = tokens.filter { $0 != .comma }
+            let argumentValues = argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
+            if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
+                let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                guard localFunction.argumentNames.count == argumentValues.count else {
+                    throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(argumentValues)")
+                }
+                try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerValue(name: name, value: argumentValues[index]) }
+                return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
+            } else {
+                try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues)
+                return .return(nil)
+            }
+        default:
+            throw ParserError.internalError(description: "invokeFunction called on \(token) token")
+        }
     }
     
     private func variableOperation(variableName: String, index: Int) throws -> Int {
