@@ -27,14 +27,14 @@ enum ParserExecResult: Equatable {
 }
 
 class Parser {
-    private let functionRegistry: ExternalFunctionRegistry
+    private let externalFunctionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
     
     private var tokens: [Token]
     
-    init(tokens: [Token], functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(), variableRegistry: VariableRegistry = VariableRegistry()) {
-        self.functionRegistry = functionRegistry
+    init(tokens: [Token], externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(), variableRegistry: VariableRegistry = VariableRegistry()) {
+        self.externalFunctionRegistry = externalFunctionRegistry
         self.localFunctionRegistry = localFunctionRegistry
         self.variableRegistry = variableRegistry
         self.tokens = tokens
@@ -48,13 +48,13 @@ class Parser {
         while let token = self.tokens[safeIndex: index] {
             switch token {
             case .function(let name):
-                try self.functionRegistry.callFunction(name: name)
+                try self.externalFunctionRegistry.callFunction(name: name)
                 index += 1
             case .functionWithArguments(let name):
                 let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: index + 1, tokens: self.tokens)
                 index += tokens.count + 3
                 let argumentTokens = tokens.filter { $0 != .comma }
-                try self.functionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) })
+                try self.externalFunctionRegistry.callFunction(name: name, args: argumentTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) })
                 break
             case .variableDefinition(_), .constantDefinition(_):
                 let consumedTokens = try variableParser.parse(variableDefinitionIndex: index, into: self.variableRegistry)
@@ -198,7 +198,7 @@ class Parser {
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
         let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry)
         let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry)
-        let parser = Parser(tokens: tokens, functionRegistry: self.functionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
+        let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
         return try parser.execute()
     }
 }

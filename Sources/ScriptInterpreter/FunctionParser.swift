@@ -27,6 +27,7 @@ class FunctionParser {
         self.tokens = tokens
     }
 
+    // returns number of consumed tokens
     func parse(functionTokenIndex index: Int, into functionRegistry: LocalFunctionRegistry) throws -> Int {
         var currentIndex = index
         guard let token = self.tokens[safeIndex: currentIndex] else {

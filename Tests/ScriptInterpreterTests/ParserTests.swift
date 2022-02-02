@@ -219,7 +219,7 @@ class ParserTests: XCTestCase {
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "error", function: spy.error))
         do {
             let lexer = try Lexer(code: code)
-            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
+            let parser = Parser(tokens: lexer.tokens, externalFunctionRegistry: functionRegistry)
             XCTAssertNoThrow(try parser.execute())
         } catch {
             XCTFail(error.localizedDescription)
@@ -236,7 +236,7 @@ class ParserTests: XCTestCase {
         XCTAssertNoThrow(try functionRegistry.registerFunc(name: "error", function: spy.error))
         do {
             let lexer = try Lexer(code: code)
-            let parser = Parser(tokens: lexer.tokens, functionRegistry: functionRegistry)
+            let parser = Parser(tokens: lexer.tokens, externalFunctionRegistry: functionRegistry)
             XCTAssertThrowsError(try parser.execute())
         } catch {
             XCTFail(error.localizedDescription)

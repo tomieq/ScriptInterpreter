@@ -41,7 +41,7 @@ public class ScriptInterpreter {
     public func exec(code: String) throws -> Value? {
         do {
             let lexer = try Lexer(code: code)
-            let parser = Parser(tokens: lexer.tokens, functionRegistry: self.functionRegistry, variableRegistry: self.variableRegistry)
+            let parser = Parser(tokens: lexer.tokens, externalFunctionRegistry: self.functionRegistry, variableRegistry: self.variableRegistry)
             let result = try parser.execute()
             switch result {
             case .finished, .break:
