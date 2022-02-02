@@ -14,13 +14,17 @@ struct LocalFunction {
 }
 
 class LocalFunctionRegistry {
-    private var functions: [LocalFunction]
+    private var functions: [String:LocalFunction]
     
     init() {
-        self.functions = []
+        self.functions = [:]
     }
     
     func register(_ localFunction: LocalFunction) {
-        self.functions.append(localFunction)
+        self.functions[localFunction.name] = localFunction
+    }
+    
+    func getFunction(name: String) -> LocalFunction? {
+        return self.functions[name]
     }
 }
