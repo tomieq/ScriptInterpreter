@@ -29,11 +29,13 @@ enum ParserExecResult: Equatable {
 class Parser {
     private let functionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
+    private let localFunctionRegistry: LocalFunctionRegistry
     
     private var tokens: [Token]
     
-    init(tokens: [Token], functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), variableRegistry: VariableRegistry = VariableRegistry()) {
+    init(tokens: [Token], functionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(), localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(), variableRegistry: VariableRegistry = VariableRegistry()) {
         self.functionRegistry = functionRegistry
+        self.localFunctionRegistry = localFunctionRegistry
         self.variableRegistry = variableRegistry
         self.tokens = tokens
     }
@@ -195,7 +197,8 @@ class Parser {
     
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
         let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry)
-        let parser = Parser(tokens: tokens, functionRegistry: self.functionRegistry, variableRegistry: variableRegistry)
+        let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry)
+        let parser = Parser(tokens: tokens, functionRegistry: self.functionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
         return try parser.execute()
     }
 }
