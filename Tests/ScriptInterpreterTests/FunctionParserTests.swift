@@ -29,6 +29,15 @@ class FunctionParserTests: XCTestCase {
         XCTAssertEqual(function?.body, [.functionWithArguments(name: "print"), .bracketOpen, .intLiteral(4), .bracketClose])
     }
     
+    func test_emptyFunctionWithArguments() {
+        let functionRegistry = self.getFunctionRegistry(code: "func add(a, b) { }")
+        let function = functionRegistry.getFunction(name: "add")
+        XCTAssertNotNil(function)
+        XCTAssertEqual(function?.name, "add")
+        XCTAssertEqual(function?.argumentNames, ["a", "b"])
+        XCTAssertEqual(function?.body, [])
+    }
+    
     private func getFunctionRegistry(code: String) -> LocalFunctionRegistry {
         let functionRegistry = LocalFunctionRegistry()
         do{
