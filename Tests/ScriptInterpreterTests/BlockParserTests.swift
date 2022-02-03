@@ -100,14 +100,20 @@ class BlockParserTests: XCTestCase {
             let lexer = try Lexer(code: code)
             let parser = BlockParser(tokens: lexer.tokens)
             let result = try parser.getForBlock(forTokenIndex: 5)
-            XCTAssertEqual(result.conditionTokens.count, 11)
-            XCTAssertEqual(result.conditionTokens[safeIndex: 0], .variableDefinition(type: "var"))
-            XCTAssertEqual(result.conditionTokens[safeIndex: 1], .variable(name: "i"))
-            XCTAssertEqual(result.conditionTokens[safeIndex: 2], .assign)
-            XCTAssertEqual(result.conditionTokens[safeIndex: 3], .intLiteral(0))
-            XCTAssertEqual(result.mainTokens.count, 1)
-            XCTAssertEqual(result.mainTokens[safeIndex: 0], .semicolon)
-            XCTAssertNil(result.elseTokens)
+            XCTAssertEqual(result.initialState[safeIndex: 0], .variableDefinition(type: "var"))
+            XCTAssertEqual(result.initialState[safeIndex: 1], .variable(name: "i"))
+            XCTAssertEqual(result.initialState[safeIndex: 2], .assign)
+            XCTAssertEqual(result.initialState[safeIndex: 3], .intLiteral(0))
+            
+            XCTAssertEqual(result.condition[safeIndex: 0], .variable(name: "i"))
+            XCTAssertEqual(result.condition[safeIndex: 1], .less)
+            XCTAssertEqual(result.condition[safeIndex: 2], .intLiteral(5))
+            
+            XCTAssertEqual(result.finalExpression[safeIndex: 0], .variable(name: "i"))
+            XCTAssertEqual(result.finalExpression[safeIndex: 1], .increment)
+            
+            XCTAssertEqual(result.body.count, 1)
+            XCTAssertEqual(result.body[safeIndex: 0], .semicolon)
         } catch {
             XCTFail(error.localizedDescription)
         }

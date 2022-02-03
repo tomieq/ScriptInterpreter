@@ -105,25 +105,22 @@ class Parser {
             case .forLoop:
                 let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getForBlock(forTokenIndex: self.currentIndex)
-                let forLoopControlTokens = result.conditionTokens.split(by: .semicolon)
-                guard forLoopControlTokens.count == 3 else {
-                    throw ParserError.syntaxError(description: "For loop requires 3 statements: initial state, the condition and code that is executed after main block")
-                }
-                guard case .variableDefinition(_) = forLoopControlTokens[0][safeIndex: 0],
-                      case .variable(let controlVariableName) = forLoopControlTokens[0][safeIndex: 1],
-                      case .assign = forLoopControlTokens[0][safeIndex: 2],
-                      case .intLiteral(let controlVariableInitialValue) = forLoopControlTokens[0][safeIndex: 3] else {
+                
+                guard case .variableDefinition(_) = result.initialState[safeIndex: 0],
+                      case .variable(let controlVariableName) = result.initialState[safeIndex: 1],
+                      case .assign = result.initialState[safeIndex: 2],
+                      case .intLiteral(let controlVariableInitialValue) = result.initialState[safeIndex: 3] else {
                     throw ParserError.syntaxError(description: "For loop error: initial state statement need to init variable")
                 }
                 // create for loop namespace and register initial value
                 let forLoopVariableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
                 try forLoopVariableRegistry.registerValue(name: controlVariableName, value: .integer(controlVariableInitialValue))
                 // append statement 3 to be executed after each loop
-                var forLoopTokens = result.mainTokens
-                forLoopTokens.append(contentsOf: forLoopControlTokens[2])
+                var body = result.body
+                body.append(contentsOf: result.finalExpression)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: forLoopVariableRegistry)
-                forLoop: while (try conditionEvaluator.check(tokens: forLoopControlTokens[1])) {
-                    let result = try self.executeSubCode(tokens: forLoopTokens, variableRegistry: forLoopVariableRegistry)
+            forLoop: while (try conditionEvaluator.check(tokens: result.condition)) {
+                    let result = try self.executeSubCode(tokens: body, variableRegistry: forLoopVariableRegistry)
                     switch result {
                     case .finished:
                         break
@@ -193,8 +190,9 @@ class Parser {
             }
             
         case .functionWithArguments(let name):
-            let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex + 1, tokens: self.tokens)
-            self.currentIndex += tokens.count + 3
+            self.currentIndex += 1
+            let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex, tokens: self.tokens)
+            self.currentIndex += tokens.count + 2
             let argumentTokens = tokens.filter { $0 != .comma }
             let optionalArgumentValues = argumentTokens.map { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
             if optionalArgumentValues.contains(nil) {

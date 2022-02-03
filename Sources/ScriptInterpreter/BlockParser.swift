@@ -30,6 +30,14 @@ struct BlockParserResult {
     let consumedTokens: Int
 }
 
+struct ForLoopParserResult {
+    let initialState: [Token]
+    let condition: [Token]
+    let finalExpression: [Token]
+    let body: [Token]
+    let consumedTokens: Int
+}
+
 class BlockParser {
     private let tokens: [Token]
     
@@ -49,12 +57,19 @@ class BlockParser {
         return result
     }
     
-    func getForBlock(forTokenIndex index: Int) throws -> BlockParserResult {
+    func getForBlock(forTokenIndex index: Int) throws -> ForLoopParserResult {
         let result = try self.getBlock(tokenIndex: index, token: .forLoop)
         guard result.elseTokens == nil else {
             throw BlockParserError.syntaxError(info: "else statement is not allowed after for clause")
         }
-        return result
+        let statementTokens = result.conditionTokens.split(by: .semicolon)
+        guard statementTokens.count == 3 else {
+            throw BlockParserError.syntaxError(info: "For loop requires 3 statements: initial state, the condition and code that is executed after main block")
+        }
+        let initialState = statementTokens[0]
+        let condition = statementTokens[1]
+        let finalExpression = statementTokens[2]
+        return ForLoopParserResult(initialState: initialState, condition: condition, finalExpression: finalExpression, body: result.mainTokens, consumedTokens: result.consumedTokens)
     }
     
     private func getBlock(tokenIndex index: Int, token: Token) throws -> BlockParserResult {
