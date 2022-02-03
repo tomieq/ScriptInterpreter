@@ -119,7 +119,7 @@ class Parser {
                 var body = result.body
                 body.append(contentsOf: result.finalExpression)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: forLoopVariableRegistry)
-            forLoop: while (try conditionEvaluator.check(tokens: result.condition)) {
+                forLoop: while (try conditionEvaluator.check(tokens: result.condition)) {
                     let result = try self.executeSubCode(tokens: body, variableRegistry: forLoopVariableRegistry)
                     switch result {
                     case .finished:
@@ -156,13 +156,7 @@ class Parser {
                         return .return(returned)
                     }
                     if returnedToken.isFunction {
-                        let result = try self.invokeFunction()
-                        switch result {
-                        case .finished, .break:
-                            break
-                        case .return(let optionalValue):
-                            return .return(optionalValue)
-                        }
+                        return .return(try self.invokeFunctionAndGetValue())
                     }
                 }
                 return .return(nil)
@@ -175,6 +169,19 @@ class Parser {
         return .finished
     }
     
+    private func invokeFunctionAndGetValue() throws -> Value {
+        let result = try self.invokeFunction()
+        switch result {
+        case .finished, .break:
+            throw ParserError.syntaxError(description: "function did not return any value!")
+        case .return(let optional):
+            guard let value = optional else {
+                throw ParserError.syntaxError(description: "function did not return any value!")
+            }
+            return value
+        }
+    }
+
     private func invokeFunction() throws -> ParserExecResult {
         guard let token = self.tokens[safeIndex: self.currentIndex] else {
             throw ParserError.internalError(description: "invokeFunction called on nil token")
@@ -235,17 +242,9 @@ class Parser {
                 return
             }
             if valueToken.isFunction {
-                let result = try self.invokeFunction()
-                switch result {
-                case .finished, .break:
-                    break
-                case .return(let optionalValue):
-                    if let value = optionalValue {
-                        try self.variableRegistry.updateValue(name: variableName, value: value)
-                        return
-                    }
-                }
-                throw ParserError.syntaxError(description: "Could not assign value to variable `\(variableName)` - function did not return any value")
+                let value = try self.invokeFunctionAndGetValue()
+                try self.variableRegistry.updateValue(name: variableName, value: value)
+                return
             }
             throw ParserError.syntaxError(description: "Invalid syntax after `\(variableName) =` - found \(valueToken)")
         case .increment:
