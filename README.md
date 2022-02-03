@@ -3,7 +3,10 @@
 ScriptInterpreter is a library that interprets and executes code passed at runtime.
 The library is written in pure Swift, but it accepts scripts in Swift and JavaScript.
 
-Some sample scenario is that you deploy your Swift app to the server and it listens for incoming scripts. When one arrives it is parsed and executed.
+Imagine you have an iOS app that is used by some big clients. For some reason it must be the same app in the AppStore. Clients are very important to you(your company) and they need custom bussiness logic for each of them. What if your app can download business logic(scripts) from the backend? It's insane, but possible with this library. Even more, the logic can be changed on the backend side, so the app will just download it and no build, release or deploy to AppStore is needed. 
+As the library supports both Swift and JavaScript syntax, on the backend side you can easily use library like [Google's blocky](https://developers.google.com/blockly)
+
+Another usage scenario is that you have some kind of server app(let's say smart home rules app) that reacts to events. You've coded it well, released, deployed to server and it's working. There is a rule that turns on the kitchen's vent when humidity is over 80%. Your humidity level is a parameter that can be updated with some kind of frontend. It's customizable. After some time you realize, that on the weekends, after 11 p.m. you want the trigger level to be 70. You have to code again, deploy and run. Would it be simpler if the rules can be edited as a script at runtime?
 
 ## Can I expose my Swift functions to the script?
 
@@ -77,7 +80,7 @@ print(amount);
 ```
 Above code run in ScriptInterpreter will print: 3, 10, 11, 2. Notice that you can use semicolons `;` or skip them
 
-Look at the `ParserTests` - you will find more examples
+Look at the [ParserTests](./Tests/ScriptInterpreterTests/ParserTests.swift) - you will find more examples
 
 ## Can I set variable/constant so that are accessible by the script?
 
