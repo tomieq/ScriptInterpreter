@@ -198,14 +198,9 @@ class Parser {
             
         case .functionWithArguments(let name):
             self.currentIndex += 1
-            let tokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex, tokens: self.tokens)
-            self.currentIndex += tokens.count + 2
-            let argumentTokens = tokens.filter { $0 != .comma }
-            let optionalArgumentValues = argumentTokens.map { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
-            if optionalArgumentValues.contains(nil) {
-                throw ParserError.syntaxError(description: "Passed invalid arguments: \(optionalArgumentValues) to function \(name)")
-            }
-            let argumentValues = optionalArgumentValues.compactMap{ $0 }
+            let argumentTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex, tokens: self.tokens)
+            self.currentIndex += argumentTokens.count + 2
+            let argumentValues = try self.getValidatedArguments(argumentTokens, for: name)
             if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
                 let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
                 guard localFunction.argumentNames.count == argumentValues.count else {
@@ -273,5 +268,14 @@ class Parser {
         let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry)
         let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
         return try parser.execute()
+    }
+    
+    private func getValidatedArguments(_ tokens: [Token], for functioNname: String) throws -> [Value] {
+        let arguments = tokens.filter { $0 != .comma }
+        let optionalArgumentValues = arguments.map { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
+        if optionalArgumentValues.contains(nil) {
+            throw ParserError.syntaxError(description: "Passed invalid arguments: \(optionalArgumentValues) to function \(functioNname)")
+        }
+        return optionalArgumentValues.compactMap{ $0 }
     }
 }
