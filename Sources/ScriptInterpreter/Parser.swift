@@ -10,6 +10,7 @@ import Foundation
 enum ParserError: Error {
     case syntaxError(description: String)
     case internalError(description: String)
+    case aborted(description: String)
 }
 
 extension ParserError: LocalizedError {
@@ -19,6 +20,8 @@ extension ParserError: LocalizedError {
             return NSLocalizedString("ParserError.syntaxError: \(info)", comment: "ParserError")
         case .internalError(let info):
             return NSLocalizedString("ParserError.internalError: \(info)", comment: "ParserError")
+        case .aborted(let info):
+            return NSLocalizedString("ParserError.aborted: \(info)", comment: "ParserError")
         }
     }
 }
@@ -29,12 +32,20 @@ enum ParserExecResult: Equatable {
     case `break`
 }
 
+enum ParserState {
+    case idle
+    case working
+    case finished
+    case aborted(String)
+}
+
 class Parser {
     private let externalFunctionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
     private var currentIndex = 0
     
+    private var state = ParserState.idle
     private var tokens: [Token]
     
     init(tokens: [Token],
@@ -49,11 +60,13 @@ class Parser {
     
     @discardableResult
     func execute() throws -> ParserExecResult {
+        self.state = .working
         let variableParser = VariableParser(tokens: self.tokens)
         let functionParser = FunctionParser(tokens: self.tokens)
         
 
         while let token = self.tokens[safeIndex: self.currentIndex] {
+            if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
             switch token {
             case .function(_), .functionWithArguments(_):
                 _ = try self.invokeFunction()
@@ -91,6 +104,7 @@ class Parser {
                 let result = try blockParser.getWhileBlock(whileTokenIndex: self.currentIndex)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 whileLoop: while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
+                    if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
                     let result = try self.executeSubCode(tokens: result.mainTokens, variableRegistry: self.variableRegistry)
                     switch result {
                     case .finished:
@@ -120,6 +134,7 @@ class Parser {
                 body.append(contentsOf: result.finalExpression)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: forLoopVariableRegistry)
                 forLoop: while (try conditionEvaluator.check(tokens: result.condition)) {
+                    if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
                     let result = try self.executeSubCode(tokens: body, variableRegistry: forLoopVariableRegistry)
                     switch result {
                     case .finished:
@@ -166,6 +181,7 @@ class Parser {
                 throw ParserError.syntaxError(description: "Unexpected sign found: \(token)")
             }
         }
+        self.state = .finished
         return .finished
     }
     
@@ -214,6 +230,10 @@ class Parser {
         default:
             throw ParserError.internalError(description: "invokeFunction called on \(token) token")
         }
+    }
+    
+    func abort(reason: String) {
+        self.state = .aborted(reason)
     }
     
     private func variableOperation(variableName: String) throws {

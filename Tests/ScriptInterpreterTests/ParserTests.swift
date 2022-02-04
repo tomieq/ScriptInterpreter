@@ -249,6 +249,23 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 0], .integer(8))
     }
     
+    func test_executionAbort() {
+        do {
+            let spy = FunctionCallSpy()
+            let functionRegistry = ExternalFunctionRegistry()
+            XCTAssertNoThrow(try functionRegistry.registerFunc(name: "print", function: spy.print))
+            let lexer = try Lexer(code: "var counter = 0; while(true){ counter++ print(counter)}")
+            let parser = Parser(tokens: lexer.tokens, externalFunctionRegistry: functionRegistry)
+            DispatchQueue.global().asyncAfter(deadline: .now() + 0.005) {
+                parser.abort(reason: "Execution timeout")
+            }
+            XCTAssertThrowsError(try parser.execute())
+            XCTAssertTrue(spy.output.count > 0)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
