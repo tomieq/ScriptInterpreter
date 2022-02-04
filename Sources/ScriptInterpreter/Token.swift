@@ -24,6 +24,9 @@ enum Token: Equatable {
     case bracketClose
     case ifStatement
     case elseStatement
+    case `switch`
+    case `case`
+    case `default`
     case whileLoop
     case forLoop
     case blockOpen
@@ -70,6 +73,9 @@ extension Token {
         generators.append(TokenGenerator(regex: "if\\b", resolver: { _ in [.ifStatement] }))
         generators.append(TokenGenerator(regex: "while\\b", resolver: { _ in [.whileLoop] }))
         generators.append(TokenGenerator(regex: "for\\b", resolver: { _ in [.forLoop] }))
+        generators.append(TokenGenerator(regex: "switch\\b", resolver: { _ in [.switch] }))
+        generators.append(TokenGenerator(regex: "case\\b", resolver: { _ in [.case] }))
+        generators.append(TokenGenerator(regex: "default\\b", resolver: { _ in [.default] }))
         generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
         generators.append(TokenGenerator(regex: "\\+\\+", resolver: { _ in [.increment] }))
         generators.append(TokenGenerator(regex: "\\-\\-", resolver: { _ in [.decrement] }))
@@ -132,6 +138,12 @@ extension Token: CustomDebugStringConvertible {
             return "while"
         case .forLoop:
             return "for"
+        case .switch:
+            return "switch"
+        case .case:
+            return "case"
+        case .default:
+            return "default"
         case .boolLiteral(let value):
             return "boolLiteral(\(value))"
         case .stringLiteral(let value):
