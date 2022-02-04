@@ -12,6 +12,7 @@ class CommentRemover {
     var script: String {
         var copy = self.original
         copy = self.removeByRegex(input: copy, regex: "/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/")
+        copy = self.removeByRegex(input: copy, regex: "\\/\\/([^\\r\\n]*)")
         return copy
     }
     

@@ -20,7 +20,7 @@ class CommentRemoverTests: XCTestCase {
 """
         let remover = CommentRemover(script: script)
         let text = remover.script
-        XCTAssertEqual(text, " text")
+        XCTAssertEqual(text.condenseWhitespace(), "text")
     }
     
     
@@ -30,10 +30,30 @@ class CommentRemoverTests: XCTestCase {
  * Common multi-line comment style.
  ****/one/*
     some comment that should be cut out! (tips)
-*/two
+*/
+two
 """
         let remover = CommentRemover(script: script)
         let text = remover.script
-        XCTAssertEqual(text, " one two")
+        XCTAssertEqual(text.condenseWhitespace(), "one two")
+    }
+    
+    func test_removingOneLineComment() {
+        let script = """
+// this is one line comment
+code here
+// here is second comment
+dalej
+"""
+        let remover = CommentRemover(script: script)
+        let text = remover.script
+        XCTAssertEqual(text.condenseWhitespace(), "code here dalej")
+    }
+}
+
+fileprivate extension String {
+    func condenseWhitespace() -> String {
+        let components = self.components(separatedBy: .whitespacesAndNewlines)
+        return components.filter { !$0.isEmpty }.joined(separator: " ")
     }
 }
