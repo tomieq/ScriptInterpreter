@@ -118,4 +118,28 @@ class BlockParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_switchSwiftStyle() {
+        let code = "switch name { case 'Ryan': break; case 'Dwigth': break; }"
+        do {
+            let lexer = try Lexer(code: code)
+            let parser = BlockParser(tokens: lexer.tokens)
+            let result = try parser.getSwitchBlock(switchTokenIndex: 0)
+            XCTAssertEqual(result.variable.first, .variable(name: "name"))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_switchJavaScriptStyle() {
+        let code = "switch (name) { case 'Ryan': break; case 'Dwigth': break; }"
+        do {
+            let lexer = try Lexer(code: code)
+            let parser = BlockParser(tokens: lexer.tokens)
+            let result = try parser.getSwitchBlock(switchTokenIndex: 0)
+            XCTAssertEqual(result.variable.first, .variable(name: "name"))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }

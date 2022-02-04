@@ -117,3 +117,5 @@ extension Value {
         }
     }
 }
+
+extension Value: Hashable {}

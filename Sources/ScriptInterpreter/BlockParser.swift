@@ -38,6 +38,12 @@ struct ForLoopParserResult {
     let consumedTokens: Int
 }
 
+struct SwitchParserResult {
+    let variable: [Token]
+    let `default`: [Token]
+    let cases: [Value: [Token]]
+}
+
 class BlockParser {
     private let tokens: [Token]
     
@@ -93,5 +99,26 @@ class BlockParser {
         }
         let result = BlockParserResult(conditionTokens: conditionTokens, mainTokens: mainTokens, elseTokens: elseTokens, consumedTokens: currentIndex - index)
         return result
+    }
+    
+    func getSwitchBlock(switchTokenIndex index: Int) throws -> SwitchParserResult {
+        guard let entryToken = self.tokens[safeIndex: index] else {
+            throw BlockParserError.invalidTokenPosition(found: nil, expected: .switch)
+        }
+        guard let entryToken = self.tokens[safeIndex: index], case .switch = entryToken else {
+            throw BlockParserError.invalidTokenPosition(found: entryToken, expected: .switch)
+        }
+        var currentIndex = index + 1
+        guard let controlToken = self.tokens[safeIndex: currentIndex] else {
+            throw BlockParserError.syntaxError(info: "Switch syntax required a variable as control statement")
+        }
+        var variableToken = [controlToken]
+        if case .bracketOpen = variableToken.first {
+            variableToken = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
+            currentIndex += 2
+        }
+        currentIndex += variableToken.count
+        
+        return SwitchParserResult(variable: variableToken, default: [], cases: [:])
     }
 }
