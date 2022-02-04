@@ -91,4 +91,8 @@ class VariableRegistry {
         self.values.forEach{ (key, value) in  dump[key] = value.value}
         return dump
     }
+    
+    func clearMemory() {
+        self.values = [:]
+    }
 }

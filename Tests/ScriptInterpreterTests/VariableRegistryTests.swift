@@ -113,4 +113,13 @@ final class VariableRegistryTests: XCTestCase {
         XCTAssertEqual(outer.memoryDump()["amount"], .integer(20))
         XCTAssertEqual(inner.memoryDump()["amount"], .integer(20))
     }
+    
+    func test_clearMemory() {
+        let registry = VariableRegistry()
+        
+        XCTAssertNoThrow(try registry.registerValue(name: "amount", value: .integer(20)))
+        XCTAssertEqual(registry.getValue(name: "amount"), .integer(20))
+        registry.clearMemory()
+        XCTAssertNil(registry.getValue(name: "amount"))
+    }
 }
