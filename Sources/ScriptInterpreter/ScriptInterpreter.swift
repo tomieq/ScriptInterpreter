@@ -65,4 +65,8 @@ public class ScriptInterpreter {
     public func memoryDump() -> [String:Value] {
         return self.variableRegistry.memoryDump()
     }
+    
+    public func clearMemory() {
+        self.variableRegistry.clearMemory()
+    }
 }
