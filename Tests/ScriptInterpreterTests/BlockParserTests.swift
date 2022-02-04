@@ -120,24 +120,33 @@ class BlockParserTests: XCTestCase {
     }
     
     func test_switchSwiftStyle() {
-        let code = "switch name { case 'Ryan': break; case 'Dwigth': break; }"
+        let code = "switch name { case 'Ryan': break; default: b++ case 'Dwigth': break; }"
         do {
             let lexer = try Lexer(code: code)
             let parser = BlockParser(tokens: lexer.tokens)
             let result = try parser.getSwitchBlock(switchTokenIndex: 0)
             XCTAssertEqual(result.variable.first, .variable(name: "name"))
+            
+            XCTAssertEqual(result.cases[.stringLiteral("Ryan")], [.break, .semicolon])
+            XCTAssertEqual(result.cases[.stringLiteral("Dwigth")], [.break, .semicolon])
+            
+            XCTAssertEqual(result.default[safeIndex: 0], .variable(name: "b"))
+            XCTAssertEqual(result.default[safeIndex: 1], .increment)
         } catch {
             XCTFail(error.localizedDescription)
         }
     }
     
     func test_switchJavaScriptStyle() {
-        let code = "switch (name) { case 'Ryan': break; case 'Dwigth': break; }"
+        let code = "switch (name) { case 'Ryan': break; case 'Dwigth': break; default: a++ }"
         do {
             let lexer = try Lexer(code: code)
             let parser = BlockParser(tokens: lexer.tokens)
             let result = try parser.getSwitchBlock(switchTokenIndex: 0)
             XCTAssertEqual(result.variable.first, .variable(name: "name"))
+
+            XCTAssertEqual(result.default[safeIndex: 0], .variable(name: "a"))
+            XCTAssertEqual(result.default[safeIndex: 1], .increment)
         } catch {
             XCTFail(error.localizedDescription)
         }

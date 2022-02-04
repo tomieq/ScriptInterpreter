@@ -41,7 +41,7 @@ struct ForLoopParserResult {
 struct SwitchParserResult {
     let variable: [Token]
     let `default`: [Token]
-    let cases: [Value: [Token]]
+    let cases: [Token: [Token]]
 }
 
 class BlockParser {
@@ -119,6 +119,27 @@ class BlockParser {
         }
         currentIndex += variableToken.count
         
-        return SwitchParserResult(variable: variableToken, default: [], cases: [:])
+        var defaultTokens: [Token] = []
+        var cases: [Token: [Token]] = [:]
+        
+        let body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
+        let splitted = body.split(by: .case)
+        for caseTokens in splitted {
+            let parts = caseTokens.split(by: .default)
+
+            guard let statements = parts[safeIndex: 0]?.split(by: .colon) else {
+                continue
+            }
+            guard let keyToken = statements[safeIndex: 0]?.first, keyToken.isLiteral else {
+                throw BlockParserError.syntaxError(info: "Case entry must be a literal")
+            }
+            cases[keyToken] = statements[safeIndex: 1] ?? []
+            
+            if let potentialDefaultTokens = parts[safeIndex: 1] {
+                defaultTokens = potentialDefaultTokens.split(by: .colon)[safeIndex: 1] ?? []
+            }
+        }
+        
+        return SwitchParserResult(variable: variableToken, default: defaultTokens, cases: cases)
     }
 }

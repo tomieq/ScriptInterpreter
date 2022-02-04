@@ -240,3 +240,5 @@ extension Token {
         return false
     }
 }
+
+extension Token: Hashable {}
