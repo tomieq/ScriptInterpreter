@@ -85,4 +85,10 @@ class VariableRegistry {
     func valueExists(name: String) -> Bool {
         return self.values[name] != nil || (self.topVariableRegistry?.valueExists(name: name) ?? false)
     }
+    
+    func memoryDump() -> [String:Value] {
+        var dump: [String:Value] = self.topVariableRegistry?.memoryDump() ??  [:]
+        self.values.forEach{ (key, value) in  dump[key] = value.value}
+        return dump
+    }
 }

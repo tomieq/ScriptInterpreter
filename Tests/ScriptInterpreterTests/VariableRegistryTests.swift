@@ -103,4 +103,14 @@ final class VariableRegistryTests: XCTestCase {
         XCTAssertThrowsError(try registry.updateValue(name: "amount", value: .integer(50)))
         
     }
+    
+    func test_memoryDump() {
+        let outer = VariableRegistry()
+        let inner = VariableRegistry(topVariableRegistry: outer)
+        
+        XCTAssertNoThrow(try outer.registerValue(name: "amount", value: .integer(20)))
+        
+        XCTAssertEqual(outer.memoryDump()["amount"], .integer(20))
+        XCTAssertEqual(inner.memoryDump()["amount"], .integer(20))
+    }
 }
