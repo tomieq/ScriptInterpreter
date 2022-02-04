@@ -1,12 +1,23 @@
 # ScriptInterpreter
+## About
 
 ScriptInterpreter is a library that interprets and executes code passed at runtime.
 The library is written in pure Swift, but it accepts scripts in Swift and JavaScript.
 
+### Sample usage
 Imagine you have an iOS app that is used by some big clients. For some reason it must be the same app in the AppStore. Clients are very important to you(your company) and they need custom bussiness logic for each of them. What if your app can download business logic(scripts) from the backend? It's insane, but possible with this library. Even more, the logic can be changed on the backend side, so the app will just download it and no build, release or deploy to AppStore is needed. 
 As the library supports both Swift and JavaScript syntax, on the backend side you can easily use library like [Google's blocky](https://developers.google.com/blockly)
 
 Another usage scenario is that you have some kind of server app(let's say smart home rules app) that reacts to events. You've coded it well, released, deployed to server and it's working. There is a rule that turns on the kitchen's vent when humidity is over 80%. Your humidity level is a parameter that can be updated with some kind of frontend. It's customizable. After some time you realize, that on the weekends, after 11 p.m. you want the trigger level to be 70. You have to code again, deploy and run. Would it be simpler if the rules can be edited as a script at runtime?
+
+## Installation
+#### Swift Package Manager
+
+You can use [Swift Package Manager](https://swift.org/package-manager/) and specify dependency in `Package.swift` by adding this:
+
+```swift
+.package(url: "https://github.com/tomieq/ScriptInterpreter", .upToNextMajor(from: "1.0.0"))
+```
 
 ## Can I expose my Swift functions to the script?
 
