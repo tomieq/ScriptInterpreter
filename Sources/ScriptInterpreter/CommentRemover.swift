@@ -9,7 +9,7 @@ import Foundation
 
 class CommentRemover {
     private let original: String
-    var script: String {
+    var cleaned: String {
         var copy = self.original
         copy = self.removeByRegex(input: copy, regex: "/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/")
         copy = self.removeByRegex(input: copy, regex: "\\/\\/([^\\r\\n]*)")

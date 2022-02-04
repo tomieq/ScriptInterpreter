@@ -19,7 +19,7 @@ class CommentRemoverTests: XCTestCase {
  ****/text
 """
         let remover = CommentRemover(script: script)
-        let text = remover.script
+        let text = remover.cleaned
         XCTAssertEqual(text.condenseWhitespace(), "text")
     }
     
@@ -34,7 +34,7 @@ class CommentRemoverTests: XCTestCase {
 two
 """
         let remover = CommentRemover(script: script)
-        let text = remover.script
+        let text = remover.cleaned
         XCTAssertEqual(text.condenseWhitespace(), "one two")
     }
     
@@ -46,7 +46,7 @@ code here
 dalej
 """
         let remover = CommentRemover(script: script)
-        let text = remover.script
+        let text = remover.cleaned
         XCTAssertEqual(text.condenseWhitespace(), "code here dalej")
     }
 }
