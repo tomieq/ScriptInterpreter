@@ -61,4 +61,8 @@ public class ScriptInterpreter {
             throw ScriptInterpreterError.runtimeError(description: error.localizedDescription)
         }
     }
+    
+    public func memoryDump() -> [String:Value] {
+        return self.variableRegistry.memoryDump()
+    }
 }
