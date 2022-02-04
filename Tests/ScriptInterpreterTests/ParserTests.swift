@@ -266,6 +266,20 @@ class ParserTests: XCTestCase {
         }
     }
     
+    func test_switchStatementSomeCase() {
+        let console = self.setupSpy(code: "var number = 10; switch number { case 3: print(3) case 10: print(10) default: print(33) } print(21)")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(10))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(21))
+    }
+    
+    func test_switchStatementDefault() {
+        let console = self.setupSpy(code: "var number = 10; switch number { case 3: print(3) case 11: print(10) default: print(33) } print(21)")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(33))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(21))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()

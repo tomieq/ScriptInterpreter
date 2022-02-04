@@ -39,9 +39,10 @@ struct ForLoopParserResult {
 }
 
 struct SwitchParserResult {
-    let variable: [Token]
+    let variable: Token
     let `default`: [Token]
     let cases: [Token: [Token]]
+    let consumedTokens: Int
 }
 
 class BlockParser {
@@ -112,17 +113,22 @@ class BlockParser {
         guard let controlToken = self.tokens[safeIndex: currentIndex] else {
             throw BlockParserError.syntaxError(info: "Switch syntax required a variable as control statement")
         }
-        var variableToken = [controlToken]
-        if case .bracketOpen = variableToken.first {
-            variableToken = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
+        var variableToken = controlToken
+        if case .bracketOpen = variableToken {
+            let inBrackets = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
+            guard inBrackets.count == 1 else {
+                throw BlockParserError.syntaxError(info: "Switch control variable must be single variable!")
+            }
+            variableToken = inBrackets.first!
             currentIndex += 2
         }
-        currentIndex += variableToken.count
+        currentIndex += 1
         
         var defaultTokens: [Token] = []
         var cases: [Token: [Token]] = [:]
         
         let body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
+        currentIndex += body.count + 2
         let splitted = body.split(by: .case)
         for caseTokens in splitted {
             let parts = caseTokens.split(by: .default)
@@ -139,7 +145,7 @@ class BlockParser {
                 defaultTokens = potentialDefaultTokens.split(by: .colon)[safeIndex: 1] ?? []
             }
         }
-        
-        return SwitchParserResult(variable: variableToken, default: defaultTokens, cases: cases)
+
+        return SwitchParserResult(variable: variableToken, default: defaultTokens, cases: cases, consumedTokens: currentIndex - index)
     }
 }

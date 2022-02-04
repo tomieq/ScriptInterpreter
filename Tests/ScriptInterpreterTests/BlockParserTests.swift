@@ -125,7 +125,7 @@ class BlockParserTests: XCTestCase {
             let lexer = try Lexer(code: code)
             let parser = BlockParser(tokens: lexer.tokens)
             let result = try parser.getSwitchBlock(switchTokenIndex: 0)
-            XCTAssertEqual(result.variable.first, .variable(name: "name"))
+            XCTAssertEqual(result.variable, .variable(name: "name"))
             
             XCTAssertEqual(result.cases[.stringLiteral("Ryan")], [.break, .semicolon])
             XCTAssertEqual(result.cases[.stringLiteral("Dwigth")], [.break, .semicolon])
@@ -143,7 +143,7 @@ class BlockParserTests: XCTestCase {
             let lexer = try Lexer(code: code)
             let parser = BlockParser(tokens: lexer.tokens)
             let result = try parser.getSwitchBlock(switchTokenIndex: 0)
-            XCTAssertEqual(result.variable.first, .variable(name: "name"))
+            XCTAssertEqual(result.variable, .variable(name: "name"))
 
             XCTAssertEqual(result.default[safeIndex: 0], .variable(name: "a"))
             XCTAssertEqual(result.default[safeIndex: 1], .increment)

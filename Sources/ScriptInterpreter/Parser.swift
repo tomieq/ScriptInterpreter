@@ -63,7 +63,7 @@ class Parser {
         self.state = .working
         let variableParser = VariableParser(tokens: self.tokens)
         let functionParser = FunctionParser(tokens: self.tokens)
-        
+        let blockParser = BlockParser(tokens: self.tokens)
 
         while let token = self.tokens[safeIndex: self.currentIndex] {
             if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
@@ -77,7 +77,6 @@ class Parser {
                 let consumedTokens = try functionParser.parse(functionTokenIndex: self.currentIndex, into: self.localFunctionRegistry)
                 self.currentIndex += consumedTokens
             case .ifStatement:
-                let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getIfBlock(ifTokenIndex: self.currentIndex)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 let shouldRunMainStatement = try conditionEvaluator.check(tokens: result.conditionTokens)
@@ -100,7 +99,6 @@ class Parser {
                 }
                 self.currentIndex += result.consumedTokens
             case .whileLoop:
-                let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getWhileBlock(whileTokenIndex: self.currentIndex)
                 let conditionEvaluator = ConditionEvaluator(variableRegistry: self.variableRegistry)
                 whileLoop: while (try conditionEvaluator.check(tokens: result.conditionTokens)) {
@@ -117,7 +115,6 @@ class Parser {
                 }
                 self.currentIndex += result.consumedTokens
             case .forLoop:
-                let blockParser = BlockParser(tokens: self.tokens)
                 let result = try blockParser.getForBlock(forTokenIndex: self.currentIndex)
                 
                 guard case .variableDefinition(_) = result.initialState[safeIndex: 0],
@@ -146,6 +143,38 @@ class Parser {
                     }
                 }
                 self.currentIndex += result.consumedTokens
+            case .switch:
+                let swtichBlock = try blockParser.getSwitchBlock(switchTokenIndex: self.currentIndex)
+                self.currentIndex += swtichBlock.consumedTokens
+                
+                guard let controlValue = ParserUtils.token2Value(swtichBlock.variable, variableRegistry: self.variableRegistry) else {
+                    throw ParserError.syntaxError(description: "Could not calculate switch control value")
+                }
+                var performDefaultCase = true
+                for (caseToken, body) in swtichBlock.cases {
+                    guard let caseValue = ParserUtils.token2Value(caseToken, variableRegistry: self.variableRegistry) else {
+                        continue
+                    }
+                    if caseValue == controlValue {
+                        performDefaultCase = false
+                        let result = try self.executeSubCode(tokens: body, variableRegistry: self.variableRegistry)
+                        switch result {
+                        case .finished, .break:
+                            break
+                        case .return(let optional):
+                            return .return(optional)
+                        }
+                    }
+                }
+                if performDefaultCase {
+                    let result = try self.executeSubCode(tokens: swtichBlock.default, variableRegistry: self.variableRegistry)
+                    switch result {
+                    case .finished, .break:
+                        break
+                    case .return(let optional):
+                        return .return(optional)
+                    }
+                }
             case .blockOpen:
                 // this is Swift-style separate namespace
                 let blockTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: self.currentIndex, tokens: self.tokens)

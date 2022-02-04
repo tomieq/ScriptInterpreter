@@ -35,7 +35,7 @@ class FunctionParser {
         }
         
         guard case .functionDefinition(_) = token else {
-            throw FunctionParserError.syntaxError(description: "Expected function definiotion token at index \(index)")
+            throw FunctionParserError.syntaxError(description: "Expected function definition token at index \(index)")
         }
         currentIndex += 1
         guard let functionNameToken = self.tokens[safeIndex: currentIndex] else {
