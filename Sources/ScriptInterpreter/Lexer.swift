@@ -27,7 +27,7 @@ class Lexer {
     let tokens: [Token]
 
     init(code: String) throws {
-        var code = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        var code = CommentRemover(script: code).cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
         var tokens: [Token] = []
         while let match = try Lexer.getNextMatch(code: code) {
             let (resolver, matchingString) = match
