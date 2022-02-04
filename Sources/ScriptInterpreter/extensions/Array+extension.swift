@@ -43,3 +43,17 @@ extension Array where Element == Token {
         return splitted
     }
 }
+
+extension Array {
+    func withAppended(_ elem: Element) -> [Element] {
+        var copy = self
+        copy.append(elem)
+        return copy
+    }
+    
+    func withAppended(_ elems: [Element]) -> [Element] {
+        var copy = self
+        copy.append(contentsOf: elems)
+        return copy
+    }
+}

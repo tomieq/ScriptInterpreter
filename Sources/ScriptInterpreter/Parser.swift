@@ -144,14 +144,20 @@ class Parser {
                 }
                 self.currentIndex += result.consumedTokens
             case .switch:
-                let swtichBlock = try blockParser.getSwitchBlock(switchTokenIndex: self.currentIndex)
-                self.currentIndex += swtichBlock.consumedTokens
+                let switchBlock = try blockParser.getSwitchBlock(switchTokenIndex: self.currentIndex)
+                self.currentIndex += switchBlock.consumedTokens
                 
-                guard let controlValue = ParserUtils.token2Value(swtichBlock.variable, variableRegistry: self.variableRegistry) else {
+                var controlValue: Value?
+                if switchBlock.variable.isFunction {
+                    controlValue = try self.executeSubCodendAndGetValue(tokens: [.return].withAppended(switchBlock.variable), variableRegistry: self.variableRegistry)
+                } else {
+                    controlValue = ParserUtils.token2Value(switchBlock.variable, variableRegistry: self.variableRegistry)
+                }
+                guard let controlValue = controlValue else {
                     throw ParserError.syntaxError(description: "Could not calculate switch control value")
                 }
                 var performDefaultCase = true
-                for (caseToken, body) in swtichBlock.cases {
+                for (caseToken, body) in switchBlock.cases {
                     guard let caseValue = ParserUtils.token2Value(caseToken, variableRegistry: self.variableRegistry) else {
                         continue
                     }
@@ -167,7 +173,7 @@ class Parser {
                     }
                 }
                 if performDefaultCase {
-                    let result = try self.executeSubCode(tokens: swtichBlock.default, variableRegistry: self.variableRegistry)
+                    let result = try self.executeSubCode(tokens: switchBlock.default, variableRegistry: self.variableRegistry)
                     switch result {
                     case .finished, .break:
                         break
@@ -317,6 +323,19 @@ class Parser {
         let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry)
         let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
         return try parser.execute()
+    }
+    
+    private func executeSubCodendAndGetValue(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> Value {
+        let result = try self.executeSubCode(tokens: tokens, variableRegistry: variableRegistry)
+        switch result {
+        case .finished, .break:
+            throw ParserError.syntaxError(description: "function did not return any value!")
+        case .return(let optional):
+            guard let value = optional else {
+                throw ParserError.syntaxError(description: "function did not return any value!")
+            }
+            return value
+        }
     }
     
     private func getValidatedArguments(_ tokens: [Token], for functioNname: String) throws -> [Value] {

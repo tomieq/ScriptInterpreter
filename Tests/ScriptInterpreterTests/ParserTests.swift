@@ -280,6 +280,13 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 1], .integer(21))
     }
     
+    func test_switchStatementControlVariableAsFunctionWithoutArguments() {
+        let console = self.setupSpy(code: "func control() { return 3 } switch control() { case 3: print(3) case 11: print(10) default: print(33) } print(21)")
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(3))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(21))
+    }
+    
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()
