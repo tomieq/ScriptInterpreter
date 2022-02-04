@@ -46,6 +46,7 @@ enum Token: Equatable {
     case andOperator
     case orOperator
     case semicolon
+    case colon
     case `break`
     case `return`
 }
@@ -77,6 +78,7 @@ extension Token {
         generators.append(TokenGenerator(regex: "case\\b", resolver: { _ in [.case] }))
         generators.append(TokenGenerator(regex: "default\\b", resolver: { _ in [.default] }))
         generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
+        generators.append(TokenGenerator(regex: ":", resolver: { _ in [.colon] }))
         generators.append(TokenGenerator(regex: "\\+\\+", resolver: { _ in [.increment] }))
         generators.append(TokenGenerator(regex: "\\-\\-", resolver: { _ in [.decrement] }))
         generators.append(TokenGenerator(regex: "\\+", resolver: { _ in [.add] }))
@@ -166,6 +168,8 @@ extension Token: CustomDebugStringConvertible {
             return "or"
         case .semicolon:
             return ";"
+        case .colon:
+            return ":"
         case .variable(let name):
             return "variable(\(name))"
         case .variableDefinition(let type):
