@@ -16,6 +16,7 @@ extension ScriptInterpreterError: LocalizedError {
 public class ScriptInterpreter {
     private let functionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
+    private var parser: Parser?
     
     public init() {
         self.functionRegistry = ExternalFunctionRegistry()
@@ -49,8 +50,8 @@ public class ScriptInterpreter {
     public func exec(code: String) throws -> Value? {
         do {
             let lexer = try Lexer(code: code)
-            let parser = Parser(tokens: lexer.tokens, externalFunctionRegistry: self.functionRegistry, variableRegistry: self.variableRegistry)
-            let result = try parser.execute()
+            self.parser = Parser(tokens: lexer.tokens, externalFunctionRegistry: self.functionRegistry, variableRegistry: self.variableRegistry)
+            let result = try self.parser?.execute() ?? .finished
             switch result {
             case .finished, .break:
                 return nil
@@ -68,5 +69,9 @@ public class ScriptInterpreter {
     
     public func clearMemory() {
         self.variableRegistry.clearMemory()
+    }
+    
+    public func abort(reason: String) {
+        self.parser?.abort(reason: reason)
     }
 }
