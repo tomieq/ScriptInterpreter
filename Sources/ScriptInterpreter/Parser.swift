@@ -47,6 +47,7 @@ class Parser {
     
     private var state = ParserState.idle
     private var tokens: [Token]
+    private var deferredTokens: [[Token]] = []
     
     init(tokens: [Token],
          externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(),
@@ -194,11 +195,17 @@ class Parser {
                     break
                 }
                 self.currentIndex += blockTokens.count + 2
+            case .defer:
+                self.currentIndex += 1
+                let deferredTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: self.currentIndex, tokens: self.tokens)
+                self.deferredTokens.append(deferredTokens)
+                self.currentIndex += deferredTokens.count + 2
             case .variable(let name):
                 try self.variableOperation(variableName: name)
             case .break:
                 return .break
             case .return:
+                try self.executeDeferredCode()
                 self.currentIndex += 1
                 if let returnedToken = self.tokens[safeIndex: self.currentIndex] {
                     if returnedToken.isLiteral || returnedToken.isVariable {
@@ -216,6 +223,7 @@ class Parser {
                 throw ParserError.syntaxError(description: "Unexpected sign found: \(token)")
             }
         }
+        try self.executeDeferredCode()
         self.state = .finished
         return .finished
     }
@@ -345,5 +353,11 @@ class Parser {
             throw ParserError.syntaxError(description: "Passed invalid arguments: \(optionalArgumentValues) to function \(functioNname)")
         }
         return optionalArgumentValues.compactMap{ $0 }
+    }
+    
+    private func executeDeferredCode() throws {
+        for tokens in self.deferredTokens.reversed() {
+            _ = try self.executeSubCode(tokens: tokens, variableRegistry: self.variableRegistry)
+        }
     }
 }

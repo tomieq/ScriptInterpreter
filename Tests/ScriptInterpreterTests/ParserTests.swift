@@ -162,6 +162,16 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 3], .integer(1))
     }
     
+    func test_deferInFunction() {
+        let console = self.setupSpy(code: "func test() { print('start') defer{ print('deferred') } defer{ print('second-deferred') }  print('middle')  print('finish') } test()")
+        XCTAssertEqual(console.output.count, 5)
+        XCTAssertEqual(console.output[safeIndex: 0], .string("start"))
+        XCTAssertEqual(console.output[safeIndex: 1], .string("middle"))
+        XCTAssertEqual(console.output[safeIndex: 2], .string("finish"))
+        XCTAssertEqual(console.output[safeIndex: 3], .string("second-deferred"))
+        XCTAssertEqual(console.output[safeIndex: 4], .string("deferred"))
+    }
+    
     func test_updateConstant() {
         self.expectError(code: "let pi = 3.14; pi = 5.5")
     }
