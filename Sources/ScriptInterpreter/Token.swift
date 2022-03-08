@@ -27,6 +27,7 @@ enum Token: Equatable {
     case `switch`
     case `case`
     case `default`
+    case `defer`
     case whileLoop
     case forLoop
     case blockOpen
@@ -77,6 +78,7 @@ extension Token {
         generators.append(TokenGenerator(regex: "switch\\b", resolver: { _ in [.switch] }))
         generators.append(TokenGenerator(regex: "case\\b", resolver: { _ in [.case] }))
         generators.append(TokenGenerator(regex: "default\\b", resolver: { _ in [.default] }))
+        generators.append(TokenGenerator(regex: "defer\\b", resolver: { _ in [.defer] }))
         generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
         generators.append(TokenGenerator(regex: ":", resolver: { _ in [.colon] }))
         generators.append(TokenGenerator(regex: "\\+\\+", resolver: { _ in [.increment] }))
@@ -146,6 +148,8 @@ extension Token: CustomDebugStringConvertible {
             return "case"
         case .default:
             return "default"
+        case .defer:
+            return "defer"
         case .boolLiteral(let value):
             return "boolLiteral(\(value))"
         case .stringLiteral(let value):
