@@ -93,7 +93,7 @@ Above code run in ScriptInterpreter will print: 3, 10, 11, 2. Notice that you ca
 
 Look at the [ParserTests](./Tests/ScriptInterpreterTests/ParserTests.swift) - you will find more examples
 
-## Can I set variable/constant so that are accessible by the script?
+## Can I set variable/constant so that is accessible by the script?
 
 Yes, of course. You can register variable or constant that will be visible to the script:
 ```
@@ -124,7 +124,7 @@ print(i) <- this will print 90, as `i` in main loop is in different namespace th
 ```
 Above scripts will call `rotate` function 3 times
 
-## Can I have returned result from executed script?
+## Can I obtain the returned result from executed script?
 
 Yes, if your script returns any value, it will be mapped into `Value` and returned by `exec(_) function`.
 Let's say you have script like this:
@@ -143,14 +143,14 @@ if (distance > 100) {
 The returned value can be obtained by calling:
 ```
 let engine = ScriptInterpreter()
-let script = // your script here
+let script = // your script goes here
 
 let result = try engine.exec(code: script)
 ```
 
 ## Does ScriptInterpreter support String interpolation?
 
-Yes, you can use Swift-like String interpolation:
+Yes, you can use Swift-like String interpolation. Sample script:
 ```
 var color = "blue"
 var text = "The walls are \(color)"
@@ -174,3 +174,25 @@ updateNumber(8)
 return number
 ```
 Execution of above code will return 8
+
+## Defer statement
+
+ScriptInterpreter supports `defer` statement, that will be called at the end, before `return`. In works exactly like native Swift's `defer`.
+Example script:
+```
+var number = 1
+
+func sample() {
+    defer {
+        number = 3
+    }
+    defer {
+        number = 5
+    }
+    number = 10
+}
+
+sample()
+return number
+```
+Execution of above code will return 3
