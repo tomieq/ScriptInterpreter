@@ -1,6 +1,6 @@
 //
 //  ArrayTests.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 29/01/2022.
 //
@@ -10,7 +10,6 @@ import XCTest
 @testable import ScriptInterpreter
 
 class ArrayTests: XCTestCase {
-    
     func test_splitByToken() {
         let tokens: [Token] = [.variable(name: "age"), .equal, .intLiteral(38), .semicolon, .function(name: "yell"), .semicolon, .variable(name: "age"), .increment]
         let splitted = tokens.split(by: .semicolon)

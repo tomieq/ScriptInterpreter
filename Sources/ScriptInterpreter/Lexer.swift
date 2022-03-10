@@ -1,6 +1,6 @@
 //
 //  Lexer.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 04/10/2021.
 //
@@ -39,10 +39,8 @@ class Lexer {
         }
         self.tokens = tokens
     }
-    
 
     private static func getNextMatch(code: String) throws -> (resolver: TokenResolver, matchingString: String)? {
-        
         for tokenGenerator in Token.generators {
             if let matchingString = try code.getMatchingString(regex: tokenGenerator.regex) {
                 return (tokenGenerator.resolver, matchingString)

@@ -1,6 +1,6 @@
 //
 //  CommentRemover.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 04/02/2022.
 //
@@ -15,11 +15,11 @@ class CommentRemover {
         copy = self.removeByRegex(input: copy, regex: "\\/\\/([^\\r\\n]*)")
         return copy
     }
-    
+
     init(script: String) {
         self.original = script
     }
-    
+
     private func removeByRegex(input: String, regex: String) -> String {
         do {
             let expression = try NSRegularExpression(pattern: regex, options: [])

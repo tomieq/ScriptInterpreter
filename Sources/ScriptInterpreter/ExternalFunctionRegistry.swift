@@ -1,6 +1,6 @@
 //
 //  ExternalFunctionRegistry.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
@@ -24,39 +24,39 @@ extension ExternalFunctionRegistryError: LocalizedError {
 }
 
 class ExternalFunctionRegistry {
-    private var functions: [String:() throws ->()] = [:]
-    private var functionsWithArgs: [String:([Value]) throws ->()] = [:]
-    private var returningFunctions: [String:() throws -> Value] = [:]
-    private var returningFunctionsWithArgs: [String:([Value]) throws -> Value] = [:]
-    
-    func registerFunc(name: String, function: @escaping () throws ->()) throws {
+    private var functions: [String: () throws -> ()] = [:]
+    private var functionsWithArgs: [String: ([Value]) throws -> ()] = [:]
+    private var returningFunctions: [String: () throws -> Value] = [:]
+    private var returningFunctionsWithArgs: [String: ([Value]) throws -> Value] = [:]
+
+    func registerFunc(name: String, function: @escaping () throws -> ()) throws {
         if self.functions.keys.contains(name) {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.functions[name] = function
     }
-    
+
     func registerFunc(name: String, function: @escaping () throws -> Value) throws {
         if self.functions.keys.contains(name) {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.returningFunctions[name] = function
     }
-    
-    func registerFunc(name: String, function: @escaping ([Value]) throws ->()) throws {
+
+    func registerFunc(name: String, function: @escaping ([Value]) throws -> ()) throws {
         if self.functionsWithArgs.keys.contains(name) {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.functionsWithArgs[name] = function
     }
-    
+
     func registerFunc(name: String, function: @escaping ([Value]) throws -> Value) throws {
         if self.functionsWithArgs.keys.contains(name) {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.returningFunctionsWithArgs[name] = function
     }
-    
+
     func callFunction(name: String) throws -> Value? {
         if let function = self.functions[name] {
             try function()
@@ -75,7 +75,7 @@ class ExternalFunctionRegistry {
         } else if let function = self.returningFunctionsWithArgs[name] {
             return try function(args)
         } else {
-            throw ExternalFunctionRegistryError.functionNotFound(signature: "\(name)(\(args.map{$0.type}.joined(separator: ", ")))")
+            throw ExternalFunctionRegistryError.functionNotFound(signature: "\(name)(\(args.map{ $0.type }.joined(separator: ", ")))")
         }
     }
 }

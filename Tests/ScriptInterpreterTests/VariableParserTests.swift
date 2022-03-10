@@ -1,6 +1,6 @@
 //
 //  VariableParserTests.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
@@ -10,9 +10,7 @@ import XCTest
 @testable import ScriptInterpreter
 
 class VariableParserTests: XCTestCase {
-
     func test_initNilVariable() {
-        
         let script = "var distance;"
         do {
             let lexer = try Lexer(code: script)
@@ -26,7 +24,6 @@ class VariableParserTests: XCTestCase {
     }
 
     func test_initBoolVariable() {
-        
         let script = "var agreed = false;"
         do {
             let lexer = try Lexer(code: script)
@@ -38,9 +35,8 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_initIntegerVariable() {
-        
         let script = "var weight = 82;"
         do {
             let lexer = try Lexer(code: script)
@@ -52,9 +48,8 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_initStringVariable() {
-        
         let script = "var name = \"Thomas\";"
         do {
             let lexer = try Lexer(code: script)
@@ -66,9 +61,8 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_initFloatVariable() {
-        
         let script = "var length = 50.9;"
         do {
             let lexer = try Lexer(code: script)
@@ -80,9 +74,8 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
-    func test_initMultipleNilVariables() {
 
+    func test_initMultipleNilVariables() {
         let script = "var milage, color, make;"
         do {
             let lexer = try Lexer(code: script)
@@ -97,7 +90,7 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_initMixedVariables() {
         let script = "var age = 38, style, flag = true;"
         do {
@@ -112,7 +105,7 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_assignVariableFromOtherVariable() {
         let script = "var ageCopy = age;"
         do {
@@ -127,7 +120,7 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_consumedTokens() {
         let script = "var age = 20, startTime = age;"
         do {

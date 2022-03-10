@@ -1,6 +1,6 @@
 //
 //  VariableParser.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
@@ -22,13 +22,12 @@ extension VariableParserError: LocalizedError {
 
 class VariableParser {
     private let tokens: [Token]
-    
+
     init(tokens: [Token]) {
         self.tokens = tokens
     }
-    
-    func parse(variableDefinitionIndex index: Int, into variableRegistry: VariableRegistry) throws -> Int {
 
+    func parse(variableDefinitionIndex index: Int, into variableRegistry: VariableRegistry) throws -> Int {
         var currentIndex = index
         guard let token = self.tokens[safeIndex: currentIndex] else {
             throw VariableParserError.syntaxError(description: "Token not found at index \(index)")
@@ -37,7 +36,6 @@ class VariableParser {
         switch token {
         case .variableDefinition(let definitionType):
             while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerValue) {
-                
                 currentIndex += data.usedTokens
                 if !data.shouldParseFurther {
                     break
@@ -45,7 +43,6 @@ class VariableParser {
             }
         case .constantDefinition(let definitionType):
             while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerConstant) {
-                
                 currentIndex += data.usedTokens
                 if !data.shouldParseFurther {
                     break
@@ -56,7 +53,7 @@ class VariableParser {
         }
         return currentIndex - index
     }
-    
+
     private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFuncion: (String, Value?) throws -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
             throw VariableParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
@@ -64,7 +61,6 @@ class VariableParser {
         var usedTokens = 1
         var shouldParseFurther = false
         if let nextToken = self.tokens[safeIndex: pos + 1], case .assign = nextToken {
-            
             guard let valueToken = self.tokens[safeIndex: pos + 2] else {
                 throw VariableParserError.syntaxError(description: "Value not found for assigning variable \(name)")
             }

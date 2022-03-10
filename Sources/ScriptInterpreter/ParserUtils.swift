@@ -1,6 +1,6 @@
 //
 //  ParserUtils.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
@@ -41,20 +41,20 @@ class ParserUtils {
             return nil
         }
     }
-    
+
     static func getTokensBetweenBrackets(indexOfOpeningBracket index: Int, tokens: [Token]) throws -> [Token] {
         return try ParserUtils.getTokensClosedBetween(searchable: tokens, openingIndex: index, barriers: (.bracketOpen, .bracketClose))
     }
-    
+
     static func getTokensForBlock(indexOfOpeningBlock index: Int, tokens: [Token]) throws -> [Token] {
         return try ParserUtils.getTokensClosedBetween(searchable: tokens, openingIndex: index, barriers: (.blockOpen, .blockClose))
     }
-    
+
     private static func getTokensClosedBetween(searchable tokens: [Token], openingIndex index: Int, barriers: (start: Token, end: Token)) throws -> [Token] {
         guard let openingToken = tokens[safeIndex: index] else {
             throw ParserUtilsError.invalidOpeningToken(given: nil, expected: barriers.start)
         }
-        
+
         guard case barriers.start = openingToken else {
             throw ParserUtilsError.invalidOpeningToken(given: openingToken, expected: barriers.start)
         }
@@ -72,7 +72,7 @@ class ParserUtils {
                 break
             }
             result.append(nextToken)
-            
+
             nextIndex += 1
         }
         return result

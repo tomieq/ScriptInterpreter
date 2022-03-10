@@ -1,6 +1,6 @@
 //
 //  Parser.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
@@ -44,11 +44,11 @@ class Parser {
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
     private var currentIndex = 0
-    
+
     private var state = ParserState.idle
     private var tokens: [Token]
     private var deferredTokens: [[Token]] = []
-    
+
     init(tokens: [Token],
          externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(),
          localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(),
@@ -58,7 +58,7 @@ class Parser {
         self.variableRegistry = variableRegistry
         self.tokens = tokens
     }
-    
+
     @discardableResult
     func execute() throws -> ParserExecResult {
         self.state = .working
@@ -117,7 +117,7 @@ class Parser {
                 self.currentIndex += result.consumedTokens
             case .forLoop:
                 let result = try blockParser.getForBlock(forTokenIndex: self.currentIndex)
-                
+
                 guard case .variableDefinition(_) = result.initialState[safeIndex: 0],
                       case .variable(let controlVariableName) = result.initialState[safeIndex: 1],
                       case .assign = result.initialState[safeIndex: 2],
@@ -147,7 +147,7 @@ class Parser {
             case .switch:
                 let switchBlock = try blockParser.getSwitchBlock(switchTokenIndex: self.currentIndex)
                 self.currentIndex += switchBlock.consumedTokens
-                
+
                 var controlValue: Value?
                 if switchBlock.variable.isFunction {
                     controlValue = try self.executeSubCodendAndGetValue(tokens: [.return].withAppended(switchBlock.variable), variableRegistry: self.variableRegistry)
@@ -227,7 +227,7 @@ class Parser {
         self.state = .finished
         return .finished
     }
-    
+
     private func invokeFunctionAndGetValue() throws -> Value {
         let result = try self.invokeFunction()
         switch result {
@@ -254,7 +254,7 @@ class Parser {
             } else {
                 return .return(try self.externalFunctionRegistry.callFunction(name: name))
             }
-            
+
         case .functionWithArguments(let name):
             self.currentIndex += 1
             let argumentTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex, tokens: self.tokens)
@@ -274,17 +274,17 @@ class Parser {
             throw ParserError.internalError(description: "invokeFunction called on \(token) token")
         }
     }
-    
+
     func abort(reason: String) {
         self.state = .aborted(reason)
     }
-    
+
     private func variableOperation(variableName: String) throws {
         self.currentIndex += 1
         guard let nextToken = self.tokens[safeIndex: self.currentIndex] else {
             return
         }
-        
+
         switch nextToken {
         case .assign:
             self.currentIndex += 1
@@ -325,14 +325,14 @@ class Parser {
             break
         }
     }
-    
+
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
         let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry)
         let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry)
         let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
         return try parser.execute()
     }
-    
+
     private func executeSubCodendAndGetValue(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> Value {
         let result = try self.executeSubCode(tokens: tokens, variableRegistry: variableRegistry)
         switch result {
@@ -345,7 +345,7 @@ class Parser {
             return value
         }
     }
-    
+
     private func getValidatedArguments(_ tokens: [Token], for functioNname: String) throws -> [Value] {
         let arguments = tokens.filter { $0 != .comma }
         let optionalArgumentValues = arguments.map { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
@@ -354,7 +354,7 @@ class Parser {
         }
         return optionalArgumentValues.compactMap{ $0 }
     }
-    
+
     private func executeDeferredCode() throws {
         for tokens in self.deferredTokens.reversed() {
             _ = try self.executeSubCode(tokens: tokens, variableRegistry: self.variableRegistry)

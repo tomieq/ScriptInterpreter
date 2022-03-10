@@ -1,6 +1,6 @@
 //
 //  ValueComparator.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 29/01/2022.
 //
@@ -27,7 +27,6 @@ enum ValueComparatorResult {
 }
 
 class ValueComparator {
-    
     func compare(left: Token, right: Token, variableRegistry: VariableRegistry) throws -> ValueComparatorResult {
         switch (left, right) {
         case (.intLiteral(let leftValue), .intLiteral(let rightValue)):
@@ -81,8 +80,8 @@ class ValueComparator {
             throw ValueComparatorError.runtimeError(info: "\(left) and \(right) cannot be compared")
         }
     }
-    
-    private func prepareResult<T:Comparable>(left: T, right: T) -> ValueComparatorResult {
+
+    private func prepareResult<T: Comparable>(left: T, right: T) -> ValueComparatorResult {
         if left == right {
             return .equal
         }
@@ -91,7 +90,7 @@ class ValueComparator {
         }
         return .rightGreater
     }
-    
+
     private func prepareResult(left: Value, right: Value) throws -> ValueComparatorResult {
         switch (left, right) {
         case (.integer(let leftValue), .integer(let rightValue)):

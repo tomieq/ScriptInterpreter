@@ -1,6 +1,6 @@
 //
 //  FunctionParserTests.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 02/02/2022.
 //
@@ -10,7 +10,6 @@ import XCTest
 @testable import ScriptInterpreter
 
 class FunctionParserTests: XCTestCase {
-    
     func test_emptyFunctionWithoutArguments() {
         let functionRegistry = self.getFunctionRegistry(code: "func rotate() { }")
         let function = functionRegistry.getFunction(name: "rotate")
@@ -19,7 +18,7 @@ class FunctionParserTests: XCTestCase {
         XCTAssertEqual(function?.argumentNames, [])
         XCTAssertEqual(function?.body, [])
     }
-    
+
     func test_functionWithoutArguments() {
         let functionRegistry = self.getFunctionRegistry(code: "func escalate() { print(4) }")
         let function = functionRegistry.getFunction(name: "escalate")
@@ -28,7 +27,7 @@ class FunctionParserTests: XCTestCase {
         XCTAssertEqual(function?.argumentNames, [])
         XCTAssertEqual(function?.body, [.functionWithArguments(name: "print"), .bracketOpen, .intLiteral(4), .bracketClose])
     }
-    
+
     func test_emptyFunctionWithArguments() {
         let functionRegistry = self.getFunctionRegistry(code: "func add(a, b) { }")
         let function = functionRegistry.getFunction(name: "add")
@@ -37,7 +36,7 @@ class FunctionParserTests: XCTestCase {
         XCTAssertEqual(function?.argumentNames, ["a", "b"])
         XCTAssertEqual(function?.body, [])
     }
-    
+
     func test_functionWithArguments() {
         let functionRegistry = self.getFunctionRegistry(code: "func sleep(seconds) { wait(seconds) }")
         let function = functionRegistry.getFunction(name: "sleep")
@@ -46,7 +45,7 @@ class FunctionParserTests: XCTestCase {
         XCTAssertEqual(function?.argumentNames, ["seconds"])
         XCTAssertEqual(function?.body, [.functionWithArguments(name: "wait"), .bracketOpen, .variable(name: "seconds"), .bracketClose])
     }
-    
+
     private func getFunctionRegistry(code: String) -> LocalFunctionRegistry {
         let functionRegistry = LocalFunctionRegistry()
         do{

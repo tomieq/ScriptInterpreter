@@ -1,6 +1,6 @@
 //
 //  BlockParser.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 29/01/2022.
 //
@@ -47,15 +47,15 @@ struct SwitchParserResult {
 
 class BlockParser {
     private let tokens: [Token]
-    
+
     init(tokens: [Token]) {
         self.tokens = tokens
     }
-    
+
     func getIfBlock(ifTokenIndex index: Int) throws -> BlockParserResult {
         return try self.getBlock(tokenIndex: index, token: .ifStatement)
     }
-    
+
     func getWhileBlock(whileTokenIndex index: Int) throws -> BlockParserResult {
         let result = try self.getBlock(tokenIndex: index, token: .whileLoop)
         guard result.elseTokens == nil else {
@@ -63,7 +63,7 @@ class BlockParser {
         }
         return result
     }
-    
+
     func getForBlock(forTokenIndex index: Int) throws -> ForLoopParserResult {
         let result = try self.getBlock(tokenIndex: index, token: .forLoop)
         guard result.elseTokens == nil else {
@@ -78,7 +78,7 @@ class BlockParser {
         let finalExpression = statementTokens[2]
         return ForLoopParserResult(initialState: initialState, condition: condition, finalExpression: finalExpression, body: result.mainTokens, consumedTokens: result.consumedTokens)
     }
-    
+
     private func getBlock(tokenIndex index: Int, token: Token) throws -> BlockParserResult {
         guard let entryToken = self.tokens[safeIndex: index] else {
             throw BlockParserError.invalidTokenPosition(found: nil, expected: token)
@@ -87,21 +87,21 @@ class BlockParser {
             throw BlockParserError.invalidTokenPosition(found: entryToken, expected: token)
         }
         var currentIndex = index + 1
-        let conditionTokens  = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
+        let conditionTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
         currentIndex += conditionTokens.count + 2
         let mainTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
         currentIndex += mainTokens.count + 2
-        var elseTokens: [Token]? = nil
+        var elseTokens: [Token]?
 
         if let elseToken = self.tokens[safeIndex: currentIndex], case .elseStatement = elseToken {
             currentIndex += 1
-            elseTokens =  try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
+            elseTokens = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
             currentIndex += (elseTokens?.count ?? 0) + 2
         }
         let result = BlockParserResult(conditionTokens: conditionTokens, mainTokens: mainTokens, elseTokens: elseTokens, consumedTokens: currentIndex - index)
         return result
     }
-    
+
     func getSwitchBlock(switchTokenIndex index: Int) throws -> SwitchParserResult {
         guard let entryToken = self.tokens[safeIndex: index] else {
             throw BlockParserError.invalidTokenPosition(found: nil, expected: .switch)
@@ -123,10 +123,10 @@ class BlockParser {
             currentIndex += 2
         }
         currentIndex += 1
-        
+
         var defaultTokens: [Token] = []
         var cases: [Token: [Token]] = [:]
-        
+
         let body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
         currentIndex += body.count + 2
         let splitted = body.split(by: .case)
@@ -140,7 +140,7 @@ class BlockParser {
                 throw BlockParserError.syntaxError(info: "Case entry must be a literal")
             }
             cases[keyToken] = statements[safeIndex: 1] ?? []
-            
+
             if let potentialDefaultTokens = parts[safeIndex: 1] {
                 defaultTokens = potentialDefaultTokens.split(by: .colon)[safeIndex: 1] ?? []
             }

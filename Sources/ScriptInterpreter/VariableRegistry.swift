@@ -1,6 +1,6 @@
 //
 //  VariableRegistry.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
@@ -31,7 +31,7 @@ extension VariableRegistryError: LocalizedError {
 
 fileprivate struct ValueContainer {
     var value: Value?
-    
+
     init(_ value: Value?) {
         self.value = value
     }
@@ -41,23 +41,23 @@ class VariableRegistry {
     private let topVariableRegistry: VariableRegistry?
     private var values: [String: ValueContainer] = [:]
     private var constantNames: [String] = []
-    
+
     init(topVariableRegistry: VariableRegistry? = nil) {
         self.topVariableRegistry = topVariableRegistry
     }
-    
+
     func registerValue(name: String, value: Value?) throws {
         if value != nil, self.values[name] != nil {
             throw VariableRegistryError.registerTheSameVariable(name: name)
         }
         self.values[name] = ValueContainer(value)
     }
-    
+
     func registerConstant(name: String, value: Value?) throws {
         try self.registerValue(name: name, value: value)
         self.constantNames.append(name)
     }
-    
+
     func updateValue(name: String, value: Value?) throws {
         if let oldValue = self.values[name] {
             if self.constantNames.contains(name) {
@@ -77,21 +77,21 @@ class VariableRegistry {
         }
         throw VariableRegistryError.valueDoesNotExist(name: name)
     }
-    
+
     func getValue(name: String) -> Value? {
         return self.values[name]?.value ?? self.topVariableRegistry?.getValue(name: name)
     }
-    
+
     func valueExists(name: String) -> Bool {
         return self.values[name] != nil || (self.topVariableRegistry?.valueExists(name: name) ?? false)
     }
-    
-    func memoryDump() -> [String:Value] {
-        var dump: [String:Value] = self.topVariableRegistry?.memoryDump() ??  [:]
-        self.values.forEach{ (key, value) in  dump[key] = value.value}
+
+    func memoryDump() -> [String: Value] {
+        var dump: [String: Value] = self.topVariableRegistry?.memoryDump() ?? [:]
+        self.values.forEach{ (key, value) in dump[key] = value.value }
         return dump
     }
-    
+
     func clearMemory() {
         self.values = [:]
     }

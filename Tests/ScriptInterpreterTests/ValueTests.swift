@@ -1,6 +1,6 @@
 //
 //  ValueTests.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 30/01/2022.
 //
@@ -10,7 +10,6 @@ import XCTest
 @testable import ScriptInterpreter
 
 class ValueTests: XCTestCase {
-    
     func test_interpolateValue() {
         let text = "I'm \\(age) years old and I'm \\(mood)"
         let variableRegistry = VariableRegistry()
@@ -19,5 +18,4 @@ class ValueTests: XCTestCase {
         let interpolated = try? Value.string(text).interpolated(with: variableRegistry).description
         XCTAssertEqual(interpolated, "I'm 38 years old and I'm happy")
     }
-    
 }

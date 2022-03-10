@@ -2,15 +2,13 @@ import XCTest
 @testable import ScriptInterpreter
 
 final class LexerTests: XCTestCase {
-
     func test_initWithEmptyCode() {
         XCTAssertNoThrow(try Lexer(code: ""))
     }
-    
+
     func test_basicIfStatement() {
-        
         let script = "if (true) { return false }"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssert(lexer.tokens.count == 8, "Invalid number of tokens")
@@ -18,7 +16,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_recogniseIntLiteral() {
         let script = "89 == 103"
         do {
@@ -30,7 +28,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_recogniseFloatLiteral() {
         let script = "55.13 == 90.7776"
         do {
@@ -42,7 +40,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_ifElseStatement() {
         let script = "if(true){ return 89.1 } else { return 100 }"
         do {
@@ -60,7 +58,7 @@ final class LexerTests: XCTestCase {
                 .blockOpen,
                 .return,
                 .intLiteral(100),
-                .blockClose
+                .blockClose,
             ]
             XCTAssertEqual(lexer.tokens.count, tokens.count)
             for (index, token) in tokens.enumerated() {
@@ -70,11 +68,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_variable() {
-        
         let script = " if (someVar) { return }"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens[safeIndex: 2], .variable(name: "someVar"))
@@ -82,10 +79,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_stringLiteralDoubleQuote() {
         let script = "( \"monkey\" )"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey")))
@@ -93,10 +90,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_stringLiteralDoubleQuoteWithSaxon() {
         let script = "( \"monkey's\" )"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey's")))
@@ -104,10 +101,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_stringLiteralDoubleQuoteWithInterpolatedVariable() {
         let script = "( \"monkey eats\\(variable)\" )"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey eats\\(variable)")))
@@ -115,10 +112,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_stringLiteralSingleQuote() {
         let script = "( 'monkey' )"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey")))
@@ -126,10 +123,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_stringLiteralSingleQuoteWithInterpolatedVariable() {
         let script = "( 'monkey eats \\(banana)' )"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertTrue(lexer.tokens.contains(.stringLiteral("monkey eats \\(banana)")))
@@ -137,10 +134,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_functionWithoutArgs() {
         let script = "someAction()"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens.first, .function(name: "someAction"))
@@ -148,10 +145,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_functionWithOneArgument() {
         let script = "drive(false)"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens.first, .functionWithArguments(name: "drive"))
@@ -162,10 +159,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_functionWithTwoArguments() {
         let script = "run(\"left\", 12)"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens.first, .functionWithArguments(name: "run"))
@@ -176,10 +173,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_andOperatorWithSpaces() {
         let script = "if(true && false){}"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens[2], .boolLiteral(true))
@@ -189,10 +186,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_andOperatorWithoutSpaces() {
         let script = "if(true&&false){}"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens[2], .boolLiteral(true))
@@ -202,10 +199,10 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_orOperatorWithSpaces() {
         let script = "if(true || false){}"
-        
+
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens[2], .boolLiteral(true))
@@ -215,7 +212,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_recogniseSemicolon() {
         let script = "execute();"
         do {
@@ -226,7 +223,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_variableDefinition() {
         let script = "var lenght = 380.5"
         do {
@@ -239,7 +236,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_constantVariableDefinition() {
         let script = "let age = 34"
         do {
@@ -252,7 +249,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_functionDefinition() {
         let script = "function exec() { print(\"error\") }"
         do {
@@ -264,7 +261,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_functionDefinitionWithArguments() {
         let script = "func exec(counter) { print(counter) }"
         do {
@@ -278,7 +275,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_conditionCheckWithNotEqual() {
         let script = "72 != 10"
         do {

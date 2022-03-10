@@ -1,6 +1,6 @@
 //
 //  Value.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
@@ -25,7 +25,7 @@ public enum Value {
     case integer(Int)
     case float(Float)
     case bool(Bool)
-    
+
     var type: String {
         switch self {
         case .string(_):
@@ -38,7 +38,7 @@ public enum Value {
             return "Bool"
         }
     }
-    
+
     public var asString: String {
         switch self {
         case .string(let value):
@@ -60,18 +60,21 @@ extension Value {
         }
         return false
     }
+
     public var isBool: Bool {
         if case .bool(_) = self {
             return true
         }
         return false
     }
+
     public var isInteger: Bool {
         if case .integer(_) = self {
             return true
         }
         return false
     }
+
     public var isFloat: Bool {
         if case .float(_) = self {
             return true
@@ -102,9 +105,8 @@ extension Value {
         }
         return .string(interpolated)
     }
-    
+
     private func matches(for regex: String, in text: String) -> [String] {
-        
         do {
             let regex = try NSRegularExpression(pattern: regex)
             let results = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
@@ -117,4 +119,3 @@ extension Value {
         }
     }
 }
-

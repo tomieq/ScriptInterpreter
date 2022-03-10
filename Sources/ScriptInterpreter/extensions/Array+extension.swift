@@ -1,28 +1,24 @@
 //
 //  Array+extension.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 28/01/2022.
 //
 
 import Foundation
 
-
 extension Array {
-    
     subscript(safeIndex index: Int) -> Element? {
         get {
-            guard index >= 0 && index < self.count else { return nil }
+            guard index >= 0, index < self.count else { return nil }
             return self[index]
         }
-        
+
         set(newValue) {
-            guard let value = newValue, index >= 0 && index < self.count else { return }
+            guard let value = newValue, index >= 0, index < self.count else { return }
             self[index] = value
         }
     }
-    
-    
 }
 
 extension Array where Element == Token {
@@ -50,7 +46,7 @@ extension Array {
         copy.append(elem)
         return copy
     }
-    
+
     func withAppended(_ elems: [Element]) -> [Element] {
         var copy = self
         copy.append(contentsOf: elems)

@@ -1,6 +1,6 @@
 //
 //  BlockParserTests.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 29/01/2022.
 //
@@ -9,9 +9,7 @@ import Foundation
 import XCTest
 @testable import ScriptInterpreter
 
-
 class BlockParserTests: XCTestCase {
-    
     func test_tokenAmount() {
         let code = "var size = 8; if(true) { size = 4; } else { size = 2 }"
         do {
@@ -26,7 +24,7 @@ class BlockParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_ifStatement() {
         let code = "var size = 18; if(size == 18) { size = 4; }"
         do {
@@ -47,7 +45,7 @@ class BlockParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_ifElseStatement() {
         let code = "print('Starting'); if(hour == 14 && minute == 00) { runMotor(); } else { stopMotor(); }"
         do {
@@ -73,7 +71,7 @@ class BlockParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_whileStatement() {
         let code = "var i = 0; while(i < 5) { i++ }"
         do {
@@ -93,7 +91,7 @@ class BlockParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_forStatement() {
         let code = "var i = 0; for(var i = 0; i < 5; i++) { ; }"
         do {
@@ -104,21 +102,21 @@ class BlockParserTests: XCTestCase {
             XCTAssertEqual(result.initialState[safeIndex: 1], .variable(name: "i"))
             XCTAssertEqual(result.initialState[safeIndex: 2], .assign)
             XCTAssertEqual(result.initialState[safeIndex: 3], .intLiteral(0))
-            
+
             XCTAssertEqual(result.condition[safeIndex: 0], .variable(name: "i"))
             XCTAssertEqual(result.condition[safeIndex: 1], .less)
             XCTAssertEqual(result.condition[safeIndex: 2], .intLiteral(5))
-            
+
             XCTAssertEqual(result.finalExpression[safeIndex: 0], .variable(name: "i"))
             XCTAssertEqual(result.finalExpression[safeIndex: 1], .increment)
-            
+
             XCTAssertEqual(result.body.count, 1)
             XCTAssertEqual(result.body[safeIndex: 0], .semicolon)
         } catch {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_switchSwiftStyle() {
         let code = "switch name { case 'Ryan': break; default: b++ case 'Dwigth': break; }"
         do {
@@ -126,17 +124,17 @@ class BlockParserTests: XCTestCase {
             let parser = BlockParser(tokens: lexer.tokens)
             let result = try parser.getSwitchBlock(switchTokenIndex: 0)
             XCTAssertEqual(result.variable, .variable(name: "name"))
-            
+
             XCTAssertEqual(result.cases[.stringLiteral("Ryan")], [.break, .semicolon])
             XCTAssertEqual(result.cases[.stringLiteral("Dwigth")], [.break, .semicolon])
-            
+
             XCTAssertEqual(result.default[safeIndex: 0], .variable(name: "b"))
             XCTAssertEqual(result.default[safeIndex: 1], .increment)
         } catch {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_switchJavaScriptStyle() {
         let code = "switch (name) { case 'Ryan': break; case 'Dwigth': break; default: a++ }"
         do {

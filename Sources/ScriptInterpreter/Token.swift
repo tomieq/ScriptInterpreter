@@ -1,12 +1,11 @@
 //
 //  Token.swift
-//  
+//
 //
 //  Created by Tomasz Kucharski on 04/10/2021.
 //
 
 import Foundation
-
 
 enum Token: Equatable {
     case floatLiteral(Float)
@@ -56,10 +55,10 @@ enum Token: Equatable {
 
 extension Token {
     static let generators: [TokenGenerator] = Token.makeTokenGenerators()
-    
+
     private static func makeTokenGenerators() -> [TokenGenerator] {
         var generators: [TokenGenerator] = []
-        
+
         generators.append(TokenGenerator(regex: "let\\s", resolver: { _ in [.constantDefinition(type: "let")] }))
         generators.append(TokenGenerator(regex: "const\\s", resolver: { _ in [.constantDefinition(type: "const")] }))
         generators.append(TokenGenerator(regex: "var\\s", resolver: { _ in [.variableDefinition(type: "var")] }))
@@ -109,14 +108,13 @@ extension Token {
         generators.append(TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { [.function(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()")))] }))
         generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", resolver: { [.functionWithArguments(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))), .bracketOpen] }))
         generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)", resolver: { [.variable(name: $0)] }))
-        
+
         return generators
     }
 }
 
 typealias TokenResolver = (String) -> [Token]?
 struct TokenGenerator {
-    
     let regex: String
     let resolver: TokenResolver
 }
@@ -220,7 +218,7 @@ extension Token {
         }
         return false
     }
-    
+
     var isVariable: Bool {
         if case .variable(_) = self {
             return true
