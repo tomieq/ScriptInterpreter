@@ -334,7 +334,7 @@ class Parser {
     }
 
     private func executeSubCodendAndGetValue(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> Value {
-        let result = try self.executeSubCode(tokens: tokens, variableRegistry: variableRegistry)
+        let result = try self.executeSubCode(tokens: tokens, variableRegistry: topVariableRegistry)
         switch result {
         case .finished, .break:
             throw ParserError.syntaxError(description: "function did not return any value!")
