@@ -287,4 +287,14 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
+    
+    func test_classDefinition() {
+        let script = "class User{}"
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .class(name: "User"))
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 }
