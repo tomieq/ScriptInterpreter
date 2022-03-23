@@ -58,60 +58,58 @@ extension Token {
     static let generators: [TokenGenerator] = Token.makeTokenGenerators()
 
     private static func makeTokenGenerators() -> [TokenGenerator] {
-        var generators: [TokenGenerator] = []
-
-        generators.append(TokenGenerator(regex: "let\\s", resolver: { _ in [.constantDefinition(type: "let")] }))
-        generators.append(TokenGenerator(regex: "const\\s", resolver: { _ in [.constantDefinition(type: "const")] }))
-        generators.append(TokenGenerator(regex: "var\\s", resolver: { _ in [.variableDefinition(type: "var")] }))
-        generators.append(TokenGenerator(regex: "nil\\b", resolver: { _ in [.nil] }))
-        generators.append(TokenGenerator(regex: "null\\b", resolver: { _ in [.nil] }))
-        generators.append(TokenGenerator(regex: "Null\\b", resolver: { _ in [.nil] }))
-        generators.append(TokenGenerator(regex: "function\\s", resolver: { _ in [.functionDefinition(type: "function")] }))
-        generators.append(TokenGenerator(regex: "func\\s", resolver: { _ in [.functionDefinition(type: "func")] }))
-        generators.append(TokenGenerator(regex: "class\\s[a-zA-Z0-9_]+", resolver: { [.class(name: $0.trimming("class "))] }))
-        generators.append(TokenGenerator(regex: "break\\b", resolver: { _ in [.break] }))
-        generators.append(TokenGenerator(regex: "return\\b", resolver: { _ in [.return] }))
-        generators.append(TokenGenerator(regex: "true\\b", resolver: { _ in [.boolLiteral(true)] }))
-        generators.append(TokenGenerator(regex: "false\\b", resolver: { _ in [.boolLiteral(false)] }))
-        generators.append(TokenGenerator(regex: "if\\b", resolver: { _ in [.ifStatement] }))
-        generators.append(TokenGenerator(regex: "while\\b", resolver: { _ in [.whileLoop] }))
-        generators.append(TokenGenerator(regex: "for\\b", resolver: { _ in [.forLoop] }))
-        generators.append(TokenGenerator(regex: "switch\\b", resolver: { _ in [.switch] }))
-        generators.append(TokenGenerator(regex: "case\\b", resolver: { _ in [.case] }))
-        generators.append(TokenGenerator(regex: "default\\b", resolver: { _ in [.default] }))
-        generators.append(TokenGenerator(regex: "defer\\b", resolver: { _ in [.defer] }))
-        generators.append(TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }))
-        generators.append(TokenGenerator(regex: ":", resolver: { _ in [.colon] }))
-        generators.append(TokenGenerator(regex: "\\+\\+", resolver: { _ in [.increment] }))
-        generators.append(TokenGenerator(regex: "\\-\\-", resolver: { _ in [.decrement] }))
-        generators.append(TokenGenerator(regex: "\\+", resolver: { _ in [.add] }))
-        generators.append(TokenGenerator(regex: "\\-", resolver: { _ in [.sublime] }))
-        generators.append(TokenGenerator(regex: "&&", resolver: { _ in [.andOperator] }))
-        generators.append(TokenGenerator(regex: "and\\b", resolver: { _ in [.andOperator] }))
-        generators.append(TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }))
-        generators.append(TokenGenerator(regex: "or\\b", resolver: { _ in [.orOperator] }))
-        generators.append(TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }))
-        generators.append(TokenGenerator(regex: "\\}", resolver: { _ in [.blockClose] }))
-        generators.append(TokenGenerator(regex: "<=", resolver: { _ in [.lessOrEqual] }))
-        generators.append(TokenGenerator(regex: ">=", resolver: { _ in [.greaterOrEqual] }))
-        generators.append(TokenGenerator(regex: "<", resolver: { _ in [.less] }))
-        generators.append(TokenGenerator(regex: ">", resolver: { _ in [.greater] }))
-        generators.append(TokenGenerator(regex: "==", resolver: { _ in [.equal] }))
-        generators.append(TokenGenerator(regex: "\\!=", resolver: { _ in [.notEqual] }))
-        generators.append(TokenGenerator(regex: ",", resolver: { _ in [.comma] }))
-        generators.append(TokenGenerator(regex: "else\\b", resolver: { _ in [.elseStatement] }))
-        generators.append(TokenGenerator(regex: "=", resolver: { _ in [.assign] }))
-        generators.append(TokenGenerator(regex: "\\(", resolver: { _ in [.bracketOpen] }))
-        generators.append(TokenGenerator(regex: "\\)", resolver: { _ in [.bracketClose] }))
-        generators.append(TokenGenerator(regex: "\\-?([0-9]*\\.[0-9]*)", resolver: { [.floatLiteral(Float($0)!)] }))
-        generators.append(TokenGenerator(regex: "(\\d++)(?!\\.)", resolver: { [.intLiteral(Int($0)!)] }))
-        generators.append(TokenGenerator(regex: "'[^']*'", resolver: { [.stringLiteral($0.trimming("'"))] }))
-        generators.append(TokenGenerator(regex: "\"[^\"]*\"", resolver: { [.stringLiteral($0.trimming("\""))] }))
-        generators.append(TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { [.function(name: $0.trimming("()"))] }))
-        generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", resolver: { [.functionWithArguments(name: $0.trimming("()")), .bracketOpen] }))
-        generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)", resolver: { [.variable(name: $0)] }))
-
-        return generators
+        return [
+            TokenGenerator(regex: "let\\s", resolver: { _ in [.constantDefinition(type: "let")] }),
+            TokenGenerator(regex: "const\\s", resolver: { _ in [.constantDefinition(type: "const")] }),
+            TokenGenerator(regex: "var\\s", resolver: { _ in [.variableDefinition(type: "var")] }),
+            TokenGenerator(regex: "nil\\b", resolver: { _ in [.nil] }),
+            TokenGenerator(regex: "null\\b", resolver: { _ in [.nil] }),
+            TokenGenerator(regex: "Null\\b", resolver: { _ in [.nil] }),
+            TokenGenerator(regex: "function\\s", resolver: { _ in [.functionDefinition(type: "function")] }),
+            TokenGenerator(regex: "func\\s", resolver: { _ in [.functionDefinition(type: "func")] }),
+            TokenGenerator(regex: "class\\s[a-zA-Z0-9_]+", resolver: { [.class(name: $0.trimming("class "))] }),
+            TokenGenerator(regex: "break\\b", resolver: { _ in [.break] }),
+            TokenGenerator(regex: "return\\b", resolver: { _ in [.return] }),
+            TokenGenerator(regex: "true\\b", resolver: { _ in [.boolLiteral(true)] }),
+            TokenGenerator(regex: "false\\b", resolver: { _ in [.boolLiteral(false)] }),
+            TokenGenerator(regex: "if\\b", resolver: { _ in [.ifStatement] }),
+            TokenGenerator(regex: "while\\b", resolver: { _ in [.whileLoop] }),
+            TokenGenerator(regex: "for\\b", resolver: { _ in [.forLoop] }),
+            TokenGenerator(regex: "switch\\b", resolver: { _ in [.switch] }),
+            TokenGenerator(regex: "case\\b", resolver: { _ in [.case] }),
+            TokenGenerator(regex: "default\\b", resolver: { _ in [.default] }),
+            TokenGenerator(regex: "defer\\b", resolver: { _ in [.defer] }),
+            TokenGenerator(regex: ";", resolver: { _ in [.semicolon] }),
+            TokenGenerator(regex: ":", resolver: { _ in [.colon] }),
+            TokenGenerator(regex: "\\+\\+", resolver: { _ in [.increment] }),
+            TokenGenerator(regex: "\\-\\-", resolver: { _ in [.decrement] }),
+            TokenGenerator(regex: "\\+", resolver: { _ in [.add] }),
+            TokenGenerator(regex: "\\-", resolver: { _ in [.sublime] }),
+            TokenGenerator(regex: "&&", resolver: { _ in [.andOperator] }),
+            TokenGenerator(regex: "and\\b", resolver: { _ in [.andOperator] }),
+            TokenGenerator(regex: "\\|\\|", resolver: { _ in [.orOperator] }),
+            TokenGenerator(regex: "or\\b", resolver: { _ in [.orOperator] }),
+            TokenGenerator(regex: "\\{", resolver: { _ in [.blockOpen] }),
+            TokenGenerator(regex: "\\}", resolver: { _ in [.blockClose] }),
+            TokenGenerator(regex: "<=", resolver: { _ in [.lessOrEqual] }),
+            TokenGenerator(regex: ">=", resolver: { _ in [.greaterOrEqual] }),
+            TokenGenerator(regex: "<", resolver: { _ in [.less] }),
+            TokenGenerator(regex: ">", resolver: { _ in [.greater] }),
+            TokenGenerator(regex: "==", resolver: { _ in [.equal] }),
+            TokenGenerator(regex: "\\!=", resolver: { _ in [.notEqual] }),
+            TokenGenerator(regex: ",", resolver: { _ in [.comma] }),
+            TokenGenerator(regex: "else\\b", resolver: { _ in [.elseStatement] }),
+            TokenGenerator(regex: "=", resolver: { _ in [.assign] }),
+            TokenGenerator(regex: "\\(", resolver: { _ in [.bracketOpen] }),
+            TokenGenerator(regex: "\\)", resolver: { _ in [.bracketClose] }),
+            TokenGenerator(regex: "\\-?([0-9]*\\.[0-9]*)", resolver: { [.floatLiteral(Float($0)!)] }),
+            TokenGenerator(regex: "(\\d++)(?!\\.)", resolver: { [.intLiteral(Int($0)!)] }),
+            TokenGenerator(regex: "'[^']*'", resolver: { [.stringLiteral($0.trimming("'"))] }),
+            TokenGenerator(regex: "\"[^\"]*\"", resolver: { [.stringLiteral($0.trimming("\""))] }),
+            TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { [.function(name: $0.trimming("()"))] }),
+            TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", resolver: { [.functionWithArguments(name: $0.trimming("()")), .bracketOpen] }),
+            TokenGenerator(regex: "([a-zA-Z0-9_]+)", resolver: { [.variable(name: $0)] }),
+        ]
     }
 }
 
