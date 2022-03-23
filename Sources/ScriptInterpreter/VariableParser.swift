@@ -33,23 +33,23 @@ class VariableParser {
             throw VariableParserError.syntaxError(description: "Token not found at index \(index)")
         }
         currentIndex += 1
-        switch token {
-        case .variableDefinition(let definitionType):
-            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFunction: variableRegistry.registerValue) {
-                currentIndex += data.usedTokens
-                if !data.shouldParseFurther {
-                    break
-                }
+        
+        func controlData() throws -> (definitionType: String, func: (String, Value?) throws -> ()) {
+            switch token {
+            case .variableDefinition(let definitionType):
+                return (definitionType, variableRegistry.registerValue)
+            case .constantDefinition(let definitionType):
+                return (definitionType, variableRegistry.registerConstant)
+            default:
+                throw VariableParserError.syntaxError(description: "Inproper token found at index \(index): \(token)")
             }
-        case .constantDefinition(let definitionType):
-            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFunction: variableRegistry.registerConstant) {
-                currentIndex += data.usedTokens
-                if !data.shouldParseFurther {
-                    break
-                }
+        }
+        let controlData = try controlData()
+        while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: controlData.definitionType, variableRegistry: variableRegistry, registerFunction: controlData.func) {
+            currentIndex += data.usedTokens
+            if !data.shouldParseFurther {
+                break
             }
-        default:
-            throw VariableParserError.syntaxError(description: "Inproper token found at index \(index): \(token)")
         }
         return currentIndex - index
     }
