@@ -35,14 +35,14 @@ class VariableParser {
         currentIndex += 1
         switch token {
         case .variableDefinition(let definitionType):
-            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerValue) {
+            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFunction: variableRegistry.registerValue) {
                 currentIndex += data.usedTokens
                 if !data.shouldParseFurther {
                     break
                 }
             }
         case .constantDefinition(let definitionType):
-            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFuncion: variableRegistry.registerConstant) {
+            while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: definitionType, variableRegistry: variableRegistry, registerFunction: variableRegistry.registerConstant) {
                 currentIndex += data.usedTokens
                 if !data.shouldParseFurther {
                     break
@@ -54,7 +54,7 @@ class VariableParser {
         return currentIndex - index
     }
 
-    private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFuncion: (String, Value?) throws -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
+    private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFunction: (String, Value?) throws -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
             throw VariableParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
@@ -65,16 +65,16 @@ class VariableParser {
                 throw VariableParserError.syntaxError(description: "Value not found for assigning variable \(name)")
             }
             if case .nil = valueToken {
-                try registerFuncion(name, nil)
+                try registerFunction(name, nil)
             } else {
                 guard let value = ParserUtils.token2Value(valueToken, variableRegistry: variableRegistry) else {
                     throw VariableParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
                 }
-                try registerFuncion(name, value)
+                try registerFunction(name, value)
             }
             usedTokens += 2
         } else {
-            try registerFuncion(name, nil)
+            try registerFunction(name, nil)
         }
         let lastToken = self.tokens[safeIndex: pos + usedTokens]
         if case .comma = lastToken {
