@@ -68,7 +68,7 @@ extension Token {
         generators.append(TokenGenerator(regex: "Null\\b", resolver: { _ in [.nil] }))
         generators.append(TokenGenerator(regex: "function\\s", resolver: { _ in [.functionDefinition(type: "function")] }))
         generators.append(TokenGenerator(regex: "func\\s", resolver: { _ in [.functionDefinition(type: "func")] }))
-        generators.append(TokenGenerator(regex: "class\\s[a-zA-Z0-9_]+", resolver: { [.class(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "class ")))] }))
+        generators.append(TokenGenerator(regex: "class\\s[a-zA-Z0-9_]+", resolver: { [.class(name: $0.trimming("class "))] }))
         generators.append(TokenGenerator(regex: "break\\b", resolver: { _ in [.break] }))
         generators.append(TokenGenerator(regex: "return\\b", resolver: { _ in [.return] }))
         generators.append(TokenGenerator(regex: "true\\b", resolver: { _ in [.boolLiteral(true)] }))
@@ -105,10 +105,10 @@ extension Token {
         generators.append(TokenGenerator(regex: "\\)", resolver: { _ in [.bracketClose] }))
         generators.append(TokenGenerator(regex: "\\-?([0-9]*\\.[0-9]*)", resolver: { [.floatLiteral(Float($0)!)] }))
         generators.append(TokenGenerator(regex: "(\\d++)(?!\\.)", resolver: { [.intLiteral(Int($0)!)] }))
-        generators.append(TokenGenerator(regex: "'[^']*'", resolver: { [.stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "'")))] }))
-        generators.append(TokenGenerator(regex: "\"[^\"]*\"", resolver: { [.stringLiteral($0.trimmingCharacters(in: CharacterSet(charactersIn: "\"")))] }))
-        generators.append(TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { [.function(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()")))] }))
-        generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", resolver: { [.functionWithArguments(name: $0.trimmingCharacters(in: CharacterSet(charactersIn: "()"))), .bracketOpen] }))
+        generators.append(TokenGenerator(regex: "'[^']*'", resolver: { [.stringLiteral($0.trimming("'"))] }))
+        generators.append(TokenGenerator(regex: "\"[^\"]*\"", resolver: { [.stringLiteral($0.trimming("\""))] }))
+        generators.append(TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", resolver: { [.function(name: $0.trimming("()"))] }))
+        generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", resolver: { [.functionWithArguments(name: $0.trimming("()")), .bracketOpen] }))
         generators.append(TokenGenerator(regex: "([a-zA-Z0-9_]+)", resolver: { [.variable(name: $0)] }))
 
         return generators
