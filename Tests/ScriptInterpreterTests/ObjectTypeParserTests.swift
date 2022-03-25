@@ -75,4 +75,21 @@ class ObjectTypeParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+
+    func test_parseClassWithAttributes() {
+        let script = "class User { var age = 38; }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let registry = ObjectTypeRegistry()
+            XCTAssertNoThrow(try parser.parse(objectTypeDefinitionIndex: 0, into: registry))
+            let objectType = registry.getObjectType("User")
+            XCTAssertNotNil(objectType)
+            let attribute = objectType?.attributesRegistry.getVariable(name: "age")
+            XCTAssertNotNil(attribute)
+            XCTAssertEqual(attribute?.primitive, .integer(38))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }

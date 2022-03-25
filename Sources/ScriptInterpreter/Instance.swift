@@ -28,4 +28,13 @@ enum Instance {
             return "class.\(type)"
         }
     }
+
+    var primitive: Value? {
+        switch self {
+        case .primitive(let value):
+            return value
+        case .class(_, _):
+            return nil
+        }
+    }
 }

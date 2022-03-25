@@ -46,13 +46,18 @@ class ObjectTypeParser {
     private func parseObjectBody(tokens: [Token], name: String) throws -> ObjectType {
         var currentIndex = 0
         let functionParser = FunctionParser(tokens: tokens)
+        let variableParser = VariableParser(tokens: tokens)
 
         let methodRegistry = LocalFunctionRegistry()
+        let attributesRegistry = VariableRegistry()
 
         while let token = tokens[safeIndex: currentIndex] {
             switch token {
             case .functionDefinition(_):
                 let consumedTokens = try functionParser.parse(functionTokenIndex: currentIndex, into: methodRegistry)
+                currentIndex += consumedTokens
+            case .variableDefinition(_), .constantDefinition(_):
+                let consumedTokens = try variableParser.parse(variableDefinitionIndex: currentIndex, into: attributesRegistry)
                 currentIndex += consumedTokens
             case .semicolon:
                 currentIndex += 1
@@ -60,6 +65,6 @@ class ObjectTypeParser {
                 throw ObjectTypeParserError.syntaxError(description: "Unexpected sign found: \(token)")
             }
         }
-        return ObjectType(name: name, methodsRegistry: methodRegistry)
+        return ObjectType(name: name, attributesRegistry: attributesRegistry, methodsRegistry: methodRegistry)
     }
 }

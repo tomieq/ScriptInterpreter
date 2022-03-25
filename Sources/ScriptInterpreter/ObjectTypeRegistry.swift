@@ -21,5 +21,6 @@ class ObjectTypeRegistry {
 
 struct ObjectType {
     let name: String
+    let attributesRegistry: VariableRegistry
     let methodsRegistry: LocalFunctionRegistry
 }
