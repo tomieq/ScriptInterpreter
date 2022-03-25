@@ -29,70 +29,82 @@ extension VariableRegistryError: LocalizedError {
     }
 }
 
-fileprivate struct ValueContainer {
-    var value: Value?
+fileprivate struct VariableContainer {
+    var variable: Instance?
 
-    init(_ value: Value?) {
-        self.value = value
+    init(_ variable: Instance?) {
+        self.variable = variable
     }
 }
 
 class VariableRegistry {
     private let topVariableRegistry: VariableRegistry?
-    private var values: [String: ValueContainer] = [:]
+    private var variables: [String: VariableContainer] = [:]
     private var constantNames: [String] = []
 
     init(topVariableRegistry: VariableRegistry? = nil) {
         self.topVariableRegistry = topVariableRegistry
     }
 
-    func registerValue(name: String, value: Value?) throws {
-        if value != nil, self.values[name] != nil {
+    func registerVariable(name: String, variable: Instance?) throws {
+        if variable != nil, self.variables[name] != nil {
             throw VariableRegistryError.registerTheSameVariable(name: name)
         }
-        self.values[name] = ValueContainer(value)
+        self.variables[name] = VariableContainer(variable)
     }
 
-    func registerConstant(name: String, value: Value?) throws {
-        try self.registerValue(name: name, value: value)
+    func registerConstant(name: String, variable: Instance) throws {
+        try self.registerVariable(name: name, variable: variable)
         self.constantNames.append(name)
     }
 
-    func updateValue(name: String, value: Value?) throws {
-        if let oldValue = self.values[name] {
+    func updateVariable(name: String, variable: Instance?) throws {
+        if let oldVariableContainer = self.variables[name] {
             if self.constantNames.contains(name) {
                 throw VariableRegistryError.cannotModifyConstant(variableName: name)
             }
-            if let oldValueType = oldValue.value?.type, let newValueType = value?.type {
-                guard oldValueType == newValueType else {
-                    throw VariableRegistryError.typeMismatch(variableName: name, existingType: oldValueType, newType: newValueType)
+            if let oldVariableType = oldVariableContainer.variable?.type, let newVariableType = variable?.type {
+                guard oldVariableType == newVariableType else {
+                    throw VariableRegistryError.typeMismatch(variableName: name, existingType: oldVariableType, newType: newVariableType)
                 }
             }
-            self.values[name] = ValueContainer(value)
+            self.variables[name] = VariableContainer(variable)
             return
         }
         if let upperValueRegistry = self.topVariableRegistry {
-            try upperValueRegistry.updateValue(name: name, value: value)
+            try upperValueRegistry.updateVariable(name: name, variable: variable)
             return
         }
         throw VariableRegistryError.valueDoesNotExist(name: name)
     }
 
-    func getValue(name: String) -> Value? {
-        return self.values[name]?.value ?? self.topVariableRegistry?.getValue(name: name)
+    func getVariable(name: String) -> Instance? {
+        return self.variables[name]?.variable ?? self.topVariableRegistry?.getVariable(name: name)
     }
 
-    func valueExists(name: String) -> Bool {
-        return self.values[name] != nil || (self.topVariableRegistry?.valueExists(name: name) ?? false)
+    func variableExists(name: String) -> Bool {
+        return self.variables[name] != nil || (self.topVariableRegistry?.variableExists(name: name) ?? false)
     }
 
     func memoryDump() -> [String: Value] {
         var dump: [String: Value] = self.topVariableRegistry?.memoryDump() ?? [:]
-        self.values.forEach{ (key, value) in dump[key] = value.value }
+        self.variables.forEach{ (key, variableContainer) in
+            switch variableContainer.variable {
+            case .none:
+                break
+            case .some(let instance):
+                switch instance {
+                case .simple(let value):
+                    dump[key] = value
+                case .class(_, _):
+                    break
+                }
+            }
+        }
         return dump
     }
 
     func clearMemory() {
-        self.values = [:]
+        self.variables = [:]
     }
 }
