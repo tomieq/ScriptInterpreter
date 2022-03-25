@@ -1,6 +1,6 @@
 //
 //  ObjectTypeParserTests.swift
-//  
+//
 //
 //  Created by Tomasz on 25/03/2022.
 //
@@ -23,7 +23,7 @@ class ObjectTypeParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
-    
+
     func test_parseClassBodyWithMethodWithoutArguments() {
         let script = "class User { func isWorking() { return false } }"
         do {
@@ -37,6 +37,40 @@ class ObjectTypeParserTests: XCTestCase {
             XCTAssertNotNil(method)
             XCTAssertEqual(method?.body, [.return, .boolLiteral(false)])
             XCTAssertEqual(consumedTokens, 9)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func test_parseClassBodyWithMethodWithArguments() {
+        let script = "class User { func setAge(number) { return false } }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let registry = ObjectTypeRegistry()
+            let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
+            let objectType = registry.getObjectType("User")
+            XCTAssertNotNil(objectType)
+            let method = objectType?.methodsRegistry.getFunction(name: "setAge")
+            XCTAssertNotNil(method)
+            XCTAssertEqual(method?.argumentNames, ["number"])
+            XCTAssertEqual(consumedTokens, 12)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func test_parseClassBodyWithMultipleMethods() {
+        let script = "class User { func setAge(number) { return false } func meow() { print('meow') } }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let registry = ObjectTypeRegistry()
+            XCTAssertNoThrow(try parser.parse(objectTypeDefinitionIndex: 0, into: registry))
+            let objectType = registry.getObjectType("User")
+            XCTAssertNotNil(objectType)
+            XCTAssertNotNil(objectType?.methodsRegistry.getFunction(name: "setAge"))
+            XCTAssertNotNil(objectType?.methodsRegistry.getFunction(name: "meow"))
         } catch {
             XCTFail(error.localizedDescription)
         }
