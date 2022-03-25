@@ -19,4 +19,13 @@ enum Instance {
             return "class.\(type)"
         }
     }
+
+    var asString: String {
+        switch self {
+        case .simple(let value):
+            return value.asString
+        case .class(let type, _):
+            return "class.\(type)"
+        }
+    }
 }
