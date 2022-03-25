@@ -9,19 +9,6 @@ import Foundation
 import XCTest
 @testable import ScriptInterpreter
 
-fileprivate extension VariableRegistry {
-    
-    func getValue(name: String) -> Value? {
-        guard let variable = self.getVariable(name: name) else { return nil }
-        switch variable {
-        case .primitive(let value):
-            return value
-        case .class(_, _):
-            return nil
-        }
-    }
-}
-
 class VariableParserTests: XCTestCase {
     func test_initNilVariable() {
         let script = "var distance;"
@@ -43,7 +30,7 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0, into: variableRegistry))
-            XCTAssertEqual(variableRegistry.getValue(name: "agreed"), .bool(false))
+            XCTAssertEqual(variableRegistry.getVariable(name: "agreed")?.primitive, .bool(false))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -56,7 +43,7 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0, into: variableRegistry))
-            XCTAssertEqual(variableRegistry.getValue(name: "weight"), .integer(82))
+            XCTAssertEqual(variableRegistry.getVariable(name: "weight")?.primitive, .integer(82))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -69,7 +56,7 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0, into: variableRegistry))
-            XCTAssertEqual(variableRegistry.getValue(name: "name"), .string("Thomas"))
+            XCTAssertEqual(variableRegistry.getVariable(name: "name")?.primitive, .string("Thomas"))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -82,7 +69,7 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0, into: variableRegistry))
-            XCTAssertEqual(variableRegistry.getValue(name: "length"), .float(50.9))
+            XCTAssertEqual(variableRegistry.getVariable(name: "length")?.primitive, .float(50.9))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -112,8 +99,8 @@ class VariableParserTests: XCTestCase {
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0, into: variableRegistry))
             XCTAssertTrue(variableRegistry.variableExists(name: "style"))
-            XCTAssertEqual(variableRegistry.getValue(name: "age"), .integer(38))
-            XCTAssertEqual(variableRegistry.getValue(name: "flag"), .bool(true))
+            XCTAssertEqual(variableRegistry.getVariable(name: "age")?.primitive, .integer(38))
+            XCTAssertEqual(variableRegistry.getVariable(name: "flag")?.primitive, .bool(true))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -127,7 +114,7 @@ class VariableParserTests: XCTestCase {
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try variableRegistry.registerVariable(name: "age", variable: .primitive(.integer(20))))
             let consumedTokens = try parser.parse(variableDefinitionIndex: 0, into: variableRegistry)
-            XCTAssertEqual(variableRegistry.getValue(name: "ageCopy"), .integer(20))
+            XCTAssertEqual(variableRegistry.getVariable(name: "ageCopy")?.primitive, .integer(20))
             XCTAssertEqual(consumedTokens, 5)
         } catch {
             XCTFail(error.localizedDescription)
@@ -141,7 +128,7 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             let consumedTokens = try parser.parse(variableDefinitionIndex: 0, into: variableRegistry)
-            XCTAssertEqual(variableRegistry.getValue(name: "age"), .integer(20))
+            XCTAssertEqual(variableRegistry.getVariable(name: "age")?.primitive, .integer(20))
             XCTAssertEqual(consumedTokens, 9)
         } catch {
             XCTFail(error.localizedDescription)
