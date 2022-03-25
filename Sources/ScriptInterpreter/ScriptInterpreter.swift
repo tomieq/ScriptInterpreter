@@ -40,11 +40,11 @@ public class ScriptInterpreter {
     }
 
     public func setupVariable(name: String, value: Value) throws {
-        try self.variableRegistry.registerValue(name: name, value: value)
+        try self.variableRegistry.registerVariable(name: name, variable: .primitive(value))
     }
 
     public func setupConstant(name: String, value: Value) throws {
-        try self.variableRegistry.registerConstant(name: name, value: value)
+        try self.variableRegistry.registerConstant(name: name, variable: .primitive(value))
     }
 
     public func exec(code: String) throws -> Value? {

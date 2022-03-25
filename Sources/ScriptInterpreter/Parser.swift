@@ -126,7 +126,7 @@ class Parser {
                 }
                 // create for loop namespace and register initial value
                 let forLoopVariableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
-                try forLoopVariableRegistry.registerValue(name: controlVariableName, value: .integer(controlVariableInitialValue))
+                try forLoopVariableRegistry.registerVariable(name: controlVariableName, variable: .primitive(.integer(controlVariableInitialValue)))
                 // append statement 3 to be executed after each loop
                 var body = result.body
                 body.append(contentsOf: result.finalExpression)
@@ -265,7 +265,7 @@ class Parser {
                 guard localFunction.argumentNames.count == argumentValues.count else {
                     throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(argumentValues)")
                 }
-                try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerValue(name: name, value: argumentValues[index]) }
+                try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerVariable(name: name, variable: .primitive(argumentValues[index])) }
                 return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
             } else {
                 return .return(try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues))
@@ -295,32 +295,32 @@ class Parser {
                 guard let value = ParserUtils.token2Value(valueToken, variableRegistry: self.variableRegistry) else {
                     throw ParserError.syntaxError(description: "Right value for assign variable \(variableName) should be either literal value or variable")
                 }
-                try self.variableRegistry.updateValue(name: variableName, value: value)
+                try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(value))
                 self.currentIndex += 1
                 return
             }
             if valueToken.isFunction {
                 let value = try self.invokeFunctionAndGetValue()
-                try self.variableRegistry.updateValue(name: variableName, value: value)
+                try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(value))
                 return
             }
             throw ParserError.syntaxError(description: "Invalid syntax after `\(variableName) =` - found \(valueToken)")
         case .increment:
             self.currentIndex += 1
-            let variable = self.variableRegistry.getValue(name: variableName)
-            guard case .integer(let intValue) = variable else {
+            let variable = self.variableRegistry.getVariable(name: variableName)
+            guard case .primitive(.integer(let intValue)) = variable else {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Increment operation can be applied only for integer type, but \(type) found")
             }
-            try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue + 1))
+            try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(.integer(intValue + 1)))
         case .decrement:
             self.currentIndex += 1
-            let variable = self.variableRegistry.getValue(name: variableName)
-            guard case .integer(let intValue) = variable else {
+            let variable = self.variableRegistry.getVariable(name: variableName)
+            guard case .primitive(.integer(let intValue)) = variable else {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Decrement operation can be applied only for integer type, but \(type) found")
             }
-            try self.variableRegistry.updateValue(name: variableName, value: .integer(intValue - 1))
+            try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(.integer(intValue - 1)))
         default:
             break
         }

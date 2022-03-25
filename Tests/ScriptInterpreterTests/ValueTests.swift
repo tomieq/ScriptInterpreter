@@ -13,8 +13,8 @@ class ValueTests: XCTestCase {
     func test_interpolateValue() {
         let text = "I'm \\(age) years old and I'm \\(mood)"
         let variableRegistry = VariableRegistry()
-        XCTAssertNoThrow(try variableRegistry.registerValue(name: "age", value: .integer(38)))
-        XCTAssertNoThrow(try variableRegistry.registerValue(name: "mood", value: .string("happy")))
+        XCTAssertNoThrow(try variableRegistry.registerVariable(name: "age", variable: .primitive(.integer(38))))
+        XCTAssertNoThrow(try variableRegistry.registerVariable(name: "mood", variable: .primitive(.string("happy"))))
         let interpolated = try? Value.string(text).interpolated(with: variableRegistry).description
         XCTAssertEqual(interpolated, "I'm 38 years old and I'm happy")
     }

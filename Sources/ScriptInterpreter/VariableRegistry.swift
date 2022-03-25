@@ -53,7 +53,7 @@ class VariableRegistry {
         self.variables[name] = VariableContainer(variable)
     }
 
-    func registerConstant(name: String, variable: Instance) throws {
+    func registerConstant(name: String, variable: Instance?) throws {
         try self.registerVariable(name: name, variable: variable)
         self.constantNames.append(name)
     }
@@ -94,7 +94,7 @@ class VariableRegistry {
                 break
             case .some(let instance):
                 switch instance {
-                case .simple(let value):
+                case .primitive(let value):
                     dump[key] = value
                 case .class(_, _):
                     break

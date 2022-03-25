@@ -9,6 +9,19 @@ import Foundation
 import XCTest
 @testable import ScriptInterpreter
 
+fileprivate extension VariableRegistry {
+    
+    func getValue(name: String) -> Value? {
+        guard let variable = self.getVariable(name: name) else { return nil }
+        switch variable {
+        case .primitive(let value):
+            return value
+        case .class(_, _):
+            return nil
+        }
+    }
+}
+
 class VariableParserTests: XCTestCase {
     func test_initNilVariable() {
         let script = "var distance;"
@@ -17,7 +30,7 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0, into: variableRegistry))
-            XCTAssertTrue(variableRegistry.valueExists(name: "distance"))
+            XCTAssertTrue(variableRegistry.variableExists(name: "distance"))
         } catch {
             XCTFail(error.localizedDescription)
         }
@@ -82,9 +95,9 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             let consumedTokens = try parser.parse(variableDefinitionIndex: 0, into: variableRegistry)
-            XCTAssertTrue(variableRegistry.valueExists(name: "milage"))
-            XCTAssertTrue(variableRegistry.valueExists(name: "color"))
-            XCTAssertTrue(variableRegistry.valueExists(name: "make"))
+            XCTAssertTrue(variableRegistry.variableExists(name: "milage"))
+            XCTAssertTrue(variableRegistry.variableExists(name: "color"))
+            XCTAssertTrue(variableRegistry.variableExists(name: "make"))
             XCTAssertEqual(consumedTokens, 7)
         } catch {
             XCTFail(error.localizedDescription)
@@ -98,7 +111,7 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0, into: variableRegistry))
-            XCTAssertTrue(variableRegistry.valueExists(name: "style"))
+            XCTAssertTrue(variableRegistry.variableExists(name: "style"))
             XCTAssertEqual(variableRegistry.getValue(name: "age"), .integer(38))
             XCTAssertEqual(variableRegistry.getValue(name: "flag"), .bool(true))
         } catch {
@@ -112,7 +125,7 @@ class VariableParserTests: XCTestCase {
             let lexer = try Lexer(code: script)
             let parser = VariableParser(tokens: lexer.tokens)
             let variableRegistry = VariableRegistry()
-            XCTAssertNoThrow(try variableRegistry.registerValue(name: "age", value: .integer(20)))
+            XCTAssertNoThrow(try variableRegistry.registerVariable(name: "age", variable: .primitive(.integer(20))))
             let consumedTokens = try parser.parse(variableDefinitionIndex: 0, into: variableRegistry)
             XCTAssertEqual(variableRegistry.getValue(name: "ageCopy"), .integer(20))
             XCTAssertEqual(consumedTokens, 5)

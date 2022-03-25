@@ -98,7 +98,7 @@ extension Value {
         var interpolated = txt
         for match in self.matches(for: "\\\\\\(([a-zA-Z0-9_]+)\\)", in: txt) {
             let variableName = match.trimmingCharacters(in: CharacterSet(charactersIn: "\\()"))
-            guard let txt = variableRegistry.getValue(name: variableName)?.asString else {
+            guard let txt = variableRegistry.getVariable(name: variableName)?.asString else {
                 throw ValueError.variableNotFound(info: "Error with String interpolation. Variable \(variableName) not registered")
             }
             interpolated = interpolated.replacingOccurrences(of: "\(match)", with: txt, options: [], range: nil)

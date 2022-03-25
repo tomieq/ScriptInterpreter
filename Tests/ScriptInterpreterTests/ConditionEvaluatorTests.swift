@@ -9,6 +9,12 @@ import Foundation
 import XCTest
 @testable import ScriptInterpreter
 
+fileprivate extension VariableRegistry {
+    func registerValue(name: String, value: Value) throws {
+        try self.registerVariable(name: name, variable: .primitive(value))
+    }
+}
+
 class ConditionEvaluatorTests: XCTestCase {
     func test_emptyCondition() {
         let evaluator = ConditionEvaluator(variableRegistry: VariableRegistry())

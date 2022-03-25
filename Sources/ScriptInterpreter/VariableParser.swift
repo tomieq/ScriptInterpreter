@@ -33,11 +33,11 @@ class VariableParser {
             throw VariableParserError.syntaxError(description: "Token not found at index \(index)")
         }
         currentIndex += 1
-        
-        func controlData() throws -> (definitionType: String, func: (String, Value?) throws -> ()) {
+
+        func controlData() throws -> (definitionType: String, func: (String, Instance?) throws -> ()) {
             switch token {
             case .variableDefinition(let definitionType):
-                return (definitionType, variableRegistry.registerValue)
+                return (definitionType, variableRegistry.registerVariable)
             case .constantDefinition(let definitionType):
                 return (definitionType, variableRegistry.registerConstant)
             default:
@@ -54,7 +54,7 @@ class VariableParser {
         return currentIndex - index
     }
 
-    private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFunction: (String, Value?) throws -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
+    private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFunction: (String, Instance?) throws -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
             throw VariableParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
@@ -70,7 +70,7 @@ class VariableParser {
                 guard let value = ParserUtils.token2Value(valueToken, variableRegistry: variableRegistry) else {
                     throw VariableParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
                 }
-                try registerFunction(name, value)
+                try registerFunction(name, .primitive(value))
             }
             usedTokens += 2
         } else {
