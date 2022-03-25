@@ -287,7 +287,7 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
-    
+
     func test_classDefinition() {
         let script = "class User{}"
         do {
@@ -295,6 +295,20 @@ final class LexerTests: XCTestCase {
             XCTAssertEqual(lexer.tokens[safeIndex: 0], .class(name: "User"))
             XCTAssertEqual(lexer.tokens[safeIndex: 1], .blockOpen)
             XCTAssertEqual(lexer.tokens[safeIndex: 2], .blockClose)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
+
+    func test_classDefinitionWithExplicitInit() {
+        let script = "class User { init() { 12} }"
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .class(name: "User"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 1], .blockOpen)
+            XCTAssertEqual(lexer.tokens[safeIndex: 2], .functionDefinition(type: "init"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 3], .function(name: "init"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 4], .blockOpen)
         } catch {
             XCTFail("\(error)")
         }

@@ -16,6 +16,7 @@ enum Token: Equatable {
     case constantDefinition(type: String)
     case variable(name: String)
     case `class`(name: String)
+    case constructor(type: String)
     case `nil`
     case assign
     case add
@@ -68,6 +69,8 @@ extension Token {
             TokenGenerator(regex: "function\\s", { _ in [.functionDefinition(type: "function")] }),
             TokenGenerator(regex: "func\\s", { _ in [.functionDefinition(type: "func")] }),
             TokenGenerator(regex: "class\\s[a-zA-Z0-9_]+", { [.class(name: $0.trimming("class "))] }),
+            TokenGenerator(regex: "init\\(\\)", { _ in [.functionDefinition(type: "init"), .function(name: "init")] }),
+            TokenGenerator(regex: "constructor\\(\\)", { _ in [.functionDefinition(type: "constructor"), .function(name: "init")] }),
             TokenGenerator(regex: "break\\b", { _ in [.break] }),
             TokenGenerator(regex: "return\\b", { _ in [.return] }),
             TokenGenerator(regex: "true\\b", { _ in [.boolLiteral(true)] }),
@@ -149,6 +152,8 @@ extension Token: CustomDebugStringConvertible {
             return "switch"
         case .case:
             return "case"
+        case .constructor(let type):
+            return "constructor(\(type)"
         case .default:
             return "default"
         case .defer:
