@@ -21,5 +21,5 @@ class ObjectTypeRegistry {
 
 struct ObjectType {
     let name: String
-    let methods: [String: [LocalFunction]]
+    let methodsRegistry: LocalFunctionRegistry
 }

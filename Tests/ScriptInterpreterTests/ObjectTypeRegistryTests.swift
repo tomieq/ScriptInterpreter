@@ -18,7 +18,7 @@ class ObjectTypeRegistryTests: XCTestCase {
     
     func test_registerOneType() {
         let registry = ObjectTypeRegistry()
-        registry.register(objectType: ObjectType(name: "User", methods: [:]))
+        registry.register(objectType: ObjectType(name: "User", methodsRegistry: LocalFunctionRegistry()))
         XCTAssertNotNil(registry.getObjectType("User"))
     }
 }

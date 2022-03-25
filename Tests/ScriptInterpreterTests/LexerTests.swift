@@ -293,6 +293,8 @@ final class LexerTests: XCTestCase {
         do {
             let lexer = try Lexer(code: script)
             XCTAssertEqual(lexer.tokens[safeIndex: 0], .class(name: "User"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 1], .blockOpen)
+            XCTAssertEqual(lexer.tokens[safeIndex: 2], .blockClose)
         } catch {
             XCTFail("\(error)")
         }
