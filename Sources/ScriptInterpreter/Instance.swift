@@ -8,12 +8,12 @@
 import Foundation
 
 enum Instance {
-    case simple(Value)
+    case primitive(Value)
     case `class`(type: String, state: VariableRegistry)
 
     var type: String {
         switch self {
-        case .simple(let value):
+        case .primitive(let value):
             return value.type
         case .class(let type, _):
             return "class.\(type)"
@@ -22,7 +22,7 @@ enum Instance {
 
     var asString: String {
         switch self {
-        case .simple(let value):
+        case .primitive(let value):
             return value.asString
         case .class(let type, _):
             return "class.\(type)"

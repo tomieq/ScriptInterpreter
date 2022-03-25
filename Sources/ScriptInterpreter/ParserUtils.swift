@@ -39,7 +39,7 @@ class ParserUtils {
         case .variable(let name):
             guard let variable = variableRegistry.getVariable(name: name) else { return nil }
             switch variable {
-            case .simple(let value):
+            case .primitive(let value):
                 return value
             case .class(_, _):
                 return nil
