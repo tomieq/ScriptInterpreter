@@ -92,4 +92,40 @@ class ObjectTypeParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+
+    func test_parseClassBodyWithSwiftConstructor() {
+        let script = "class User { init() { return false } }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let registry = ObjectTypeRegistry()
+            let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
+            let objectType = registry.getObjectType("User")
+            XCTAssertNotNil(objectType)
+            let method = objectType?.methodsRegistry.getFunction(name: "init")
+            XCTAssertNotNil(method)
+            XCTAssertEqual(method?.body, [.return, .boolLiteral(false)])
+            XCTAssertEqual(consumedTokens, 9)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func test_parseClassBodyWithJavaScriptConstructor() {
+        let script = "class User { constructor() { return false } }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let registry = ObjectTypeRegistry()
+            let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
+            let objectType = registry.getObjectType("User")
+            XCTAssertNotNil(objectType)
+            let method = objectType?.methodsRegistry.getFunction(name: "init")
+            XCTAssertNotNil(method)
+            XCTAssertEqual(method?.body, [.return, .boolLiteral(false)])
+            XCTAssertEqual(consumedTokens, 9)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }
