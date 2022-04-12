@@ -43,6 +43,7 @@ class Parser {
     private let externalFunctionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
+    private let objectTypeRegistry: ObjectTypeRegistry
     private var currentIndex = 0
 
     private var state = ParserState.idle
