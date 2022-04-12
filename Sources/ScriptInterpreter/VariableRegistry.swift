@@ -107,4 +107,11 @@ class VariableRegistry {
     func clearMemory() {
         self.variables = [:]
     }
+
+    func makeCopy() -> VariableRegistry {
+        let registry = VariableRegistry(topVariableRegistry: self.topVariableRegistry)
+        registry.variables = self.variables
+        registry.constantNames = self.constantNames
+        return registry
+    }
 }
