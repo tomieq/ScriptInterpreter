@@ -13,7 +13,7 @@ fileprivate extension VariableRegistry {
     func registerVariable(name: String, value: Value) throws {
         try self.registerVariable(name: name, variable: .primitive(value))
     }
-    
+
     func getValue(name: String) -> Value? {
         guard let variable = self.getVariable(name: name) else { return nil }
         switch variable {
