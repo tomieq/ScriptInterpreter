@@ -56,6 +56,7 @@ class Parser {
         self.externalFunctionRegistry = externalFunctionRegistry
         self.localFunctionRegistry = localFunctionRegistry
         self.variableRegistry = variableRegistry
+        self.objectTypeRegistry = ObjectTypeRegistry()
         self.tokens = tokens
     }
 
@@ -65,6 +66,7 @@ class Parser {
         let variableParser = VariableParser(tokens: self.tokens)
         let functionParser = FunctionParser(tokens: self.tokens)
         let blockParser = BlockParser(tokens: self.tokens)
+        let objectTypeParser = ObjectTypeParser(tokens: self.tokens)
 
         while let token = self.tokens[safeIndex: self.currentIndex] {
             if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
@@ -76,6 +78,9 @@ class Parser {
                 self.currentIndex += consumedTokens
             case .functionDefinition(_):
                 let consumedTokens = try functionParser.parse(functionTokenIndex: self.currentIndex, into: self.localFunctionRegistry)
+                self.currentIndex += consumedTokens
+            case .class(_):
+                let consumedTokens = try objectTypeParser.parse(objectTypeDefinitionIndex: self.currentIndex, into: self.objectTypeRegistry)
                 self.currentIndex += consumedTokens
             case .ifStatement:
                 let result = try blockParser.getIfBlock(ifTokenIndex: self.currentIndex)
