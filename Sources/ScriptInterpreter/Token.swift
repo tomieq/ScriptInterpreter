@@ -45,6 +45,7 @@ enum Token: Equatable {
     case function(name: String)
     case functionWithArguments(name: String)
     case comma
+    case underscore
     case andOperator
     case orOperator
     case semicolon
@@ -82,6 +83,7 @@ extension Token {
             TokenGenerator(regex: "case\\b", { _ in [.case] }),
             TokenGenerator(regex: "default\\b", { _ in [.default] }),
             TokenGenerator(regex: "defer\\b", { _ in [.defer] }),
+            TokenGenerator(regex: "_\\b", { _ in [.underscore] }),
             TokenGenerator(regex: ";", { _ in [.semicolon] }),
             TokenGenerator(regex: ":", { _ in [.colon] }),
             TokenGenerator(regex: "\\+\\+", { _ in [.increment] }),
@@ -198,6 +200,8 @@ extension Token: CustomDebugStringConvertible {
             return "+"
         case .sublime:
             return "-"
+        case .underscore:
+            return "_"
         case .functionDefinition(let type):
             return "functionDefinition(\(type))"
         case .break:

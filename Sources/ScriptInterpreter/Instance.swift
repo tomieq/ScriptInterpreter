@@ -29,6 +29,15 @@ enum Instance {
         }
     }
 
+    var asTypeValue: String {
+        switch self {
+        case .primitive(let value):
+            return value.asTypeValue
+        case .class(let type, _):
+            return "class.\(type)"
+        }
+    }
+
     var primitive: Value? {
         switch self {
         case .primitive(let value):

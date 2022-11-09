@@ -24,6 +24,7 @@ extension ExternalFunctionRegistryError: LocalizedError {
 }
 
 class ExternalFunctionRegistry {
+    private let logTag = "🐡 ExternalFunctionRegistry"
     private var functions: [String: () throws -> ()] = [:]
     private var functionsWithArgs: [String: ([Value]) throws -> ()] = [:]
     private var returningFunctions: [String: () throws -> Value] = [:]
@@ -34,6 +35,7 @@ class ExternalFunctionRegistry {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.functions[name] = function
+        Logger.v(self.logTag, "registered function \(name)()")
     }
 
     func registerFunc(name: String, function: @escaping () throws -> Value) throws {
@@ -41,6 +43,7 @@ class ExternalFunctionRegistry {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.returningFunctions[name] = function
+        Logger.v(self.logTag, "registered returning function \(name)()")
     }
 
     func registerFunc(name: String, function: @escaping ([Value]) throws -> ()) throws {
@@ -48,6 +51,7 @@ class ExternalFunctionRegistry {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.functionsWithArgs[name] = function
+        Logger.v(self.logTag, "registered function \(name)(_ values: Value...)")
     }
 
     func registerFunc(name: String, function: @escaping ([Value]) throws -> Value) throws {
@@ -55,9 +59,11 @@ class ExternalFunctionRegistry {
             throw ExternalFunctionRegistryError.functionAlreadyRegistered(name: name)
         }
         self.returningFunctionsWithArgs[name] = function
+        Logger.v(self.logTag, "registered returning function \(name)(_ values: Value...)")
     }
 
     func callFunction(name: String) throws -> Value? {
+        Logger.v(self.logTag, "invoke function \(name)()")
         if let function = self.functions[name] {
             try function()
             return nil
@@ -69,6 +75,7 @@ class ExternalFunctionRegistry {
     }
 
     func callFunction(name: String, args: [Value]) throws -> Value? {
+        Logger.v(self.logTag, "invoke function \(name)(\(args.map{ $0.asTypeValue }.joined(separator: ", ")))")
         if let function = self.functionsWithArgs[name] {
             try function(args)
             return nil

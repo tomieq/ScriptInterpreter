@@ -51,6 +51,19 @@ public enum Value {
             return "\(value)"
         }
     }
+
+    public var asTypeValue: String {
+        switch self {
+        case .string(let value):
+            return "string(\(value))"
+        case .integer(let value):
+            return "integer(\(value))"
+        case .float(let value):
+            return "float(\(value))"
+        case .bool(let value):
+            return "bool(\(value))"
+        }
+    }
 }
 
 extension Value {

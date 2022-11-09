@@ -40,6 +40,7 @@ enum ParserState {
 }
 
 class Parser {
+    private let logTag = "🐫 Parser"
     private let externalFunctionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
@@ -72,8 +73,13 @@ class Parser {
         while let token = self.tokens[safeIndex: self.currentIndex] {
             if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
             switch token {
-            case .function(_), .functionWithArguments(_):
-                _ = try self.invokeFunction()
+            case .function(let name), .functionWithArguments(let name):
+                if let objectType = self.objectTypeRegistry.getObjectType(name) {
+                    let attributesRegistry = objectType.attributesRegistry.makeCopy()
+                    try self.variableRegistry.registerVariable(name: name, variable: .class(type: objectType.name, state: attributesRegistry))
+                } else {
+                    _ = try self.invokeFunction()
+                }
             case .variableDefinition(_), .constantDefinition(_):
                 let consumedTokens = try variableParser.parse(variableDefinitionIndex: self.currentIndex, into: self.variableRegistry)
                 self.currentIndex += consumedTokens
@@ -216,12 +222,16 @@ class Parser {
                 if let returnedToken = self.tokens[safeIndex: self.currentIndex] {
                     if returnedToken.isLiteral || returnedToken.isVariable {
                         let returned = ParserUtils.token2Value(returnedToken, variableRegistry: self.variableRegistry)
+                        Logger.v(self.logTag, "return \(returned?.asTypeValue ?? "nil")")
                         return .return(returned)
                     }
                     if returnedToken.isFunction {
-                        return .return(try self.invokeFunctionAndGetValue())
+                        let returned = try self.invokeFunctionAndGetValue()
+                        Logger.v(self.logTag, "return \(returned.asTypeValue)")
+                        return .return(returned)
                     }
                 }
+                Logger.v(self.logTag, "return nil")
                 return .return(nil)
             case .semicolon:
                 self.currentIndex += 1
@@ -255,6 +265,7 @@ class Parser {
         case .function(let name):
             self.currentIndex += 1
             if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
+                Logger.v(self.logTag, "invoke local function \(name)()")
                 let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
                 return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
             } else {
@@ -267,6 +278,7 @@ class Parser {
             self.currentIndex += argumentTokens.count + 2
             let argumentValues = try self.getValidatedArguments(argumentTokens, for: name)
             if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
+                Logger.v(self.logTag, "invoke local function \(name)(\(argumentValues.map{ $0.asTypeValue }.joined(separator: ", ")))")
                 let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
                 guard localFunction.argumentNames.count == argumentValues.count else {
                     throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(argumentValues)")
@@ -362,6 +374,8 @@ class Parser {
     }
 
     private func executeDeferredCode() throws {
+        guard !self.deferredTokens.isEmpty else { return }
+        Logger.v(self.logTag, "Executing deferred code")
         for tokens in self.deferredTokens.reversed() {
             _ = try self.executeSubCode(tokens: tokens, variableRegistry: self.variableRegistry)
         }

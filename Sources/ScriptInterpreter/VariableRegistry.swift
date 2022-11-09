@@ -38,12 +38,17 @@ fileprivate struct VariableContainer {
 }
 
 class VariableRegistry {
+    private let logTag = "🦆 VariableRegistry"
     private let topVariableRegistry: VariableRegistry?
     private var variables: [String: VariableContainer] = [:]
     private var constantNames: [String] = []
+    private let id = "0x".appendingRandomHexDigits(length: 4)
 
     init(topVariableRegistry: VariableRegistry? = nil) {
         self.topVariableRegistry = topVariableRegistry
+        let parentID = topVariableRegistry?.id
+        let parentInfo = parentID.isNil ? "" : " to parentID: \(parentID!)"
+        Logger.v(self.logTag, "Created new registryID: \(self.id)" + parentInfo)
     }
 
     func registerVariable(name: String, variable: Instance?) throws {
@@ -51,6 +56,7 @@ class VariableRegistry {
             throw VariableRegistryError.registerTheSameVariable(name: name)
         }
         self.variables[name] = VariableContainer(variable)
+        Logger.v(self.logTag, "new variable \(name) = \(variable?.asTypeValue ?? "nil") in registryID: \(self.id)")
     }
 
     func registerConstant(name: String, variable: Instance?) throws {
@@ -69,6 +75,7 @@ class VariableRegistry {
                 }
             }
             self.variables[name] = VariableContainer(variable)
+            Logger.v(self.logTag, "set \(name) = \(variable?.asTypeValue ?? "nil") in registryID: \(self.id)")
             return
         }
         if let upperValueRegistry = self.topVariableRegistry {
