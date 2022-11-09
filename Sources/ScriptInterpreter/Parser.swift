@@ -233,7 +233,7 @@ class Parser {
                 }
                 Logger.v(self.logTag, "return nil")
                 return .return(nil)
-            case .semicolon:
+            case .semicolon, .this:
                 self.currentIndex += 1
             default:
                 throw ParserError.syntaxError(description: "Unexpected sign found: \(token)")
@@ -371,7 +371,7 @@ class Parser {
             guard method.argumentNames.count == argumentValues.count else {
                 throw ParserError.syntaxError(description: "Method \(methodName) expects arguments \(method.argumentNames) but provided \(argumentValues)")
             }
-            try method.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerVariable(name: name, variable: .primitive(argumentValues[index])) }
+            try method.argumentNames.enumerated().forEach { (index, name) in try methodVariableRegistry.registerVariable(name: name, variable: .primitive(argumentValues[index])) }
         }
         let result = try self.executeSubCode(tokens: method.body, variableRegistry: methodVariableRegistry)
         if case .return(let value) = result {
@@ -401,7 +401,7 @@ class Parser {
     }
 
     func getValidatedArguments(_ tokens: [Token], for functioNname: String) throws -> [Value] {
-        let arguments = tokens.filter { $0 != .comma }
+        let arguments = tokens.filter { $0 != .comma }.filter { $0 != .this }
         let optionalArgumentValues = arguments.map { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
         if optionalArgumentValues.contains(nil) {
             throw ParserError.syntaxError(description: "Passed invalid arguments: \(optionalArgumentValues) to function \(functioNname)")
