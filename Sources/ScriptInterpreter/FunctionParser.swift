@@ -55,10 +55,14 @@ class FunctionParser {
             let argumetTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: currentIndex, tokens: self.tokens)
             currentIndex += argumetTokens.count + 2
             for argumentArray in argumetTokens.split(by: .comma) {
-                guard argumentArray.count == 1 else {
+                guard argumentArray.count > 0 else {
                     throw FunctionParserError.syntaxError(description: "Invalid argument names in function \(functionName)")
                 }
-                guard case .variable(let variableName) = argumentArray.first! else {
+                var argumentNameToken = argumentArray.first!
+                if argumentNameToken == .underscore, argumentArray.count > 1 {
+                    argumentNameToken = argumentArray[1]
+                }
+                guard case .variable(let variableName) = argumentNameToken else {
                     throw FunctionParserError.syntaxError(description: "Function definition \(functionName) arguments should be names, but found \(argumentArray.first!)")
                 }
                 argumentNames.append(variableName)
