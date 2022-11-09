@@ -44,6 +44,8 @@ enum Token: Equatable {
     case functionDefinition(type: String)
     case function(name: String)
     case functionWithArguments(name: String)
+    case method(name: String)
+    case methodWithArguments(name: String)
     case comma
     case underscore
     case andOperator
@@ -72,6 +74,8 @@ extension Token {
             TokenGenerator(regex: "class\\s[a-zA-Z0-9_]+", { [.class(name: $0.trimming("class "))] }),
             TokenGenerator(regex: "init\\(\\)", { _ in [.functionDefinition(type: "init"), .function(name: "init")] }),
             TokenGenerator(regex: "constructor\\(\\)", { _ in [.functionDefinition(type: "constructor"), .function(name: "init")] }),
+            TokenGenerator(regex: "init\\((?!\\))", { _ in [.functionDefinition(type: "init"), .functionWithArguments(name: "init"), .bracketOpen] }),
+            TokenGenerator(regex: "constructor\\((?!\\))", { _ in [.functionDefinition(type: "constructor"), .functionWithArguments(name: "init"), .bracketOpen] }),
             TokenGenerator(regex: "break\\b", { _ in [.break] }),
             TokenGenerator(regex: "return\\b", { _ in [.return] }),
             TokenGenerator(regex: "true\\b", { _ in [.boolLiteral(true)] }),
@@ -107,10 +111,12 @@ extension Token {
             TokenGenerator(regex: "=", { _ in [.assign] }),
             TokenGenerator(regex: "\\(", { _ in [.bracketOpen] }),
             TokenGenerator(regex: "\\)", { _ in [.bracketClose] }),
-            TokenGenerator(regex: "\\-?([0-9]*\\.[0-9]*)", { [.floatLiteral(Float($0)!)] }),
+            TokenGenerator(regex: "\\-?([0-9]*\\.[0-9]+)", { [.floatLiteral(Float($0)!)] }),
             TokenGenerator(regex: "(\\d++)(?!\\.)", { [.intLiteral(Int($0)!)] }),
             TokenGenerator(regex: "'[^']*'", { [.stringLiteral($0.trimming("'"))] }),
             TokenGenerator(regex: "\"[^\"]*\"", { [.stringLiteral($0.trimming("\""))] }),
+            TokenGenerator(regex: "\\.[a-zA-Z0-9_]+\\(\\)", { [.method(name: $0.trimming(".()"))] }),
+            TokenGenerator(regex: "\\.([a-zA-Z0-9_]+)\\((?!\\))", { [.methodWithArguments(name: $0.trimming(".()")), .bracketOpen] }),
             TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", { [.function(name: $0.trimming("()"))] }),
             TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", { [.functionWithArguments(name: $0.trimming("()")), .bracketOpen] }),
             TokenGenerator(regex: "([a-zA-Z0-9_]+)", { [.variable(name: $0)] }),
@@ -176,6 +182,10 @@ extension Token: CustomDebugStringConvertible {
             return "function:\(name)"
         case .functionWithArguments(let name):
             return "functionWithArguments:\(name)"
+        case .method(let name):
+            return "method:\(name)"
+        case .methodWithArguments(let name):
+            return "methodWithArguments:\(name)"
         case .comma:
             return ","
         case .andOperator:

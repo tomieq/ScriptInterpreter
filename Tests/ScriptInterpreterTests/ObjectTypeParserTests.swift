@@ -111,6 +111,25 @@ class ObjectTypeParserTests: XCTestCase {
         }
     }
 
+    func test_parseClassBodyWithSwiftConstructorWithArguments() {
+        let script = "class User { init(name) { return name } }"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let registry = ObjectTypeRegistry()
+            let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
+            let objectType = registry.getObjectType("User")
+            XCTAssertNotNil(objectType)
+            let method = objectType?.methodsRegistry.getFunction(name: "init")
+            XCTAssertNotNil(method)
+            XCTAssertEqual(method?.argumentNames, ["name"])
+            XCTAssertEqual(method?.body, [.return, .variable(name: "name")])
+            XCTAssertEqual(consumedTokens, 12)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
     func test_parseClassBodyWithJavaScriptConstructor() {
         let script = "class User { constructor() { return false } }"
         do {

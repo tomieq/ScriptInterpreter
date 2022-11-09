@@ -27,7 +27,10 @@ class VariableParser {
         self.tokens = tokens
     }
 
-    func parse(variableDefinitionIndex index: Int, into variableRegistry: VariableRegistry) throws -> Int {
+    func parse(variableDefinitionIndex index: Int,
+               into variableRegistry: VariableRegistry,
+               using objectTypeRegistry: ObjectTypeRegistry? = nil,
+               parser: Parser? = nil) throws -> Int {
         var currentIndex = index
         guard let token = self.tokens[safeIndex: currentIndex] else {
             throw VariableParserError.syntaxError(description: "Token not found at index \(index)")
@@ -41,11 +44,16 @@ class VariableParser {
             case .constantDefinition(let definitionType):
                 return (definitionType, variableRegistry.registerConstant)
             default:
-                throw VariableParserError.syntaxError(description: "Inproper token found at index \(index): \(token)")
+                throw VariableParserError.syntaxError(description: "Improper token found at index \(index): \(token)")
             }
         }
         let controlData = try controlData()
-        while let data = try self.initVariable(variableTokenIndex: currentIndex, definitionType: controlData.definitionType, variableRegistry: variableRegistry, registerFunction: controlData.func) {
+        while let data = try self.initVariable(variableTokenIndex: currentIndex,
+                                               definitionType: controlData.definitionType,
+                                               variableRegistry: variableRegistry,
+                                               objectTypeRegistry: objectTypeRegistry,
+                                               parser: parser,
+                                               register: controlData.func) {
             currentIndex += data.usedTokens
             if !data.shouldParseFurther {
                 break
@@ -54,7 +62,12 @@ class VariableParser {
         return currentIndex - index
     }
 
-    private func initVariable(variableTokenIndex pos: Int, definitionType: String, variableRegistry: VariableRegistry, registerFunction: (String, Instance?) throws -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
+    private func initVariable(variableTokenIndex pos: Int,
+                              definitionType: String,
+                              variableRegistry: VariableRegistry,
+                              objectTypeRegistry: ObjectTypeRegistry?,
+                              parser: Parser?,
+                              register: (String, Instance?) throws -> ()) throws -> (shouldParseFurther: Bool, usedTokens: Int)? {
         guard case .variable(let name) = self.tokens[safeIndex: pos] else {
             throw VariableParserError.syntaxError(description: "No variable name found after keyword \(definitionType) usage!")
         }
@@ -65,16 +78,32 @@ class VariableParser {
                 throw VariableParserError.syntaxError(description: "Value not found for assigning variable \(name)")
             }
             if case .nil = valueToken {
-                try registerFunction(name, nil)
+                try register(name, nil)
             } else {
-                guard let value = ParserUtils.token2Value(valueToken, variableRegistry: variableRegistry) else {
-                    throw VariableParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
+                switch valueToken {
+                case .function(let className), .functionWithArguments(let className):
+                    if let objectType = objectTypeRegistry?.getObjectType(className) {
+                        let attributesRegistry = objectType.attributesRegistry.makeCopy()
+                        try register(name, .class(type: objectType.name, state: attributesRegistry))
+                        // call initializer
+                        var argumentValues: [Value] = []
+                        if case .functionWithArguments = valueToken {
+                            let argumentTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: pos + 3, tokens: self.tokens)
+                            usedTokens += argumentTokens.count + 2
+                            argumentValues = try parser?.getValidatedArguments(argumentTokens, for: "init") ?? []
+                        }
+                        _ = try? parser?.callMethod(method: "init", onVariable: name, argumentValues: argumentValues)
+                    }
+                default:
+                    guard let value = ParserUtils.token2Value(valueToken, variableRegistry: variableRegistry) else {
+                        throw VariableParserError.syntaxError(description: "Invalid value assigned to variable \(name) [\(valueToken)]")
+                    }
+                    try register(name, .primitive(value))
                 }
-                try registerFunction(name, .primitive(value))
             }
             usedTokens += 2
         } else {
-            try registerFunction(name, nil)
+            try register(name, nil)
         }
         let lastToken = self.tokens[safeIndex: pos + usedTokens]
         if case .comma = lastToken {

@@ -41,6 +41,7 @@ enum ParserState {
 
 class Parser {
     private let logTag = "🐫 Parser"
+    private let id = "0x".appendingRandomHexDigits(length: 4)
     private let externalFunctionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
@@ -55,6 +56,7 @@ class Parser {
          externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(),
          localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(),
          variableRegistry: VariableRegistry = VariableRegistry()) {
+        Logger.v(self.logTag, "new parserID: \(self.id) with tokens: \(tokens)")
         self.externalFunctionRegistry = externalFunctionRegistry
         self.localFunctionRegistry = localFunctionRegistry
         self.variableRegistry = variableRegistry
@@ -73,15 +75,13 @@ class Parser {
         while let token = self.tokens[safeIndex: self.currentIndex] {
             if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
             switch token {
-            case .function(let name), .functionWithArguments(let name):
-                if let objectType = self.objectTypeRegistry.getObjectType(name) {
-                    let attributesRegistry = objectType.attributesRegistry.makeCopy()
-                    try self.variableRegistry.registerVariable(name: name, variable: .class(type: objectType.name, state: attributesRegistry))
-                } else {
-                    _ = try self.invokeFunction()
-                }
+            case .function(_), .functionWithArguments(_):
+                _ = try self.invokeFunction()
             case .variableDefinition(_), .constantDefinition(_):
-                let consumedTokens = try variableParser.parse(variableDefinitionIndex: self.currentIndex, into: self.variableRegistry)
+                let consumedTokens = try variableParser.parse(variableDefinitionIndex: self.currentIndex,
+                                                              into: self.variableRegistry,
+                                                              using: self.objectTypeRegistry,
+                                                              parser: self)
                 self.currentIndex += consumedTokens
             case .functionDefinition(_):
                 let consumedTokens = try functionParser.parse(functionTokenIndex: self.currentIndex, into: self.localFunctionRegistry)
@@ -339,9 +339,45 @@ class Parser {
                 throw ParserError.syntaxError(description: "Decrement operation can be applied only for integer type, but \(type) found")
             }
             try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(.integer(intValue - 1)))
+        case .method(let methodName):
+            _ = try self.callMethod(method: methodName, onVariable: variableName)
+            self.currentIndex += 1
+        case .methodWithArguments(let methodName):
+            self.currentIndex += 1
+            let argumentTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex, tokens: self.tokens)
+            self.currentIndex += argumentTokens.count + 2
+            let argumentValues = try self.getValidatedArguments(argumentTokens, for: methodName)
+            _ = try self.callMethod(method: methodName, onVariable: variableName, argumentValues: argumentValues)
         default:
             break
         }
+    }
+
+    func callMethod(method methodName: String, onVariable variableName: String, argumentValues: [Value] = []) throws -> Value? {
+        let variable = self.variableRegistry.getVariable(name: variableName)
+        guard case .class(let type, let variableRegistry) = variable else {
+            let type = variable?.type ?? "nil"
+            throw ParserError.syntaxError(description: "Method call can be applied only for class type, but \(type) found")
+        }
+        guard let objectType = self.objectTypeRegistry.getObjectType(type) else {
+            throw ParserError.syntaxError(description: "Could not find object type for variable \(variableName)")
+        }
+        guard let method = objectType.methodsRegistry.getFunction(name: methodName) else {
+            throw ParserError.syntaxError(description: "ObjectType \(type) has no method \(methodName)")
+        }
+        Logger.v(self.logTag, "invoke method \(variableName).\(methodName)(\(argumentValues.map{ $0.asTypeValue }.joined(separator: ", "))) on type \(type)")
+        let methodVariableRegistry = VariableRegistry(topVariableRegistry: variableRegistry)
+        if !argumentValues.isEmpty {
+            guard method.argumentNames.count == argumentValues.count else {
+                throw ParserError.syntaxError(description: "Method \(methodName) expects arguments \(method.argumentNames) but provided \(argumentValues)")
+            }
+            try method.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerVariable(name: name, variable: .primitive(argumentValues[index])) }
+        }
+        let result = try self.executeSubCode(tokens: method.body, variableRegistry: methodVariableRegistry)
+        if case .return(let value) = result {
+            return value
+        }
+        return nil
     }
 
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
@@ -364,7 +400,7 @@ class Parser {
         }
     }
 
-    private func getValidatedArguments(_ tokens: [Token], for functioNname: String) throws -> [Value] {
+    func getValidatedArguments(_ tokens: [Token], for functioNname: String) throws -> [Value] {
         let arguments = tokens.filter { $0 != .comma }
         let optionalArgumentValues = arguments.map { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
         if optionalArgumentValues.contains(nil) {
