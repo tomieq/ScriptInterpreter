@@ -15,7 +15,7 @@ extension FunctionParserError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .syntaxError(let info):
-            return NSLocalizedString("VariableParserError.syntaxError: \(info)", comment: "VariableParserError")
+            return NSLocalizedString("FunctionParserError.syntaxError: \(info)", comment: "FunctionParserError")
         }
     }
 }

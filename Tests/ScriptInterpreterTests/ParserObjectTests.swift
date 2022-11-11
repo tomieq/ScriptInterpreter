@@ -119,6 +119,29 @@ class ParserObjectTests: XCTestCase {
         XCTAssertEqual(spy.output, [.integer(100), .integer(200), .integer(300)])
     }
 
+    func test_updateAttributeValueInMethod() throws {
+        let code = """
+
+        func run() {
+        }
+        class Computer {
+            var age = 100
+            func run(newAge) {
+                age = newAge
+            }
+        }
+        let computer = Computer()
+        computer.run(3)
+        let three = computer.age
+        computer.run(5)
+        let five = computer.age
+        computer.run(2)
+        print(three + five + computer.age)
+        """
+        let spy = self.setupSpy(code: code)
+        XCTAssertEqual(spy.output, [.integer(10)])
+    }
+
     func test_globalFunctionUsage() throws {
         let code = """
         func global(val) {

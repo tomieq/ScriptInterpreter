@@ -10,11 +10,18 @@ import XCTest
 @testable import ScriptInterpreter
 
 class ObjectTypeParserTests: XCTestCase {
+    var registerSet: RegisterSet {
+        RegisterSet(variableRegistry: VariableRegistry(),
+                    localFunctionRegistry: LocalFunctionRegistry(),
+                    externalFunctionRegistry: ExternalFunctionRegistry(),
+                    objectTypeRegistry: ObjectTypeRegistry())
+    }
+
     func test_parseEmptyClassBody() {
         let script = "class User {}"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
             XCTAssertNotNil(registry.getObjectType("User"))
@@ -28,7 +35,7 @@ class ObjectTypeParserTests: XCTestCase {
         let script = "class User { func isWorking() { return false } }"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
             let objectType = registry.getObjectType("User")
@@ -46,7 +53,7 @@ class ObjectTypeParserTests: XCTestCase {
         let script = "class User { func setAge(number) { return false } }"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
             let objectType = registry.getObjectType("User")
@@ -64,7 +71,7 @@ class ObjectTypeParserTests: XCTestCase {
         let script = "class User { func setAge(number) { return false } func meow() { print('meow') } }"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             XCTAssertNoThrow(try parser.parse(objectTypeDefinitionIndex: 0, into: registry))
             let objectType = registry.getObjectType("User")
@@ -80,7 +87,7 @@ class ObjectTypeParserTests: XCTestCase {
         let script = "class User { var age = 38; }"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             XCTAssertNoThrow(try parser.parse(objectTypeDefinitionIndex: 0, into: registry))
             let objectType = registry.getObjectType("User")
@@ -97,7 +104,7 @@ class ObjectTypeParserTests: XCTestCase {
         let script = "class User { init() { return false } }"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
             let objectType = registry.getObjectType("User")
@@ -115,7 +122,7 @@ class ObjectTypeParserTests: XCTestCase {
         let script = "class User { init(name) { return name } }"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
             let objectType = registry.getObjectType("User")
@@ -134,7 +141,7 @@ class ObjectTypeParserTests: XCTestCase {
         let script = "class User { constructor() { return false } }"
         do {
             let lexer = try Lexer(code: script)
-            let parser = ObjectTypeParser(tokens: lexer.tokens)
+            let parser = ObjectTypeParser(tokens: lexer.tokens, registerSet: self.registerSet)
             let registry = ObjectTypeRegistry()
             let consumedTokens = try parser.parse(objectTypeDefinitionIndex: 0, into: registry)
             let objectType = registry.getObjectType("User")

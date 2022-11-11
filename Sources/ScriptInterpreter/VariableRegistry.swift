@@ -42,7 +42,7 @@ class VariableRegistry {
     private let topVariableRegistry: VariableRegistry?
     private var variables: [String: VariableContainer] = [:]
     private var constantNames: [String] = []
-    private let id = "0x".appendingRandomHexDigits(length: 4)
+    let id = "0x".appendingRandomHexDigits(length: 4)
 
     init(topVariableRegistry: VariableRegistry? = nil) {
         self.topVariableRegistry = topVariableRegistry

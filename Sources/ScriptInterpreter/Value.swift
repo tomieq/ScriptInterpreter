@@ -64,6 +64,19 @@ public enum Value {
             return "bool(\(value))"
         }
     }
+
+    var literalToken: Token {
+        switch self {
+        case .string(let value):
+            return .stringLiteral(value)
+        case .integer(let value):
+            return .intLiteral(value)
+        case .float(let value):
+            return .floatLiteral(value)
+        case .bool(let value):
+            return .boolLiteral(value)
+        }
+    }
 }
 
 extension Value {

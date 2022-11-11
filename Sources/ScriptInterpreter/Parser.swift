@@ -46,6 +46,7 @@ class Parser {
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
     private let objectTypeRegistry: ObjectTypeRegistry
+    private let registerSet: RegisterSet
     private var currentIndex = 0
 
     private var state = ParserState.idle
@@ -56,21 +57,25 @@ class Parser {
          externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(),
          localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(),
          variableRegistry: VariableRegistry = VariableRegistry()) {
-        Logger.v(self.logTag, "new parserID: \(self.id) with tokens: \(tokens)")
+        Logger.v(self.logTag, "new parserID: \(self.id) with tokens: \(tokens.map{ $0.debugDescription }.joined(separator: " "))")
         self.externalFunctionRegistry = externalFunctionRegistry
         self.localFunctionRegistry = localFunctionRegistry
         self.variableRegistry = variableRegistry
         self.objectTypeRegistry = ObjectTypeRegistry()
         self.tokens = tokens
+        self.registerSet = RegisterSet(variableRegistry: self.variableRegistry,
+                                       localFunctionRegistry: self.localFunctionRegistry,
+                                       externalFunctionRegistry: self.externalFunctionRegistry,
+                                       objectTypeRegistry: self.objectTypeRegistry)
     }
 
     @discardableResult
     func execute() throws -> ParserExecResult {
         self.state = .working
-        let variableParser = VariableParser(tokens: self.tokens)
+        let variableParser = VariableParser(tokens: self.tokens, registerSet: self.registerSet, parser: self)
         let functionParser = FunctionParser(tokens: self.tokens)
         let blockParser = BlockParser(tokens: self.tokens)
-        let objectTypeParser = ObjectTypeParser(tokens: self.tokens)
+        let objectTypeParser = ObjectTypeParser(tokens: self.tokens, registerSet: self.registerSet)
 
         while let token = self.tokens[safeIndex: self.currentIndex] {
             if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
@@ -78,10 +83,7 @@ class Parser {
             case .function(_), .functionWithArguments(_):
                 _ = try self.invokeFunction()
             case .variableDefinition(_), .constantDefinition(_):
-                let consumedTokens = try variableParser.parse(variableDefinitionIndex: self.currentIndex,
-                                                              into: self.variableRegistry,
-                                                              using: self.objectTypeRegistry,
-                                                              parser: self)
+                let consumedTokens = try variableParser.parse(variableDefinitionIndex: self.currentIndex)
                 self.currentIndex += consumedTokens
             case .functionDefinition(_):
                 let consumedTokens = try functionParser.parse(functionTokenIndex: self.currentIndex, into: self.localFunctionRegistry)
@@ -274,19 +276,21 @@ class Parser {
 
         case .functionWithArguments(let name):
             self.currentIndex += 1
-            let argumentTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex, tokens: self.tokens)
-            self.currentIndex += argumentTokens.count + 2
-            let argumentValues = try self.getValidatedArguments(argumentTokens, for: name)
+            let argumentParser = FunctionArgumentParser(tokens: self.tokens, registerSet: self.registerSet)
+            let parserResult = try argumentParser.getArgumentValues(index: self.currentIndex)
+            self.currentIndex += parserResult.consumedTokens
+            let values = parserResult.values
+
             if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
-                Logger.v(self.logTag, "invoke local function \(name)(\(argumentValues.map{ $0.asTypeValue }.joined(separator: ", ")))")
+                Logger.v(self.logTag, "invoke local function \(name)(\(values.map{ $0.asTypeValue }.joined(separator: ", ")))")
                 let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
-                guard localFunction.argumentNames.count == argumentValues.count else {
-                    throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(argumentValues)")
+                guard localFunction.argumentNames.count == values.count else {
+                    throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(values)")
                 }
-                try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerVariable(name: name, variable: .primitive(argumentValues[index])) }
+                try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerVariable(name: name, variable: .primitive(values[index])) }
                 return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
             } else {
-                return .return(try self.externalFunctionRegistry.callFunction(name: name, args: argumentValues))
+                return .return(try self.externalFunctionRegistry.callFunction(name: name, args: values))
             }
         default:
             throw ParserError.internalError(description: "invokeFunction called on \(token) token")
@@ -306,23 +310,13 @@ class Parser {
         switch nextToken {
         case .assign:
             self.currentIndex += 1
-            guard let valueToken = self.tokens[safeIndex: self.currentIndex] else {
-                throw ParserError.syntaxError(description: "Missing right value for assign variable \(variableName)")
+            let calculator = ArithmeticCalculator(tokens: self.tokens, registerSet: self.registerSet)
+            let parserResult = try calculator.calculateValue(startIndex: self.currentIndex)
+            self.currentIndex += parserResult.consumedTokens
+            guard let value = parserResult.value else {
+                throw ParserError.syntaxError(description: "Value not found for assigning variable \(variableName)")
             }
-            if valueToken.isLiteral || valueToken.isVariable {
-                guard let value = ParserUtils.token2Value(valueToken, variableRegistry: self.variableRegistry) else {
-                    throw ParserError.syntaxError(description: "Right value for assign variable \(variableName) should be either literal value or variable")
-                }
-                try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(value))
-                self.currentIndex += 1
-                return
-            }
-            if valueToken.isFunction {
-                let value = try self.invokeFunctionAndGetValue()
-                try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(value))
-                return
-            }
-            throw ParserError.syntaxError(description: "Invalid syntax after `\(variableName) =` - found \(valueToken)")
+            try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(value))
         case .increment:
             self.currentIndex += 1
             let variable = self.variableRegistry.getVariable(name: variableName)
@@ -344,10 +338,10 @@ class Parser {
             self.currentIndex += 1
         case .methodWithArguments(let methodName):
             self.currentIndex += 1
-            let argumentTokens = try ParserUtils.getTokensBetweenBrackets(indexOfOpeningBracket: self.currentIndex, tokens: self.tokens)
-            self.currentIndex += argumentTokens.count + 2
-            let argumentValues = try self.getValidatedArguments(argumentTokens, for: methodName)
-            _ = try self.callMethod(method: methodName, onVariable: variableName, argumentValues: argumentValues)
+            let argumentParser = FunctionArgumentParser(tokens: self.tokens, registerSet: self.registerSet)
+            let parserResult = try argumentParser.getArgumentValues(index: self.currentIndex)
+            self.currentIndex += parserResult.consumedTokens
+            _ = try self.callMethod(method: methodName, onVariable: variableName, argumentValues: parserResult.values)
         default:
             break
         }
@@ -366,6 +360,7 @@ class Parser {
             throw ParserError.syntaxError(description: "ObjectType \(type) has no method \(methodName)")
         }
         Logger.v(self.logTag, "invoke method \(variableName).\(methodName)(\(argumentValues.map{ $0.asTypeValue }.joined(separator: ", "))) on type \(type)")
+        Logger.v(self.logTag, "creating variableRegistry for method context")
         let methodVariableRegistry = VariableRegistry(topVariableRegistry: variableRegistry)
         if !argumentValues.isEmpty {
             guard method.argumentNames.count == argumentValues.count else {

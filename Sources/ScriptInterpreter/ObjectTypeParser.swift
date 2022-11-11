@@ -21,10 +21,13 @@ extension ObjectTypeParserError: LocalizedError {
 }
 
 class ObjectTypeParser {
+    private let logTag = "🪰 ObjectTypeParser"
     private let tokens: [Token]
+    private let registerSet: RegisterSet
 
-    init(tokens: [Token]) {
+    init(tokens: [Token], registerSet: RegisterSet) {
         self.tokens = tokens
+        self.registerSet = registerSet
     }
 
     func parse(objectTypeDefinitionIndex index: Int, into registry: ObjectTypeRegistry) throws -> Int {
@@ -46,10 +49,12 @@ class ObjectTypeParser {
     private func parseObjectBody(tokens: [Token], name: String) throws -> ObjectType {
         var currentIndex = 0
         let functionParser = FunctionParser(tokens: tokens)
-        let variableParser = VariableParser(tokens: tokens)
 
+        Logger.v(self.logTag, "creating LocalFunctionRegistry for class \(name) methods")
         let methodRegistry = LocalFunctionRegistry()
-        let attributesRegistry = VariableRegistry()
+        Logger.v(self.logTag, "creating VariableRegistry for class \(name) definition attributes")
+        let registerSet = self.registerSet.copy(variableRegistry: VariableRegistry())
+        let variableParser = VariableParser(tokens: tokens, registerSet: registerSet)
 
         while let token = tokens[safeIndex: currentIndex] {
             switch token {
@@ -57,7 +62,7 @@ class ObjectTypeParser {
                 let consumedTokens = try functionParser.parse(functionTokenIndex: currentIndex, into: methodRegistry)
                 currentIndex += consumedTokens
             case .variableDefinition(_), .constantDefinition(_):
-                let consumedTokens = try variableParser.parse(variableDefinitionIndex: currentIndex, into: attributesRegistry)
+                let consumedTokens = try variableParser.parse(variableDefinitionIndex: currentIndex)
                 currentIndex += consumedTokens
             case .semicolon:
                 currentIndex += 1
@@ -65,6 +70,6 @@ class ObjectTypeParser {
                 throw ObjectTypeParserError.syntaxError(description: "Unexpected sign found: \(token)")
             }
         }
-        return ObjectType(name: name, attributesRegistry: attributesRegistry, methodsRegistry: methodRegistry)
+        return ObjectType(name: name, attributesRegistry: registerSet.variableRegistry, methodsRegistry: methodRegistry)
     }
 }

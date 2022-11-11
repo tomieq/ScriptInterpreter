@@ -20,7 +20,7 @@ enum Token: Equatable {
     case `nil`
     case assign
     case add
-    case sublime
+    case subtract
     case bracketOpen
     case bracketClose
     case ifStatement
@@ -46,6 +46,7 @@ enum Token: Equatable {
     case functionWithArguments(name: String)
     case method(name: String)
     case methodWithArguments(name: String)
+    case attribute(name: String)
     case comma
     case underscore
     case andOperator
@@ -94,7 +95,7 @@ extension Token {
             TokenGenerator(regex: "\\+\\+", { _ in [.increment] }),
             TokenGenerator(regex: "\\-\\-", { _ in [.decrement] }),
             TokenGenerator(regex: "\\+", { _ in [.add] }),
-            TokenGenerator(regex: "\\-", { _ in [.sublime] }),
+            TokenGenerator(regex: "\\-", { _ in [.subtract] }),
             TokenGenerator(regex: "&&", { _ in [.andOperator] }),
             TokenGenerator(regex: "and\\b", { _ in [.andOperator] }),
             TokenGenerator(regex: "\\|\\|", { _ in [.orOperator] }),
@@ -118,6 +119,7 @@ extension Token {
             TokenGenerator(regex: "\"[^\"]*\"", { [.stringLiteral($0.trimming("\""))] }),
             TokenGenerator(regex: "\\.[a-zA-Z0-9_]+\\(\\)", { [.method(name: $0.trimming(".()"))] }),
             TokenGenerator(regex: "\\.([a-zA-Z0-9_]+)\\((?!\\))", { [.methodWithArguments(name: $0.trimming(".()")), .bracketOpen] }),
+            TokenGenerator(regex: "\\.[a-zA-Z0-9_]+", { [.attribute(name: $0.trimming("."))] }),
             TokenGenerator(regex: "[a-zA-Z0-9_]+\\(\\)", { [.function(name: $0.trimming("()"))] }),
             TokenGenerator(regex: "([a-zA-Z0-9_]+)\\((?!\\))", { [.functionWithArguments(name: $0.trimming("()")), .bracketOpen] }),
             TokenGenerator(regex: "([a-zA-Z0-9_]+)", { [.variable(name: $0)] }),
@@ -187,6 +189,8 @@ extension Token: CustomDebugStringConvertible {
             return "method:\(name)"
         case .methodWithArguments(let name):
             return "methodWithArguments:\(name)"
+        case .attribute(let name):
+            return "attribute:\(name)"
         case .comma:
             return ","
         case .andOperator:
@@ -209,7 +213,7 @@ extension Token: CustomDebugStringConvertible {
             return "="
         case .add:
             return "+"
-        case .sublime:
+        case .subtract:
             return "-"
         case .underscore:
             return "_"
