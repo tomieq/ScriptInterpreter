@@ -70,6 +70,7 @@ class ExternalFunctionRegistry {
         } else if let function = self.returningFunctions[name] {
             return try function()
         } else {
+            Logger.e(self.logTag, "Could not find function \(name)")
             throw ExternalFunctionRegistryError.functionNotFound(signature: "\(name)()")
         }
     }

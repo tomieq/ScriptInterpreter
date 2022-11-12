@@ -20,7 +20,7 @@ struct Logger {
 
     static func log(_ label: String, _ log: String) {
         let log = log.replacingOccurrences(of: "\\/", with: "/")
-        let localMessage = "\(Self.logDate()) [ScriptInterpreter][\(label)] \(log)"
+        let localMessage = "\(Self.logDate()) [\(label)] \(log)"
         print(localMessage)
     }
 

@@ -80,7 +80,7 @@ class VariableParser {
                 // New class initialization
                 case .function(let className), .functionWithArguments(let className):
                     if let objectType = self.registerSet.objectTypeRegistry.getObjectType(className) {
-                        Logger.v(self.logTag, "creating variableRegistry for class \(className) instance")
+                        Logger.v(self.logTag, "creating attributesRegistry for class \(className) instance")
                         let attributesRegistry = objectType.attributesRegistry.makeCopy()
                         try register(name, .class(type: objectType.name, state: attributesRegistry))
                         // call initializer

@@ -292,6 +292,22 @@ class ParserTests: XCTestCase {
         XCTAssertEqual(console.output[safeIndex: 1], .integer(21))
     }
 
+    func test_updateClassAttribute() throws {
+        let code = """
+        class Computer {
+            var ram = 128
+        }
+        let computer = Computer()
+        print(computer.ram)
+        computer.ram = 256
+        print(computer.ram)
+        """
+        let console = self.setupSpy(code: code)
+        XCTAssertEqual(console.output.count, 2)
+        XCTAssertEqual(console.output[safeIndex: 0], .integer(128))
+        XCTAssertEqual(console.output[safeIndex: 1], .integer(256))
+    }
+
     private func setupSpy(code: String) -> FunctionCallSpy {
         let spy = FunctionCallSpy()
         let functionRegistry = ExternalFunctionRegistry()

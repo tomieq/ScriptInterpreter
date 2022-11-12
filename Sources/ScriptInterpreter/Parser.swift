@@ -77,8 +77,12 @@ class Parser {
         let blockParser = BlockParser(tokens: self.tokens)
         let objectTypeParser = ObjectTypeParser(tokens: self.tokens, registerSet: self.registerSet)
 
+        // go through every token
         while let token = self.tokens[safeIndex: self.currentIndex] {
-            if case .aborted(let reason) = self.state { throw ParserError.aborted(description: reason) }
+            if case .aborted(let reason) = self.state {
+                Logger.v(self.logTag, "Program execution aborted with reason: \(reason)")
+                throw ParserError.aborted(description: reason)
+            }
             switch token {
             case .function(_), .functionWithArguments(_):
                 _ = try self.invokeFunction()
@@ -334,14 +338,44 @@ class Parser {
             }
             try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(.integer(intValue - 1)))
         case .method(let methodName):
+            // this case is responsible for invoking class' method
             _ = try self.callMethod(method: methodName, onVariable: variableName)
             self.currentIndex += 1
         case .methodWithArguments(let methodName):
+            // this case is responsible for invoking class' method
             self.currentIndex += 1
             let argumentParser = FunctionArgumentParser(tokens: self.tokens, registerSet: self.registerSet)
             let parserResult = try argumentParser.getArgumentValues(index: self.currentIndex)
             self.currentIndex += parserResult.consumedTokens
             _ = try self.callMethod(method: methodName, onVariable: variableName, argumentValues: parserResult.values)
+        case .attribute(let attributeName):
+            // this case is responsible for updating class' instance attribute value
+            guard let variable = self.variableRegistry.getVariable(name: variableName) else {
+                throw ParserError.syntaxError(description: "Variable \(variableName) not found in the context!")
+            }
+            self.currentIndex += 1
+            switch variable {
+            case .class(let objectType, let attributesRegistry):
+                guard attributesRegistry.variableExists(name: attributeName) else {
+                    throw ParserError.syntaxError(description: "Variable \(variableName):\(objectType) has no attribute \(attributeName)")
+                }
+                guard let assignToken = self.tokens[safeIndex: self.currentIndex] else {
+                    throw ParserError.syntaxError(description: "Unexpected code end after \(variableName).\(attributeName)")
+                }
+                guard case .assign = assignToken else {
+                    throw ParserError.syntaxError(description: "Expected assign token(=) after \(variableName).\(attributeName) but found \(assignToken)")
+                }
+                self.currentIndex += 1
+                let calculator = ArithmeticCalculator(tokens: self.tokens, registerSet: self.registerSet)
+                let parserResult = try calculator.calculateValue(startIndex: self.currentIndex)
+                self.currentIndex += parserResult.consumedTokens
+                guard let value = parserResult.value else {
+                    throw ParserError.syntaxError(description: "Could not determine value for \(variableName).\(attributeName)")
+                }
+                try attributesRegistry.updateVariable(name: attributeName, variable: .primitive(value))
+            case .primitive:
+                throw ParserError.syntaxError(description: "Variable \(variableName) is a primitive type. Cannot access attribute \(variableName).\(attributeName) on it")
+            }
         default:
             break
         }

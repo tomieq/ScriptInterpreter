@@ -182,11 +182,11 @@ extension Token: CustomDebugStringConvertible {
         case .notEqual:
             return "!="
         case .function(let name):
-            return "function:\(name)"
+            return "function:\(name)()"
         case .functionWithArguments(let name):
             return "functionWithArguments:\(name)"
         case .method(let name):
-            return "method:\(name)"
+            return "method:\(name)()"
         case .methodWithArguments(let name):
             return "methodWithArguments:\(name)"
         case .attribute(let name):
