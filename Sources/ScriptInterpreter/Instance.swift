@@ -9,7 +9,7 @@ import Foundation
 
 enum Instance {
     case primitive(Value)
-    case `class`(type: String, state: VariableRegistry)
+    case `class`(type: String, attributesRegistry: VariableRegistry)
 
     var type: String {
         switch self {

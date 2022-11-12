@@ -195,7 +195,8 @@ final class ArithmeticCalculatorTests: XCTestCase {
         sut.registerSet.objectTypeRegistry.register(objectType: ObjectType(name: "Computer",
                                                                            attributesRegistry: VariableRegistry(),
                                                                            methodsRegistry: objectMethods))
-        try sut.registerSet.variableRegistry.registerVariable(name: "computer", variable: .class(type: "Computer", state: VariableRegistry()))
+        try sut.registerSet.variableRegistry.registerVariable(name: "computer",
+                                                              variable: .class(type: "Computer", attributesRegistry: VariableRegistry()))
         let result = try sut.calculateValue(startIndex: 0)
         XCTAssertEqual(result.consumedTokens, 4)
         XCTAssertEqual(result.value, .integer(18))
@@ -208,7 +209,8 @@ final class ArithmeticCalculatorTests: XCTestCase {
         sut.registerSet.objectTypeRegistry.register(objectType: ObjectType(name: "Computer",
                                                                            attributesRegistry: VariableRegistry(),
                                                                            methodsRegistry: objectMethods))
-        try sut.registerSet.variableRegistry.registerVariable(name: "computer", variable: .class(type: "Computer", state: VariableRegistry()))
+        try sut.registerSet.variableRegistry.registerVariable(name: "computer",
+                                                              variable: .class(type: "Computer", attributesRegistry: VariableRegistry()))
         let result = try sut.calculateValue(startIndex: 0)
         XCTAssertEqual(result.consumedTokens, 7)
         XCTAssertEqual(result.value, .integer(74))

@@ -38,11 +38,11 @@ fileprivate struct VariableContainer {
 }
 
 class VariableRegistry {
+    let id = "0x".appendingRandomHexDigits(length: 4)
     private let logTag = "🦆 VariableRegistry"
     private let topVariableRegistry: VariableRegistry?
     private var variables: [String: VariableContainer] = [:]
     private var constantNames: [String] = []
-    let id = "0x".appendingRandomHexDigits(length: 4)
 
     init(topVariableRegistry: VariableRegistry? = nil) {
         self.topVariableRegistry = topVariableRegistry
@@ -67,6 +67,7 @@ class VariableRegistry {
     func updateVariable(name: String, variable: Instance?) throws {
         if let oldVariableContainer = self.variables[name] {
             if self.constantNames.contains(name) {
+                Logger.e(self.logTag, "Variable \(name) is a constant. You cannot modify it. RegistryID: \(self.id)")
                 throw VariableRegistryError.cannotModifyConstant(variableName: name)
             }
             if let oldVariableType = oldVariableContainer.variable?.type, let newVariableType = variable?.type {

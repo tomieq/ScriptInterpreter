@@ -82,7 +82,7 @@ class VariableParser {
                     if let objectType = self.registerSet.objectTypeRegistry.getObjectType(className) {
                         Logger.v(self.logTag, "creating attributesRegistry for class \(className) instance")
                         let attributesRegistry = objectType.attributesRegistry.makeCopy()
-                        try register(name, .class(type: objectType.name, state: attributesRegistry))
+                        try register(name, .class(type: objectType.name, attributesRegistry: attributesRegistry))
                         // call initializer
                         var argumentValues: [Value] = []
                         if case .functionWithArguments = valueToken {

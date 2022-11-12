@@ -162,8 +162,9 @@ class VariableParserTests: XCTestCase {
             try attributesRegistry.registerVariable(name: "ram", variable: .primitive(.integer(128)))
             parser.registerSet.objectTypeRegistry.register(objectType: ObjectType(name: "Computer",
                                                                                   attributesRegistry: attributesRegistry, methodsRegistry: LocalFunctionRegistry()))
-            try parser.registerSet.variableRegistry.registerVariable(name: "computer", variable: .class(type: "Computer",
-                                                                                                        state: attributesRegistry))
+            try parser.registerSet.variableRegistry.registerVariable(name: "computer",
+                                                                     variable: .class(type: "Computer",
+                                                                                      attributesRegistry: attributesRegistry))
             let consumedTokens = try parser.parse(variableDefinitionIndex: 0)
             XCTAssertEqual(parser.registerSet.variableRegistry.getVariable(name: "age")?.primitive, .integer(128))
             XCTAssertEqual(consumedTokens, 5)

@@ -33,10 +33,14 @@ class ObjectTypeParser {
     func parse(objectTypeDefinitionIndex index: Int, into registry: ObjectTypeRegistry) throws -> Int {
         var currentIndex = index
         guard let token = self.tokens[safeIndex: currentIndex] else {
-            throw ObjectTypeParserError.syntaxError(description: "Token not found at index \(index)")
+            let info = "Token not found at index \(index)"
+            Logger.e(self.logTag, info)
+            throw ObjectTypeParserError.syntaxError(description: info)
         }
         guard case Token.class(let className) = token else {
-            throw ObjectTypeParserError.syntaxError(description: "Token not found at index \(index)")
+            let info = "Unexpected token at index \(index). Should be class token but found \(token)"
+            Logger.e(self.logTag, info)
+            throw ObjectTypeParserError.syntaxError(description: info)
         }
         currentIndex += 1
 
@@ -50,9 +54,9 @@ class ObjectTypeParser {
         var currentIndex = 0
         let functionParser = FunctionParser(tokens: tokens)
 
-        Logger.v(self.logTag, "creating LocalFunctionRegistry for class \(name) methods")
+        Logger.v(self.logTag, "creating LocalFunctionRegistry for class definition \(name) methods")
         let methodRegistry = LocalFunctionRegistry()
-        Logger.v(self.logTag, "creating VariableRegistry for class \(name) definition attributes")
+        Logger.v(self.logTag, "creating VariableRegistry for class definition \(name) attributes")
         let registerSet = self.registerSet.copy(variableRegistry: VariableRegistry())
         let variableParser = VariableParser(tokens: tokens, registerSet: registerSet)
 

@@ -68,6 +68,7 @@ class ArithmeticCalculator {
                 currentIndex += 1
                 previousTokenIsOperator = true
             case .variable(let variableName):
+                // as we encounter variable reference, we need to calculate the literal value that stands there
                 guard previousTokenIsOperator else {
                     break loop
                 }
@@ -77,15 +78,19 @@ class ArithmeticCalculator {
                 }
                 switch variableType {
                 case .primitive(let variable):
+                    // it's primitive variable, so simply add it
                     selectedTokens.append(variable.literalToken)
                     currentIndex += 1
-                case .class(let objectTypeName, let variableRegistry):
+                case .class(let objectTypeName, let attributesRegistry):
+                    // it's class-type variable, so we need to either execute method or access attribute
                     guard let objectType = self.registerSet.objectTypeRegistry.getObjectType(objectTypeName) else {
                         throw ArithmeticCalculatorError.syntaxError(description: "Could not find objectType \(objectTypeName)")
                     }
                     currentIndex += 1
                     guard let methodToken = self.tokens[safeIndex: currentIndex] else {
-                        throw ArithmeticCalculatorError.syntaxError(description: "Invalid syntax. After class instance name a method name is required! \(variableName):\(objectTypeName)")
+                        let info = "Invalid syntax. After class instance name a method ot attribute name is required! \(variableName):\(objectTypeName)"
+                        Logger.e(self.logTag, info)
+                        throw ArithmeticCalculatorError.syntaxError(description: info)
                     }
                     switch methodToken {
                     case .method(let methodName):
@@ -94,8 +99,9 @@ class ArithmeticCalculator {
                         }
                         Logger.v(self.logTag, "invoke method \(methodName)() on \(variableName):\(objectTypeName)")
                         Logger.v(self.logTag, "creating variableRegistry for method context")
-                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: variableRegistry)
-                        let calculatedToken = try self.executeTokens(tokens: method.body, variableRegistry: methodVariableRegistry).literalToken
+                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: attributesRegistry)
+                        let calculatedToken = try self.executeTokens(tokens: method.body,
+                                                                     variableRegistry: methodVariableRegistry).literalToken
                         selectedTokens.append(calculatedToken)
                         currentIndex += 1
                     case .methodWithArguments(let methodName):
@@ -109,10 +115,12 @@ class ArithmeticCalculator {
                         let values = parserResult.values
                         Logger.v(self.logTag, "invoke method \(methodName)(\(values.map{ $0.asTypeValue }.joined(separator: ", "))) on \(variableName):\(objectTypeName)")
                         Logger.v(self.logTag, "creating variableRegistry for method context")
-                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: variableRegistry)
+                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: attributesRegistry)
                         // validate function signature - whether number of arguments passed to func matches function definition
                         guard method.argumentNames.count == values.count else {
-                            throw ParserError.syntaxError(description: "Function \(methodName) expects arguments \(method.argumentNames) but provided \(values)")
+                            let info = "Method \(methodName) on type \(objectTypeName) expects arguments: \(method.argumentNames) but provided: \(values)"
+                            Logger.e(self.logTag, info)
+                            throw ParserError.syntaxError(description: info)
                         }
                         // init variable registry for functions' memory space
                         try method.argumentNames.enumerated().forEach { (index, name) in
@@ -121,18 +129,24 @@ class ArithmeticCalculator {
                         let calculatedToken = try self.executeTokens(tokens: method.body, variableRegistry: methodVariableRegistry).literalToken
                         selectedTokens.append(calculatedToken)
                     case .attribute(let attributeName):
-                        guard let attribute = variableRegistry.getVariable(name: attributeName) else {
-                            throw ArithmeticCalculatorError.syntaxError(description: "Uknown attribute \(attributeName) on objectType \(variableName):\(objectTypeName)")
+                        guard let attribute = attributesRegistry.getVariable(name: attributeName) else {
+                            let info = "Variable \(variableName):\(objectTypeName) has no attribute \(attributeName)"
+                            Logger.e(self.logTag, info)
+                            throw ArithmeticCalculatorError.syntaxError(description: info)
                         }
                         switch attribute {
                         case .primitive(let value):
                             selectedTokens.append(value.literalToken)
-                        default:
-                            throw ArithmeticCalculatorError.syntaxError(description: "Attribute \(attributeName) on objectType \(variableName):\(objectTypeName) is not simple value!")
+                        case .class(let objectType, _):
+                            let info = "Statement \(variableName).\(attributeName) refers to a class \(objectType) which is not a simple type"
+                            Logger.e(self.logTag, info)
+                            throw ArithmeticCalculatorError.syntaxError(description: info)
                         }
                         currentIndex += 1
                     default:
-                        throw ArithmeticCalculatorError.syntaxError(description: "Invalid syntax. After class instance name a method name is required but found \(methodToken) \(variableName):\(objectTypeName)")
+                        let info = "Invalid syntax. \(variableName)\(methodToken) is not valid code"
+                        Logger.e(self.logTag, info)
+                        throw ArithmeticCalculatorError.syntaxError(description: info)
                     }
                     break loop
                 }
