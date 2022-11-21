@@ -109,6 +109,36 @@ extension Value {
     }
 }
 
+extension Value {
+    public var string: String? {
+        if case .string(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    public var bool: Bool? {
+        if case .bool(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    public var integer: Int? {
+        if case .integer(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    public var float: Float? {
+        if case .float(let value) = self {
+            return value
+        }
+        return nil
+    }
+}
+
 extension Value: Equatable {}
 extension Value: CustomStringConvertible {
     public var description: String {
