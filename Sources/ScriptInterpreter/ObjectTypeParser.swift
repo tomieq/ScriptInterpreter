@@ -74,6 +74,10 @@ class ObjectTypeParser {
                 throw ObjectTypeParserError.syntaxError(description: "Unexpected sign found: \(token)")
             }
         }
+        // if there is no explicit init, define empty one
+        if methodRegistry.getFunction(name: "init").isNil {
+            methodRegistry.register(LocalFunction(name: "init", argumentNames: [], body: []))
+        }
         return ObjectType(name: name, attributesRegistry: registerSet.variableRegistry, methodsRegistry: methodRegistry)
     }
 }
