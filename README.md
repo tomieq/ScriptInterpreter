@@ -22,7 +22,7 @@ You can use [Swift Package Manager](https://swift.org/package-manager/) and spec
 ## Can I expose my Swift functions to the script?
 
 Yes, that's core functionality. All the functions you want to expose to the script must be registered first:
-```
+```swift
 class Handler {
     func turnOnLight() {
         // logic goes here
@@ -54,7 +54,7 @@ From now on, all the scripts that will be passed to `engine.exec(code:)` may inv
 You can register functions with parameters or without them.
 
 The script passed to ScriptInterpreter may look like this:
-```
+```swift
 let hour = 11
 if(hour > 17) {
     lightMeUp()
@@ -67,7 +67,7 @@ if(hour > 17) {
 Yes, ScriptInterpreter creates internal namespaces in which you can create and update variables. It supports strings, integers, boolean and float. There are variables and constants.
 Constants might be defined with keyword `let` or `const`.
 Sample script:
-```
+```swift
 var counter = 0
 let isBroken = true
 if (isBroken) {
@@ -77,7 +77,7 @@ if (isBroken) {
 }
 ```
 Isolated namespaces:
-```
+```swift
 var amount = 3;
 print(amount);
 {
@@ -96,7 +96,7 @@ Look at the [ParserTests](./Tests/ScriptInterpreterTests/ParserTests.swift) - yo
 ## Can I set variable/constant so that is accessible by the script?
 
 Yes, of course. You can register variable or constant that will be visible to the script:
-```
+```swift
 let engine = ScriptInterpreter()
 try engine.setupConstant(name: "hour", value: .integer(23))
 try engine.setupConstant(name: "welcome", value: .string("Hello world"))
@@ -107,7 +107,7 @@ try engine.setupVariable(name: "isDone", value: .bool(false))
 
 Yes! Both while and for(JavaScript-style).
 Sample while-script:
-```
+```swift
 var counter = 0
 while(counter <= 3) {
     counter++
@@ -115,7 +115,7 @@ while(counter <= 3) {
 }
 ```
 Sample for-script:
-```
+```swift
 var i = 90
 for(var i = 0; i < 3; i++) {
     rotate()
@@ -128,7 +128,7 @@ Above scripts will call `rotate` function 3 times
 
 Yes, if your script returns any value, it will be mapped into `Value` and returned by `exec(_) function`.
 Let's say you have script like this:
-```
+```swift
 let distance = 50
 var speed = 92
 
@@ -141,7 +141,7 @@ if (distance > 100) {
 ```
 
 The returned value can be obtained by calling:
-```
+```swift
 let engine = ScriptInterpreter()
 let script = // your script goes here
 
@@ -151,7 +151,7 @@ let result = try engine.exec(code: script)
 ## Does ScriptInterpreter support String interpolation?
 
 Yes, you can use Swift-like String interpolation. Sample script:
-```
+```swift
 var color = "blue"
 var text = "The walls are \(color)"
 print(text)
@@ -165,7 +165,7 @@ Above code will produce: "The walls are blue", "The size is 85"
 
 Yes, you can define functions in your script. You can use keyword `func` or `function`.
 Example script:
-```
+```swift
 var number = 0
 func updateNumber(newVal) {
     number = newVal
@@ -179,7 +179,7 @@ Execution of above code will return 8
 
 ScriptInterpreter supports `defer` statement, that will be called at the end, before `return`. In works exactly like native Swift's `defer`.
 Example script:
-```
+```swift
 var number = 1
 
 func sample() {
