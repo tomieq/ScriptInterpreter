@@ -33,6 +33,23 @@ class ScriptInterpreterTests: XCTestCase {
 
         XCTAssertEqual(returnedValue, .integer(5))
     }
+    
+    func test_switchStatement() throws {
+        let code = """
+        func getAge(name: String) -> Int {
+            switch name {
+            case "John":
+                return 1
+            default:
+                return 2
+            }
+        }
+        return getAge("John")
+        """
+        let engine = ScriptInterpreter()
+        let returnedValue = try? engine.exec(code: code)
+        XCTAssertEqual(returnedValue, .integer(1))
+    }
 }
 
 fileprivate class Console {

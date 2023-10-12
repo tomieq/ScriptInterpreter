@@ -196,3 +196,17 @@ sample()
 return number
 ```
 Execution of above code will return 3
+
+## Switch statement
+
+ScriptInterpreter supports `switch` statement. Your script can use `switch` logic with default fallback:
+```swift
+func getAge(name: String) -> Int {
+    switch name {
+    case "John":
+        return 1
+    default:
+        return 2
+    }
+}
+```
