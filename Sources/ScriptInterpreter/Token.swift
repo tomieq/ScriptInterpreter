@@ -46,6 +46,7 @@ enum Token: Equatable {
     case functionWithArguments(name: String)
     case method(name: String)
     case methodWithArguments(name: String)
+    case swiftReturnSign
     case attribute(name: String)
     case comma
     case underscore
@@ -73,6 +74,7 @@ extension Token {
             TokenGenerator(regex: "self\\.\\b", { _ in [.this] }),
             TokenGenerator(regex: "function\\s", { _ in [.functionDefinition(type: "function")] }),
             TokenGenerator(regex: "func\\s", { _ in [.functionDefinition(type: "func")] }),
+            TokenGenerator(regex: "\\-\\>\\s", { _ in [.swiftReturnSign] }),
             TokenGenerator(regex: "class\\s[a-zA-Z0-9_]+", { [.class(name: $0.trimming("class "))] }),
             TokenGenerator(regex: "init\\(\\)", { _ in [.functionDefinition(type: "init"), .function(name: "init")] }),
             TokenGenerator(regex: "constructor\\(\\)", { _ in [.functionDefinition(type: "constructor"), .function(name: "init")] }),
@@ -189,6 +191,8 @@ extension Token: CustomDebugStringConvertible {
             return "method:\(name)()"
         case .methodWithArguments(let name):
             return "methodWithArguments:\(name)"
+        case .swiftReturnSign:
+            return "funcReturnSign"
         case .attribute(let name):
             return "attribute:\(name)"
         case .comma:

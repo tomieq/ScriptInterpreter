@@ -275,6 +275,18 @@ final class LexerTests: XCTestCase {
             XCTFail("\(error)")
         }
     }
+    
+    func test_functionDefinitionWithExplicitReturnType() {
+        let script = "function exec() -> Int { print(\"error\") }"
+        do {
+            let lexer = try Lexer(code: script)
+            XCTAssertEqual(lexer.tokens[safeIndex: 0], .functionDefinition(type: "function"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 1], .function(name: "exec"))
+            XCTAssertEqual(lexer.tokens[safeIndex: 2], .swiftReturnSign)
+        } catch {
+            XCTFail("\(error)")
+        }
+    }
 
     func test_conditionCheckWithNotEqual() {
         let script = "72 != 10"
