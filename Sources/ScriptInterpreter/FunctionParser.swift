@@ -70,6 +70,9 @@ class FunctionParser {
         default:
             throw FunctionParserError.syntaxError(description: "After function definition function name is required, token index = \(index)")
         }
+        if case .swiftReturnSign = self.tokens[safeIndex: currentIndex] {
+            currentIndex += 2
+        }
         let body = try ParserUtils.getTokensForBlock(indexOfOpeningBlock: currentIndex, tokens: self.tokens)
         currentIndex += body.count + 2
         let function = LocalFunction(name: functionName, argumentNames: argumentNames, body: body)
