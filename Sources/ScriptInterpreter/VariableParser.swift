@@ -69,6 +69,14 @@ class VariableParser {
         }
         var usedTokens = 1
         var shouldParseFurther = false
+        
+        var pos = pos
+        var expectedType: String?
+        if case .colon = self.tokens[safeIndex: pos + usedTokens] {
+            expectedType = self.tokens[safeIndex: pos + usedTokens + 1]?.variableName
+            usedTokens += 2
+            pos += 2
+        }
         if let nextToken = self.tokens[safeIndex: pos + 1], case .assign = nextToken {
             guard let valueToken = self.tokens[safeIndex: pos + 2] else {
                 throw VariableParserError.syntaxError(description: "Value not found for assigning variable \(name)")
@@ -101,6 +109,11 @@ class VariableParser {
                     usedTokens += parserResult.consumedTokens - 1
                     guard let value = parserResult.value else {
                         throw VariableParserError.syntaxError(description: "Value not found for assigning variable \(name)")
+                    }
+                    if let expectedType = expectedType {
+                        guard value.type == expectedType else {
+                            throw VariableParserError.syntaxError(description: "Variable \(name) should be of type \(expectedType) but assigned \(value.type)")
+                        }
                     }
                     try register(name, .primitive(value))
                 }

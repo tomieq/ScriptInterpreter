@@ -260,6 +260,13 @@ extension Token {
         }
         return false
     }
+    
+    var variableName: String? {
+        if case .variable(let name) = self {
+            return name
+        }
+        return nil
+    }
 
     var isLiteral: Bool {
         if case .stringLiteral(_) = self {

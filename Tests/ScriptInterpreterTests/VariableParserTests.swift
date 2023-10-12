@@ -40,6 +40,18 @@ class VariableParserTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    
+    func test_initTypedBoolVariable() {
+        let script = "var agreed: Bool = false;"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = VariableParser(tokens: lexer.tokens, registerSet: self.registerSet)
+            XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0))
+            XCTAssertEqual(parser.registerSet.variableRegistry.getVariable(name: "agreed")?.primitive, .bool(false))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 
     func test_initIntegerVariable() {
         let script = "var weight = 82;"
@@ -48,6 +60,29 @@ class VariableParserTests: XCTestCase {
             let parser = VariableParser(tokens: lexer.tokens, registerSet: self.registerSet)
             XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0))
             XCTAssertEqual(parser.registerSet.variableRegistry.getVariable(name: "weight")?.primitive, .integer(82))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func test_initTypedIntegerVariable() {
+        let script = "var weight: Int = 82;"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = VariableParser(tokens: lexer.tokens, registerSet: self.registerSet)
+            XCTAssertNoThrow(try parser.parse(variableDefinitionIndex: 0))
+            XCTAssertEqual(parser.registerSet.variableRegistry.getVariable(name: "weight")?.primitive, .integer(82))
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+    func test_initAssignWrongTypeValue() {
+        let script = "var weight: Bool = 82"
+        do {
+            let lexer = try Lexer(code: script)
+            let parser = VariableParser(tokens: lexer.tokens, registerSet: self.registerSet)
+            XCTAssertThrowsError(try parser.parse(variableDefinitionIndex: 0))
         } catch {
             XCTFail(error.localizedDescription)
         }
