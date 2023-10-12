@@ -227,7 +227,9 @@ class Parser {
                 self.currentIndex += 1
                 if let returnedToken = self.tokens[safeIndex: self.currentIndex] {
                     if returnedToken.isLiteral || returnedToken.isVariable {
-                        let returned = ParserUtils.token2Value(returnedToken, variableRegistry: self.variableRegistry)
+                        let calculator = ArithmeticCalculator(tokens: self.tokens, registerSet: self.registerSet)
+                        let calcResult = try calculator.calculateValue(startIndex: self.currentIndex)
+                        let returned = calcResult.value
                         Logger.v(self.logTag, "return \(returned?.asTypeValue ?? "nil")")
                         return .return(returned)
                     }

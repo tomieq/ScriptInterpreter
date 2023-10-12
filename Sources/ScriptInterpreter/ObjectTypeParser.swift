@@ -54,9 +54,9 @@ class ObjectTypeParser {
         var currentIndex = 0
         let functionParser = FunctionParser(tokens: tokens)
 
-        Logger.v(self.logTag, "creating LocalFunctionRegistry for class definition \(name) methods")
+        Logger.v(self.logTag, "creating LocalFunctionRegistry for class definition `\(name)` methods")
         let methodRegistry = LocalFunctionRegistry()
-        Logger.v(self.logTag, "creating VariableRegistry for class definition \(name) attributes")
+        Logger.v(self.logTag, "creating VariableRegistry for class definition `\(name)` attributes")
         let registerSet = self.registerSet.copy(variableRegistry: VariableRegistry())
         let variableParser = VariableParser(tokens: tokens, registerSet: registerSet)
 
