@@ -74,7 +74,7 @@ class ArithmeticCalculator {
                 }
                 previousTokenIsOperator = false
                 guard let variableType = self.registerSet.variableRegistry.getVariable(name: variableName) else {
-                    throw ArithmeticCalculatorError.syntaxError(description: "Could not find variable \(variableName)")
+                    throw ArithmeticCalculatorError.syntaxError(description: "Could not find variable `\(variableName)`")
                 }
                 switch variableType {
                 case .primitive(let variable):
@@ -84,7 +84,7 @@ class ArithmeticCalculator {
                 case .class(let objectTypeName, let attributesRegistry):
                     // it's class-type variable, so we need to either execute method or access attribute
                     guard let objectType = self.registerSet.objectTypeRegistry.getObjectType(objectTypeName) else {
-                        throw ArithmeticCalculatorError.syntaxError(description: "Could not find objectType \(objectTypeName)")
+                        throw ArithmeticCalculatorError.syntaxError(description: "Could not find objectType `\(objectTypeName)`")
                     }
                     currentIndex += 1
                     guard let methodToken = self.tokens[safeIndex: currentIndex] else {
@@ -95,7 +95,7 @@ class ArithmeticCalculator {
                     switch methodToken {
                     case .method(let methodName):
                         guard let method = objectType.methodsRegistry.getFunction(name: methodName) else {
-                            throw ArithmeticCalculatorError.syntaxError(description: "Uknown method \(methodName) on objectType \(variableName):\(objectTypeName)")
+                            throw ArithmeticCalculatorError.syntaxError(description: "Uknown method `\(methodName)` on objectType \(variableName):\(objectTypeName)")
                         }
                         Logger.v(self.logTag, "invoke method \(methodName)() on \(variableName):\(objectTypeName)")
                         Logger.v(self.logTag, "creating variableRegistry for method context")
@@ -107,7 +107,7 @@ class ArithmeticCalculator {
                     case .methodWithArguments(let methodName):
                         currentIndex += 1
                         guard let method = objectType.methodsRegistry.getFunction(name: methodName) else {
-                            throw ArithmeticCalculatorError.syntaxError(description: "Uknown method \(methodName) on objectType \(variableName):\(objectTypeName)")
+                            throw ArithmeticCalculatorError.syntaxError(description: "Uknown method `\(methodName)` on objectType \(variableName):\(objectTypeName)")
                         }
                         let argumentParser = FunctionArgumentParser(tokens: self.tokens, registerSet: self.registerSet)
                         let parserResult = try argumentParser.getArgumentValues(index: currentIndex)
@@ -148,7 +148,6 @@ class ArithmeticCalculator {
                         Logger.e(self.logTag, info)
                         throw ArithmeticCalculatorError.syntaxError(description: info)
                     }
-                    break loop
                 }
             case .function(let functionName):
                 guard previousTokenIsOperator else {

@@ -158,6 +158,15 @@ final class ArithmeticCalculatorTests: XCTestCase {
         XCTAssertEqual(result.value, .integer(57))
     }
 
+    func testResolvingLocalFunctionReversed() throws {
+        let sut = try self.makeSUT("nine() - two() + 50")
+        sut.registerSet.localFunctionRegistry.register(LocalFunction(name: "nine", argumentNames: [], body: [.return, .intLiteral(9)]))
+        sut.registerSet.localFunctionRegistry.register(LocalFunction(name: "two", argumentNames: [], body: [.return, .intLiteral(2)]))
+        let result = try sut.calculateValue(startIndex: 0)
+        XCTAssertEqual(result.consumedTokens, 5)
+        XCTAssertEqual(result.value, .integer(57))
+    }
+
     func testResolvingLocalFunctionWithArguments() throws {
         let sut = try self.makeSUT("12 + number(2 + 11)")
         sut.registerSet.localFunctionRegistry.register(LocalFunction(name: "number", argumentNames: ["x"], body: [.return, .variable(name: "x")]))
@@ -190,6 +199,20 @@ final class ArithmeticCalculatorTests: XCTestCase {
 
     func testResolvingClassMethodCall() throws {
         let sut = try self.makeSUT("10 + computer.ram()")
+        let objectMethods = LocalFunctionRegistry()
+        objectMethods.register(LocalFunction(name: "ram", argumentNames: [], body: [.return, .intLiteral(8)]))
+        sut.registerSet.objectTypeRegistry.register(objectType: ObjectType(name: "Computer",
+                                                                           attributesRegistry: VariableRegistry(),
+                                                                           methodsRegistry: objectMethods))
+        try sut.registerSet.variableRegistry.registerVariable(name: "computer",
+                                                              variable: .class(type: "Computer", attributesRegistry: VariableRegistry()))
+        let result = try sut.calculateValue(startIndex: 0)
+        XCTAssertEqual(result.consumedTokens, 4)
+        XCTAssertEqual(result.value, .integer(18))
+    }
+
+    func testResolvingClassMethodCallReversed() throws {
+        let sut = try self.makeSUT("computer.ram() + 10")
         let objectMethods = LocalFunctionRegistry()
         objectMethods.register(LocalFunction(name: "ram", argumentNames: [], body: [.return, .intLiteral(8)]))
         sut.registerSet.objectTypeRegistry.register(objectType: ObjectType(name: "Computer",
