@@ -39,9 +39,19 @@ enum ParserState {
     case aborted(String)
 }
 
+class ParserID {
+    private static var counter = 0
+    static var next: String {
+        defer {
+            Self.counter += 1
+        }
+        return String(format: "%03d", Self.counter)
+    }
+}
+
 class Parser {
-    private let logTag = "🐫 Parser"
-    private let id = "0x".appendingRandomHexDigits(length: 4)
+    private let logTag: String
+    private let id: String
     private let externalFunctionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private let localFunctionRegistry: LocalFunctionRegistry
@@ -56,8 +66,11 @@ class Parser {
     init(tokens: [Token],
          externalFunctionRegistry: ExternalFunctionRegistry = ExternalFunctionRegistry(),
          localFunctionRegistry: LocalFunctionRegistry = LocalFunctionRegistry(),
-         variableRegistry: VariableRegistry = VariableRegistry()) {
-        Logger.v(self.logTag, "new parserID: \(self.id) with tokens: \(tokens.map{ $0.debugDescription }.joined(separator: " "))")
+         variableRegistry: VariableRegistry = VariableRegistry(),
+         idPrefix: String? = nil) {
+        self.id = idPrefix.isNil ? ParserID.next : "\(idPrefix.readable).\(ParserID.next)"
+        self.logTag = "🐫 Parser.\(self.id)"
+        Logger.v(self.logTag, "new parser with tokens: \(tokens.map{ $0.debugDescription }.joined(separator: " "))")
         self.externalFunctionRegistry = externalFunctionRegistry
         self.localFunctionRegistry = localFunctionRegistry
         self.variableRegistry = variableRegistry
@@ -418,9 +431,11 @@ class Parser {
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
         let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry,
                                                 idPrefix: topVariableRegistry.id)
-        let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
         let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry,
                                                           idPrefix: "subcode")
+        let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry,
+                            localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry,
+                            idPrefix: "subcode")
         return try parser.execute()
     }
 
