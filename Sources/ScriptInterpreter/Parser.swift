@@ -318,7 +318,7 @@ class Parser {
                 guard localFunction.argumentNames.count == values.count else {
                     throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(values)")
                 }
-                try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerVariable(name: name, variable: .primitive(values[index])) }
+                try localFunction.argumentNames.enumerated().forEach { (index, name) in try variableRegistry.registerConstant(name: name, variable: .primitive(values[index])) }
                 return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
             } else {
                 return .return(try self.externalFunctionRegistry.callFunction(name: name, args: values))
@@ -428,7 +428,7 @@ class Parser {
             guard method.argumentNames.count == argumentValues.count else {
                 throw ParserError.syntaxError(description: "Method \(methodName) expects arguments \(method.argumentNames) but provided \(argumentValues)")
             }
-            try method.argumentNames.enumerated().forEach { (index, name) in try methodVariableRegistry.registerVariable(name: name, variable: .primitive(argumentValues[index])) }
+            try method.argumentNames.enumerated().forEach { (index, name) in try methodVariableRegistry.registerConstant(name: name, variable: .primitive(argumentValues[index])) }
         }
         let result = try self.executeSubCode(tokens: method.body, variableRegistry: methodVariableRegistry)
         if case .return(let value) = result {

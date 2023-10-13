@@ -137,7 +137,7 @@ class ArithmeticCalculator {
                         }
                         // init variable registry for functions' memory space
                         try method.argumentNames.enumerated().forEach { (index, name) in
-                            try methodVariableRegistry.registerVariable(name: name, variable: .primitive(values[index]))
+                            try methodVariableRegistry.registerConstant(name: name, variable: .primitive(values[index]))
                         }
                         let calculatedToken = try self.executeTokens(tokens: method.body, variableRegistry: methodVariableRegistry).literalToken
                         selectedTokens.append(calculatedToken)
@@ -201,7 +201,7 @@ class ArithmeticCalculator {
                     }
                     // init variable registry for functions' memory space
                     try localFunction.argumentNames.enumerated().forEach { (index, name) in
-                        try variableRegistry.registerVariable(name: name, variable: .primitive(values[index]))
+                        try variableRegistry.registerConstant(name: name, variable: .primitive(values[index]))
                     }
                     let calculatedToken = try self.executeTokens(tokens: localFunction.body, variableRegistry: variableRegistry).literalToken
                     selectedTokens.append(calculatedToken)
