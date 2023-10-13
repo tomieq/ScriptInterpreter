@@ -17,6 +17,7 @@ public class ScriptInterpreter {
     private let functionRegistry: ExternalFunctionRegistry
     private let variableRegistry: VariableRegistry
     private var parser: Parser?
+    private let logTag = "🌼 ScriptInterpreter"
 
     public init() {
         self.functionRegistry = ExternalFunctionRegistry()
@@ -48,17 +49,21 @@ public class ScriptInterpreter {
     }
 
     public func exec(code: String) throws -> Value? {
+        Logger.v(self.logTag, "Start executing code")
         do {
             let lexer = try Lexer(code: code)
             self.parser = Parser(tokens: lexer.tokens, externalFunctionRegistry: self.functionRegistry, variableRegistry: self.variableRegistry)
             let result = try self.parser?.execute() ?? .finished
             switch result {
             case .finished, .break:
+                Logger.v(self.logTag, "Code execution finished")
                 return nil
             case .return(let value):
+                Logger.v(self.logTag, "Code execution finished with value: \(value.readable)")
                 return value
             }
         } catch {
+            Logger.v(self.logTag, "Code execution runtime error: \(error)")
             throw ScriptInterpreterError.runtimeError(description: error.localizedDescription)
         }
     }

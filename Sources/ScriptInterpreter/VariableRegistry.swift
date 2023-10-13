@@ -127,9 +127,9 @@ class VariableRegistry {
         self.variables = [:]
     }
 
-    func makeCopy() -> VariableRegistry {
+    func makeCopy(idPrefix: String? = nil) -> VariableRegistry {
         let registry = VariableRegistry(topVariableRegistry: self.topVariableRegistry,
-                                        idPrefix: "copy:\(self.id)")
+                                        idPrefix: idPrefix ?? "copy:\(self.id)")
         registry.variables = self.variables
         registry.constantNames = self.constantNames
         return registry

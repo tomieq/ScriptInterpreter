@@ -32,3 +32,14 @@ extension Optional where Wrapped == String {
         }
     }
 }
+
+extension Optional where Wrapped == Value {
+    var readable: String {
+        switch self {
+        case .some(let value):
+            return value.asTypeValue
+        case .none:
+            return "nil"
+        }
+    }
+}

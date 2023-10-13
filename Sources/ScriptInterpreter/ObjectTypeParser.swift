@@ -54,8 +54,8 @@ class ObjectTypeParser {
         var currentIndex = 0
         let functionParser = FunctionParser(tokens: tokens)
 
-        let methodRegistry = LocalFunctionRegistry(idPrefix: name)
-        let registerSet = self.registerSet.copy(variableRegistry: VariableRegistry(idPrefix: name))
+        let methodRegistry = LocalFunctionRegistry(idPrefix: "class.\(name)")
+        let registerSet = self.registerSet.copy(variableRegistry: VariableRegistry(idPrefix: "class.\(name)"))
         let variableParser = VariableParser(tokens: tokens, registerSet: registerSet)
 
         while let token = tokens[safeIndex: currentIndex] {

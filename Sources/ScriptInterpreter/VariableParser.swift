@@ -89,9 +89,10 @@ class VariableParser {
                 case .function(let className), .functionWithArguments(let className):
                     if let objectType = self.registerSet.objectTypeRegistry.getObjectType(className) {
                         Logger.v(self.logTag, "creating attributesRegistry for class `\(className)` instance")
-                        let attributesRegistry = objectType.attributesRegistry.makeCopy()
+                        let attributesRegistry = objectType.attributesRegistry.makeCopy(idPrefix: "instance.\(name):\(className)")
                         try register(name, .class(type: objectType.name, attributesRegistry: attributesRegistry))
-                        // call initializer
+                        Logger.v(self.logTag, "registered new variable \(name):\(className)")
+                        // get init arguments, if any
                         var argumentValues: [Value] = []
                         if case .functionWithArguments = valueToken {
                             let argumentParser = FunctionArgumentParser(tokens: self.tokens, registerSet: self.registerSet)
@@ -99,7 +100,9 @@ class VariableParser {
                             usedTokens += parserResult.consumedTokens
                             argumentValues = parserResult.values
                         }
-                        _ = try? self.parser?.callMethod(method: "init", onVariable: name, argumentValues: argumentValues)
+                        // call initializer
+                        Logger.v(self.logTag, "call init on \(className) with args: \(argumentValues)")
+                        _ = try self.parser?.callMethod(method: "init", onVariable: name, argumentValues: argumentValues)
                     } else {
                         fallthrough
                     }

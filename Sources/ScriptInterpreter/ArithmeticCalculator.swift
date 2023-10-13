@@ -238,7 +238,7 @@ class ArithmeticCalculator {
                 throw ArithmeticCalculatorError.syntaxError(description: "Invalid token for ArithmeticCalculator: \(firstToken)")
             }
         }
-        Logger.v(self.logTag, "Calculation finished with value: \(value.debugDescription)")
+        Logger.v(self.logTag, "Calculation finished with value: \(value.readable)")
         //let values = selectedTokens.compactMap { ParserUtils.token2Value($0, variableRegistry: self.variableRegistry) }
         return ArithmeticCalculatorResult(value: value, consumedTokens: currentIndex - startIndex)
     }

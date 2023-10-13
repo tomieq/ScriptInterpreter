@@ -84,6 +84,11 @@ class Parser {
 
     @discardableResult
     func execute() throws -> ParserExecResult {
+        func logged(_ returned: Value?) -> Value? {
+            Logger.v(self.logTag, "return \(returned.readable)")
+            return returned
+        }
+
         self.state = .working
         let variableParser = VariableParser(tokens: self.tokens, registerSet: self.registerSet, parser: self)
         let functionParser = FunctionParser(tokens: self.tokens)
@@ -117,16 +122,22 @@ class Parser {
                     switch result {
                     case .finished:
                         break
-                    case .break, .return(_):
+                    case .break:
+                        Logger.v(self.logTag, "break code execution")
                         return result
+                    case .return(let value):
+                        return .return(logged(value))
                     }
                 } else if let elseTokens = result.elseTokens {
                     let result = try self.executeSubCode(tokens: elseTokens, variableRegistry: self.variableRegistry)
                     switch result {
                     case .finished:
                         break
-                    case .break, .return(_):
+                    case .break:
+                        Logger.v(self.logTag, "break code execution")
                         return result
+                    case .return(let value):
+                        return .return(logged(value))
                     }
                 }
                 self.currentIndex += result.consumedTokens
@@ -139,8 +150,8 @@ class Parser {
                     switch result {
                     case .finished:
                         break
-                    case .return(_):
-                        return result
+                    case .return(let value):
+                        return .return(logged(value))
                     case .break:
                         break whileLoop
                     }
@@ -157,7 +168,7 @@ class Parser {
                 }
                 // create for loop namespace and register initial value
                 let forLoopVariableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry,
-                                                               idPrefix: "loop")
+                                                               idPrefix: "forLoop")
                 try forLoopVariableRegistry.registerVariable(name: controlVariableName, variable: .primitive(.integer(controlVariableInitialValue)))
                 // append statement 3 to be executed after each loop
                 var body = result.body
@@ -169,8 +180,8 @@ class Parser {
                     switch result {
                     case .finished:
                         break
-                    case .return(_):
-                        return result
+                    case .return(let value):
+                        return .return(logged(value))
                     case .break:
                         break forLoop
                     }
@@ -200,8 +211,8 @@ class Parser {
                         switch result {
                         case .finished, .break:
                             break
-                        case .return(let optional):
-                            return .return(optional)
+                        case .return(let value):
+                            return .return(logged(value))
                         }
                     }
                 }
@@ -210,8 +221,8 @@ class Parser {
                     switch result {
                     case .finished, .break:
                         break
-                    case .return(let optional):
-                        return .return(optional)
+                    case .return(let value):
+                        return .return(logged(value))
                     }
                 }
             case .blockOpen:
@@ -221,8 +232,8 @@ class Parser {
                 switch result {
                 case .finished:
                     break
-                case .return(_):
-                    return result
+                case .return(let value):
+                    return .return(logged(value))
                 case .break:
                     break
                 }
@@ -235,6 +246,7 @@ class Parser {
             case .variable(let name):
                 try self.variableOperation(variableName: name)
             case .break:
+                Logger.v(self.logTag, "return .break")
                 return .break
             case .return:
                 try self.executeDeferredCode()
@@ -243,18 +255,15 @@ class Parser {
                     if returnedToken.isLiteral || returnedToken.isVariable {
                         let calculator = ArithmeticCalculator(tokens: self.tokens, registerSet: self.registerSet)
                         let calcResult = try calculator.calculateValue(startIndex: self.currentIndex)
-                        let returned = calcResult.value
-                        Logger.v(self.logTag, "return \(returned?.asTypeValue ?? "nil")")
-                        return .return(returned)
+                        let value = calcResult.value
+                        return .return(logged(value))
                     }
                     if returnedToken.isFunction {
-                        let returned = try self.invokeFunctionAndGetValue()
-                        Logger.v(self.logTag, "return \(returned.asTypeValue)")
-                        return .return(returned)
+                        let value = try self.invokeFunctionAndGetValue()
+                        return .return(logged(value))
                     }
                 }
-                Logger.v(self.logTag, "return nil")
-                return .return(nil)
+                return .return(logged(nil))
             case .semicolon, .this:
                 self.currentIndex += 1
             default:
