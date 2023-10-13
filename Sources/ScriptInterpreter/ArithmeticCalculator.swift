@@ -28,8 +28,18 @@ struct ArithmeticCalculatorResult {
     let consumedTokens: Int
 }
 
+class ArithmeticCalculatorID {
+    private static var counter = 0
+    static var next: String {
+        defer {
+            Self.counter += 1
+        }
+        return String(format: "%03d", Self.counter)
+    }
+}
+
 class ArithmeticCalculator {
-    private let logTag = "🦃 ArithmeticCalculator"
+    private let logTag: String
     let tokens: [Token]
     // we need all the registers, because calculator is capable of calling functions and resolving variables
     let registerSet: RegisterSet
@@ -37,6 +47,7 @@ class ArithmeticCalculator {
     init(tokens: [Token], registerSet: RegisterSet) {
         self.tokens = tokens
         self.registerSet = registerSet
+        self.logTag = "🦃 ArithmeticCalculator.\(ArithmeticCalculatorID.next)"
     }
 
     func calculateValue(startIndex: Int) throws -> ArithmeticCalculatorResult {
