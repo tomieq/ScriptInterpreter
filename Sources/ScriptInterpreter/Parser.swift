@@ -418,8 +418,9 @@ class Parser {
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
         let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry,
                                                 idPrefix: topVariableRegistry.id)
-        let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry)
         let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
+        let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry,
+                                                          idPrefix: "subcode")
         return try parser.execute()
     }
 

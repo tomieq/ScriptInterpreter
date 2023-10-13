@@ -309,7 +309,8 @@ class ArithmeticCalculator {
     }
 
     private func executeTokens(tokens: [Token], variableRegistry: VariableRegistry) throws -> Value {
-        let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.registerSet.localFunctionRegistry)
+        let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.registerSet.localFunctionRegistry,
+                                                          idPrefix: "onFly")
         let parser = Parser(tokens: tokens,
                             externalFunctionRegistry: self.registerSet.externalFunctionRegistry,
                             localFunctionRegistry: localFunctionRegistry,
