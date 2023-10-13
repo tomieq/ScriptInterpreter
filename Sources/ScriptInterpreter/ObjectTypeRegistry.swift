@@ -7,13 +7,23 @@
 
 import Foundation
 
+class ObjectTypeRegistryID {
+    private static var counter = 0
+    static var next: String {
+        defer {
+            Self.counter += 1
+        }
+        return String(format: "%03d", Self.counter)
+    }
+}
+
 class ObjectTypeRegistry {
     private let logTag = "🦋 ObjectTypeRegistry"
     private var objectTypes: [String: ObjectType] = [:]
-    private let id = "0x".appendingRandomHexDigits(length: 4)
+    private let id = ObjectTypeRegistryID.next
 
     init() {
-        Logger.v(self.logTag, "Created new registryID: \(self.id)")
+        Logger.v(self.logTag, "Created new registry: \(self.id)")
     }
 
     func register(objectType: ObjectType) {
