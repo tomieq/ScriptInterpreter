@@ -37,18 +37,29 @@ fileprivate struct VariableContainer {
     }
 }
 
+class VariableRegistryID {
+    private static var counter = 0
+    static var next: String {
+        defer {
+            Self.counter += 1
+        }
+        return String(format: "%03d", Self.counter)
+    }
+}
+
 class VariableRegistry {
-    let id = "0x".appendingRandomHexDigits(length: 4)
+    let id: String
     private let logTag = "🦆 VariableRegistry"
     private let topVariableRegistry: VariableRegistry?
     private var variables: [String: VariableContainer] = [:]
     private var constantNames: [String] = []
 
-    init(topVariableRegistry: VariableRegistry? = nil) {
+    init(topVariableRegistry: VariableRegistry? = nil, idPrefix: String? = nil) {
+        self.id = idPrefix.isNil ? VariableRegistryID.next : "\(idPrefix.readable).\(VariableRegistryID.next)"
         self.topVariableRegistry = topVariableRegistry
         let parentID = topVariableRegistry?.id
         let parentInfo = parentID.isNil ? "" : " to parentID: \(parentID!)"
-        Logger.v(self.logTag, "Created new registryID: \(self.id)" + parentInfo)
+        Logger.v(self.logTag, "Created new registry: \(self.id)" + parentInfo)
     }
 
     func registerVariable(name: String, variable: Instance?) throws {
@@ -56,7 +67,7 @@ class VariableRegistry {
             throw VariableRegistryError.registerTheSameVariable(name: name)
         }
         self.variables[name] = VariableContainer(variable)
-        Logger.v(self.logTag, "new variable \(name) = \(variable?.asTypeValue ?? "nil") in registryID: \(self.id)")
+        Logger.v(self.logTag, "new variable \(name) = \(variable?.asTypeValue ?? "nil") in registry: \(self.id)")
     }
 
     func registerConstant(name: String, variable: Instance?) throws {
@@ -117,7 +128,8 @@ class VariableRegistry {
     }
 
     func makeCopy() -> VariableRegistry {
-        let registry = VariableRegistry(topVariableRegistry: self.topVariableRegistry)
+        let registry = VariableRegistry(topVariableRegistry: self.topVariableRegistry,
+                                        idPrefix: "copy:\(self.id)")
         registry.variables = self.variables
         registry.constantNames = self.constantNames
         return registry

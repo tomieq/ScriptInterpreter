@@ -21,3 +21,14 @@ extension Optional {
         !self.isNil
     }
 }
+
+extension Optional where Wrapped == String {
+    var readable: String {
+        switch self {
+        case .some(let value):
+            return value
+        case .none:
+            return "nil"
+        }
+    }
+}

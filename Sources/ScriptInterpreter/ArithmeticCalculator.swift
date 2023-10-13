@@ -99,7 +99,8 @@ class ArithmeticCalculator {
                         }
                         Logger.v(self.logTag, "invoke method \(methodName)() on \(variableName):\(objectTypeName)")
                         Logger.v(self.logTag, "creating variableRegistry for method context")
-                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: attributesRegistry)
+                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: attributesRegistry,
+                                                                      idPrefix: "\(variableName).\(methodName)")
                         let calculatedToken = try self.executeTokens(tokens: method.body,
                                                                      variableRegistry: methodVariableRegistry).literalToken
                         selectedTokens.append(calculatedToken)
@@ -115,7 +116,8 @@ class ArithmeticCalculator {
                         let values = parserResult.values
                         Logger.v(self.logTag, "invoke method \(methodName)(\(values.map{ $0.asTypeValue }.joined(separator: ", "))) on \(variableName):\(objectTypeName)")
                         Logger.v(self.logTag, "creating variableRegistry for method context")
-                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: attributesRegistry)
+                        let methodVariableRegistry = VariableRegistry(topVariableRegistry: attributesRegistry,
+                                                                      idPrefix: "\(variableName).\(methodName)")
                         // validate function signature - whether number of arguments passed to func matches function definition
                         guard method.argumentNames.count == values.count else {
                             let info = "Method \(methodName) on type \(objectTypeName) expects arguments: \(method.argumentNames) but provided: \(values)"
@@ -156,7 +158,8 @@ class ArithmeticCalculator {
                 previousTokenIsOperator = false
                 if let localFunction = self.registerSet.localFunctionRegistry.getFunction(name: functionName) {
                     Logger.v(self.logTag, "invoke local function \(functionName)()")
-                    let variableRegistry = VariableRegistry(topVariableRegistry: self.registerSet.variableRegistry)
+                    let variableRegistry = VariableRegistry(topVariableRegistry: self.registerSet.variableRegistry,
+                                                            idPrefix: "func/\(functionName)")
                     let calculatedToken = try self.executeTokens(tokens: localFunction.body, variableRegistry: variableRegistry).literalToken
                     selectedTokens.append(calculatedToken)
                     currentIndex += 1
@@ -179,7 +182,8 @@ class ArithmeticCalculator {
                 let values = parserResult.values
                 if let localFunction = self.registerSet.localFunctionRegistry.getFunction(name: functionName) {
                     Logger.v(self.logTag, "invoke local function \(functionName)(\(values.map{ $0.asTypeValue }.joined(separator: ", ")))")
-                    let variableRegistry = VariableRegistry(topVariableRegistry: self.registerSet.variableRegistry)
+                    let variableRegistry = VariableRegistry(topVariableRegistry: self.registerSet.variableRegistry,
+                                                            idPrefix: "func/\(functionName)")
                     // validate function signature - whether number of arguments passed to func matches function definition
                     guard localFunction.argumentNames.count == values.count else {
                         throw ParserError.syntaxError(description: "Function \(functionName) expects arguments \(localFunction.argumentNames) but provided \(values)")

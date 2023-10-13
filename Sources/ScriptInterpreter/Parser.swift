@@ -143,7 +143,8 @@ class Parser {
                     throw ParserError.syntaxError(description: "For loop error: initial state statement need to init variable")
                 }
                 // create for loop namespace and register initial value
-                let forLoopVariableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                let forLoopVariableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry,
+                                                               idPrefix: "loop")
                 try forLoopVariableRegistry.registerVariable(name: controlVariableName, variable: .primitive(.integer(controlVariableInitialValue)))
                 // append statement 3 to be executed after each loop
                 var body = result.body
@@ -274,7 +275,8 @@ class Parser {
             self.currentIndex += 1
             if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
                 Logger.v(self.logTag, "invoke local function \(name)()")
-                let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry,
+                                                        idPrefix: localFunction.name)
                 return try self.executeSubCode(tokens: localFunction.body, variableRegistry: variableRegistry)
             } else {
                 return .return(try self.externalFunctionRegistry.callFunction(name: name))
@@ -289,7 +291,8 @@ class Parser {
 
             if let localFunction = self.localFunctionRegistry.getFunction(name: name) {
                 Logger.v(self.logTag, "invoke local function \(name)(\(values.map{ $0.asTypeValue }.joined(separator: ", ")))")
-                let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry)
+                let variableRegistry = VariableRegistry(topVariableRegistry: self.variableRegistry,
+                                                        idPrefix: localFunction.name)
                 guard localFunction.argumentNames.count == values.count else {
                     throw ParserError.syntaxError(description: "Function \(name) expects arguments \(localFunction.argumentNames) but provided \(values)")
                 }
@@ -397,7 +400,8 @@ class Parser {
         }
         Logger.v(self.logTag, "invoke method \(variableName).\(methodName)(\(argumentValues.map{ $0.asTypeValue }.joined(separator: ", "))) on type \(type)")
         Logger.v(self.logTag, "creating variableRegistry for method context")
-        let methodVariableRegistry = VariableRegistry(topVariableRegistry: variableRegistry)
+        let methodVariableRegistry = VariableRegistry(topVariableRegistry: variableRegistry,
+                                                      idPrefix: "\(variableName).\(methodName)()")
         if !argumentValues.isEmpty {
             guard method.argumentNames.count == argumentValues.count else {
                 throw ParserError.syntaxError(description: "Method \(methodName) expects arguments \(method.argumentNames) but provided \(argumentValues)")
@@ -412,7 +416,8 @@ class Parser {
     }
 
     private func executeSubCode(tokens: [Token], variableRegistry topVariableRegistry: VariableRegistry) throws -> ParserExecResult {
-        let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry)
+        let variableRegistry = VariableRegistry(topVariableRegistry: topVariableRegistry,
+                                                idPrefix: topVariableRegistry.id)
         let localFunctionRegistry = LocalFunctionRegistry(topFunctionRegistry: self.localFunctionRegistry)
         let parser = Parser(tokens: tokens, externalFunctionRegistry: self.externalFunctionRegistry, localFunctionRegistry: localFunctionRegistry, variableRegistry: variableRegistry)
         return try parser.execute()
