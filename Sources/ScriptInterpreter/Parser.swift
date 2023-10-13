@@ -333,6 +333,12 @@ class Parser {
     }
 
     private func variableOperation(variableName: String) throws {
+        let varRegistry2Update: VariableRegistry = {
+            if case .this = self.tokens[safeIndex: self.currentIndex - 1] {
+                return self.variableRegistry.topVariableRegistry?.topVariableRegistry ?? self.variableRegistry
+            }
+            return self.variableRegistry
+        }()
         self.currentIndex += 1
         guard let nextToken = self.tokens[safeIndex: self.currentIndex] else {
             return
@@ -347,7 +353,7 @@ class Parser {
             guard let value = parserResult.value else {
                 throw ParserError.syntaxError(description: "Value not found for assigning variable \(variableName)")
             }
-            try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(value))
+            try varRegistry2Update.updateVariable(name: variableName, variable: .primitive(value))
         case .increment:
             self.currentIndex += 1
             let variable = self.variableRegistry.getVariable(name: variableName)
@@ -355,7 +361,7 @@ class Parser {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Increment operation can be applied only for integer type, but \(type) found")
             }
-            try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(.integer(intValue + 1)))
+            try varRegistry2Update.updateVariable(name: variableName, variable: .primitive(.integer(intValue + 1)))
         case .decrement:
             self.currentIndex += 1
             let variable = self.variableRegistry.getVariable(name: variableName)
@@ -363,7 +369,7 @@ class Parser {
                 let type = variable?.type ?? "nil"
                 throw ParserError.syntaxError(description: "Decrement operation can be applied only for integer type, but \(type) found")
             }
-            try self.variableRegistry.updateVariable(name: variableName, variable: .primitive(.integer(intValue - 1)))
+            try varRegistry2Update.updateVariable(name: variableName, variable: .primitive(.integer(intValue - 1)))
         case .method(let methodName):
             // this case is responsible for invoking class' method
             _ = try self.callMethod(method: methodName, onVariable: variableName)

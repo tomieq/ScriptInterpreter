@@ -50,7 +50,7 @@ class VariableRegistryID {
 class VariableRegistry {
     let id: String
     private let logTag = "🦆 VariableRegistry"
-    private let topVariableRegistry: VariableRegistry?
+    let topVariableRegistry: VariableRegistry?
     private var variables: [String: VariableContainer] = [:]
     private var constantNames: [String] = []
 
